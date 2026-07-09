@@ -1,15 +1,15 @@
-// LowerInstall 1.3 — RootHide-safe store spoof that can finish installs
+// LowerInstall 1.4 — RootHide-safe
 //
-// Symptom (1.2.1): update starts downloading then snaps back to Update.
-// Cause: App Store queues the update, then installd / AMS re-checks real OS
-// and aborts. UA-only spoof is not enough; Gestalt + installd must agree.
+// Download starts then snaps back = appstored queued the job, then installd
+// (or AMS) rejected the payload against the REAL iOS version.
 //
-// 1.3:
-//  - Logos %hookf MGCopyAnswer (more reliable on ElleKit than raw MSHookFunction)
-//  - Spoof version tokens inside HTTP bodies (AMS JSON)
-//  - Broader installd / installable hooks for mid-install rejection
-//  - Target installcoordinationd as well
-//  - Still hard-deny SpringBoard (no Safe Mode)
+// 1.4 adds:
+//  - installd: force MinimumOSVersion via NSBundle + MIBundle
+//  - Logos %hookf MGCopyAnswer (ProductVersion) for store/installd
+//  - AMS UA + JSON body rewrite
+//  - Injection breadcrumb files so we can see if daemons actually loaded us
+//  - Default spoof 99.0.0 (same idea as AppStoreTroller)
+//  - Hard deny SpringBoard (no Safe Mode)
 
 #import <Foundation/Foundation.h>
 #import <substrate.h>
@@ -19,13 +19,15 @@
 #import <string.h>
 #import <dlfcn.h>
 #import <os/log.h>
+#import <unistd.h>
 
 extern const char *__progname;
 
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.julioverne.lowerinstall.plist"
 #define PREFS_DOMAIN "com.julioverne.lowerinstall"
 #define PREFS_CHANGED "com.julioverne.lowerinstall/SettingsChanged"
-#define DEFAULT_SPOOF_VERSION @"18.5"
+#define DEFAULT_SPOOF_VERSION @"99.0.0"
+#define BREADCRUMB_DIR @"/var/mobile/Library/Logs/LowerInstall"
 
 static BOOL gEnabled = YES;
 static NSString *gSpoofDevice = nil;
@@ -42,29 +44,48 @@ static os_log_t LILog(void) {
 
 #pragma mark - Process gate
 
-static BOOL LIIsDeniedProcess(const char *prog) {
-	if (!prog || !prog[0]) return YES;
+static BOOL LIIsDenied(const char *p) {
+	if (!p || !p[0]) return YES;
 	static const char *denied[] = {
 		"SpringBoard", "backboardd", "UserEventAgent", "Preferences",
 		"preferencebundled", "ReportCrash", "mediaserverd", "runningboardd",
-		"launchd", "cfprefsd", "logd", NULL
+		"launchd", "cfprefsd", "logd", "CommCenter", NULL
 	};
-	for (int i = 0; denied[i]; i++) {
-		if (strcmp(prog, denied[i]) == 0) return YES;
-	}
+	for (int i = 0; denied[i]; i++) if (strcmp(p, denied[i]) == 0) return YES;
 	return NO;
 }
 
-static BOOL LIIsInstalld(const char *p) { return p && strcmp(p, "installd") == 0; }
-static BOOL LIIsInstallCoord(const char *p) { return p && strcmp(p, "installcoordinationd") == 0; }
+static BOOL LIIsInstalld(const char *p) {
+	return p && (strcmp(p, "installd") == 0 || strcmp(p, "installcoordinationd") == 0);
+}
 static BOOL LIIsStore(const char *p) {
 	return p && (strcmp(p, "appstored") == 0 || strcmp(p, "itunesstored") == 0 || strcmp(p, "AppStore") == 0);
 }
-static BOOL LIIsAllowed(const char *p) {
-	return LIIsInstalld(p) || LIIsInstallCoord(p) || LIIsStore(p);
+static BOOL LIIsAllowed(const char *p) { return LIIsInstalld(p) || LIIsStore(p); }
+
+static void LIWriteBreadcrumb(const char *prog, NSString *detail) {
+	@autoreleasepool {
+		[[NSFileManager defaultManager] createDirectoryAtPath:BREADCRUMB_DIR withIntermediateDirectories:YES attributes:nil error:nil];
+		NSString *path = [NSString stringWithFormat:@"%@/%s.loaded", BREADCRUMB_DIR, prog ?: "unknown"];
+		NSString *body = [NSString stringWithFormat:@"pid=%d\nprog=%s\nenabled=%d\nspoof=%@\nreal=%@\ndetail=%@\nts=%@\n",
+			getpid(), prog ?: "?", gEnabled, gSpoofVersion ?: @"?", gCurrentVersion ?: @"?", detail ?: @"",
+			[NSDate date].description];
+		[body writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];
+		// Also a combined status for Settings/Filza
+		NSString *status = [NSString stringWithFormat:@"%@/%@.txt", BREADCRUMB_DIR, @"status"];
+		NSString *line = [NSString stringWithFormat:@"%@ loaded into %s (spoof %@)\n", [NSDate date], prog ?: "?", gSpoofVersion ?: @"?"];
+		NSFileHandle *fh = [NSFileHandle fileHandleForWritingAtPath:status];
+		if (!fh) {
+			[line writeToFile:status atomically:YES encoding:NSUTF8StringEncoding error:nil];
+		} else {
+			[fh seekToEndOfFile];
+			[fh writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];
+			[fh closeFile];
+		}
+	}
 }
 
-#pragma mark - Prefs / version helpers
+#pragma mark - Prefs
 
 static NSString *LICurrentOSVersion(void) {
 	NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
@@ -96,6 +117,7 @@ static void LILoadPrefs(void) {
 
 		NSString *ver = LIPrefObject(@"SpoofVersion");
 		if ([ver isKindOfClass:[NSString class]] && ver.length) {
+			// Auto-upgrade weak spoofs that match real OS or are < 18
 			if ((gCurrentVersion && [ver isEqualToString:gCurrentVersion]) ||
 				[ver compare:@"18.0" options:NSNumericSearch] == NSOrderedAscending) {
 				gSpoofVersion = [DEFAULT_SPOOF_VERSION copy];
@@ -119,25 +141,29 @@ static NSString *LISpoof(void) {
 	return v;
 }
 
-/// Replace every occurrence of the real OS version string with spoof in free text / JSON / UA.
-static NSString *LIRewriteVersionTokens(NSString *value) {
+static BOOL LIIsMinOSKey(id key) {
+	if (![key isKindOfClass:[NSString class]]) return NO;
+	NSString *k = key;
+	return [k isEqualToString:@"MinimumOSVersion"]
+		|| [k isEqualToString:@"LSMinimumSystemVersion"]
+		|| [k isEqualToString:@"MinimumOSVersionString"];
+}
+
+#pragma mark - Version string rewrite (UA / JSON)
+
+static NSString *LIRewrite(NSString *value) {
 	if (!value.length || !gEnabled) return value;
 	NSString *spoof = LISpoof();
 	NSString *real = gCurrentVersion ?: LICurrentOSVersion();
 	NSMutableString *out = [value mutableCopy];
-
-	// Direct real → spoof
 	if (real.length) {
 		[out replaceOccurrencesOfString:real withString:spoof options:0 range:NSMakeRange(0, out.length)];
-		// underscored form 17_0_3
-		NSString *realU = [real stringByReplacingOccurrencesOfString:@"." withString:@"_"];
-		NSString *spoofU = [spoof stringByReplacingOccurrencesOfString:@"." withString:@"_"];
-		[out replaceOccurrencesOfString:realU withString:spoofU options:0 range:NSMakeRange(0, out.length)];
+		[out replaceOccurrencesOfString:[real stringByReplacingOccurrencesOfString:@"." withString:@"_"]
+							withString:[spoof stringByReplacingOccurrencesOfString:@"." withString:@"_"]
+							   options:0 range:NSMakeRange(0, out.length)];
 	}
-
-	// Canonical patterns even if real string differs slightly (17.0 vs 17.0.0)
 	NSString *under = [spoof stringByReplacingOccurrencesOfString:@"." withString:@"_"];
-	NSArray *patterns = @[
+	NSArray *pats = @[
 		@"iOS/[0-9]+(?:\\.[0-9]+){0,3}",
 		@"CPU (?:iPhone )?OS [0-9]+(?:_[0-9]+){0,3}",
 		@"iPhone OS [0-9]+(?:_[0-9]+){0,3}",
@@ -147,6 +173,7 @@ static NSString *LIRewriteVersionTokens(NSString *value) {
 		@"\"ProductVersion\"\\s*:\\s*\"[^\"]+\"",
 		@"\"os-version\"\\s*:\\s*\"[^\"]+\"",
 		@"\"platform-version\"\\s*:\\s*\"[^\"]+\"",
+		@"\"client-os-version\"\\s*:\\s*\"[^\"]+\"",
 	];
 	NSArray *reps = @[
 		[NSString stringWithFormat:@"iOS/%@", spoof],
@@ -158,35 +185,32 @@ static NSString *LIRewriteVersionTokens(NSString *value) {
 		[NSString stringWithFormat:@"\"ProductVersion\":\"%@\"", spoof],
 		[NSString stringWithFormat:@"\"os-version\":\"%@\"", spoof],
 		[NSString stringWithFormat:@"\"platform-version\":\"%@\"", spoof],
+		[NSString stringWithFormat:@"\"client-os-version\":\"%@\"", spoof],
 	];
-	for (NSUInteger i = 0; i < patterns.count; i++) {
-		NSError *err = nil;
-		NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:patterns[i] options:0 error:&err];
-		if (!re) continue;
-		[re replaceMatchesInString:out options:0 range:NSMakeRange(0, out.length) withTemplate:reps[i]];
+	for (NSUInteger i = 0; i < pats.count; i++) {
+		NSError *e = nil;
+		NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:pats[i] options:0 error:&e];
+		if (re) [re replaceMatchesInString:out options:0 range:NSMakeRange(0, out.length) withTemplate:reps[i]];
 	}
-
 	if (gCurrentDevice.length && gSpoofDevice.length && ![gCurrentDevice isEqualToString:gSpoofDevice]) {
 		[out replaceOccurrencesOfString:gCurrentDevice withString:gSpoofDevice options:0 range:NSMakeRange(0, out.length)];
 	}
 	return [out copy];
 }
 
-static NSData *LIRewriteBodyData(NSData *data) {
-	if (!gEnabled || data.length == 0 || data.length > 2 * 1024 * 1024) return data; // skip huge
-	// Only rewrite if looks like text/json
+static NSData *LIRewriteData(NSData *data) {
+	if (!gEnabled || data.length == 0 || data.length > 2*1024*1024) return data;
 	const uint8_t *b = (const uint8_t *)data.bytes;
-	if (b[0] != '{' && b[0] != '[' && b[0] != '<' && !(b[0] >= 0x20 && b[0] < 0x7f)) return data;
+	if (b[0] != '{' && b[0] != '[' && !(b[0] >= 0x20 && b[0] < 0x7f)) return data;
 	NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 	if (!s) return data;
-	NSString *out = LIRewriteVersionTokens(s);
-	if ([out isEqualToString:s]) return data;
-	return [out dataUsingEncoding:NSUTF8StringEncoding];
+	NSString *o = LIRewrite(s);
+	if ([o isEqualToString:s]) return data;
+	return [o dataUsingEncoding:NSUTF8StringEncoding];
 }
 
-#pragma mark - MGCopyAnswer via Logos hookf
+#pragma mark - Gestalt
 
-// Declared for %hookf — linked from libMobileGestalt (C ABI)
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -196,188 +220,174 @@ CFTypeRef MGCopyAnswer(CFStringRef key);
 #endif
 
 %group GestaltHooks
-
 %hookf(CFTypeRef, MGCopyAnswer, CFStringRef key) {
-	if (gEnabled && key) {
-		if (CFEqual(key, CFSTR("ProductVersion")) || CFEqual(key, CFSTR("ProductVersionExtra"))) {
-			NSString *v = LISpoof();
-			return CFStringCreateWithCString(kCFAllocatorDefault, v.UTF8String, kCFStringEncodingUTF8);
-		}
+	if (gEnabled && key && (CFEqual(key, CFSTR("ProductVersion")) || CFEqual(key, CFSTR("ProductVersionExtra")))) {
+		NSString *v = LISpoof();
+		return CFStringCreateWithCString(kCFAllocatorDefault, v.UTF8String, kCFStringEncodingUTF8);
 	}
 	return %orig;
 }
-
 %end
 
 #pragma mark - UIDevice
 
-static NSString *(*orig_uiSysVer)(id, SEL) = NULL;
-static NSString *hook_uiSysVer(id self, SEL _cmd) {
-	if (gEnabled) return LISpoof();
-	return orig_uiSysVer ? orig_uiSysVer(self, _cmd) : LICurrentOSVersion();
+static NSString *(*orig_ui)(id, SEL) = NULL;
+static NSString *hook_ui(id self, SEL _cmd) {
+	return gEnabled ? LISpoof() : (orig_ui ? orig_ui(self, _cmd) : LICurrentOSVersion());
+}
+static void LITryHook(Class c, SEL s, IMP n, IMP *o) {
+	if (c && class_getInstanceMethod(c, s)) MSHookMessageEx(c, s, n, o);
 }
 
-static void LITryHook(Class cls, SEL sel, IMP neu, IMP *orig) {
-	if (!cls || !class_getInstanceMethod(cls, sel)) return;
-	MSHookMessageEx(cls, sel, neu, orig);
-}
-
-static void LIHookUIDevice(void) {
-	Class c = objc_getClass("UIDevice");
-	if (c) LITryHook(c, @selector(systemVersion), (IMP)hook_uiSysVer, (IMP *)&orig_uiSysVer);
-}
-
-#pragma mark - installd / installcoordination soft hooks
-
-#define LI_BOOL0(name) \
-static BOOL (*orig_##name)(id, SEL) = NULL; \
-static BOOL hook_##name(id self, SEL _cmd) { \
-	if (gEnabled) return YES; \
-	return orig_##name ? orig_##name(self, _cmd) : YES; \
-}
-
-#define LI_BOOL_ERR(name) \
-static BOOL (*orig_##name)(id, SEL, NSError **) = NULL; \
-static BOOL hook_##name(id self, SEL _cmd, NSError **e) { \
-	if (gEnabled) { if (e) *e = nil; return YES; } \
-	return orig_##name ? orig_##name(self, _cmd, e) : YES; \
-}
-
-LI_BOOL0(skipFam)
-LI_BOOL0(skipThin)
-LI_BOOL_ERR(famErr)
-LI_BOOL_ERR(osErr)
-LI_BOOL_ERR(capErr)
-LI_BOOL_ERR(thinErr)
-LI_BOOL_ERR(valApp)
-LI_BOOL_ERR(valPlug)
-LI_BOOL_ERR(devErr)
-LI_BOOL_ERR(verifyMeta)
-LI_BOOL_ERR(verifySub)
-LI_BOOL_ERR(installErr)
-LI_BOOL_ERR(launchErr)
+#pragma mark - installd: MI* + NSBundle MinimumOSVersion
 
 static NSString *(*orig_minOS)(id, SEL) = NULL;
 static NSString *hook_minOS(id self, SEL _cmd) {
-	if (gEnabled) return @"2.0";
-	return orig_minOS ? orig_minOS(self, _cmd) : @"2.0";
+	return gEnabled ? @"2.0" : (orig_minOS ? orig_minOS(self, _cmd) : @"2.0");
 }
 
-static NSArray *(*orig_devices)(id, SEL) = NULL;
-static NSArray *hook_devices(id self, SEL _cmd) {
-	NSArray *ret = orig_devices ? orig_devices(self, _cmd) : @[];
+static NSArray *(*orig_devs)(id, SEL) = NULL;
+static NSArray *hook_devs(id self, SEL _cmd) {
+	NSArray *ret = orig_devs ? orig_devs(self, _cmd) : @[];
 	if (!gEnabled) return ret;
-	NSString *machine = gCurrentDevice ?: LICurrentMachine();
-	if (machine && ![ret containsObject:machine]) {
-		NSMutableArray *mut = [ret mutableCopy] ?: [NSMutableArray array];
-		[mut addObject:machine];
-		return [mut copy];
+	NSString *m = gCurrentDevice ?: LICurrentMachine();
+	if (m && ![ret containsObject:m]) {
+		NSMutableArray *a = [ret mutableCopy] ?: [NSMutableArray array];
+		[a addObject:m];
+		return a;
 	}
 	return ret;
 }
 
-static BOOL (*orig_osVerErr)(id, SEL, id, NSError **) = NULL;
-static BOOL hook_osVerErr(id self, SEL _cmd, id a, NSError **e) {
+#define LI_YES_ERR(n) \
+static BOOL (*orig_##n)(id, SEL, NSError **) = NULL; \
+static BOOL hook_##n(id self, SEL _cmd, NSError **e) { \
+	if (gEnabled) { if (e) *e = nil; return YES; } \
+	return orig_##n ? orig_##n(self, _cmd, e) : YES; \
+}
+LI_YES_ERR(famErr) LI_YES_ERR(osErr) LI_YES_ERR(capErr) LI_YES_ERR(thinErr)
+LI_YES_ERR(valApp) LI_YES_ERR(valPlug) LI_YES_ERR(devErr) LI_YES_ERR(vMeta) LI_YES_ERR(vSub)
+
+static BOOL (*orig_osVer)(id, SEL, id, NSError **) = NULL;
+static BOOL hook_osVer(id s, SEL c, id a, NSError **e) {
 	if (gEnabled) { if (e) *e = nil; return YES; }
-	return orig_osVerErr ? orig_osVerErr(self, _cmd, a, e) : YES;
+	return orig_osVer ? orig_osVer(s, c, a, e) : YES;
+}
+static BOOL (*orig_fam)(id, SEL, int) = NULL;
+static BOOL hook_fam(id s, SEL c, int f) { return gEnabled ? YES : (orig_fam ? orig_fam(s, c, f) : YES); }
+static BOOL (*orig_skipF)(id, SEL) = NULL;
+static BOOL hook_skipF(id s, SEL c) { return gEnabled ? YES : (orig_skipF ? orig_skipF(s, c) : NO); }
+static BOOL (*orig_skipT)(id, SEL) = NULL;
+static BOOL hook_skipT(id s, SEL c) { return gEnabled ? YES : (orig_skipT ? orig_skipT(s, c) : NO); }
+
+// NSBundle Info.plist reads (installd path)
+static id (*orig_bundleInfo)(id, SEL, NSString *) = NULL;
+static id hook_bundleInfo(id self, SEL _cmd, NSString *key) {
+	if (gEnabled && LIIsMinOSKey(key)) return @"2.0";
+	return orig_bundleInfo ? orig_bundleInfo(self, _cmd, key) : nil;
 }
 
-static BOOL (*orig_compatFam)(id, SEL, int) = NULL;
-static BOOL hook_compatFam(id self, SEL _cmd, int f) {
-	if (gEnabled) return YES;
-	return orig_compatFam ? orig_compatFam(self, _cmd, f) : YES;
+// NSDictionary path — installd reads Info.plist into dicts; key-scoped only
+static id (*orig_dictKey)(id, SEL, id) = NULL;
+static id hook_dictKey(id self, SEL _cmd, id key) {
+	id r = orig_dictKey ? orig_dictKey(self, _cmd, key) : nil;
+	if (gEnabled && LIIsMinOSKey(key) && r != nil) return @"2.0";
+	return r;
+}
+static id (*orig_mdictKey)(id, SEL, id) = NULL;
+static id hook_mdictKey(id self, SEL _cmd, id key) {
+	id r = orig_mdictKey ? orig_mdictKey(self, _cmd, key) : nil;
+	if (gEnabled && LIIsMinOSKey(key) && r != nil) return @"2.0";
+	return r;
 }
 
 static void LIInstallInstalldHooks(void) {
-	Class miBundle = objc_getClass("MIBundle");
-	Class miInstallable = objc_getClass("MIInstallableBundle");
-	Class miCfg = objc_getClass("MIDaemonConfiguration");
-	Class miInstaller = objc_getClass("MIInstaller");
-	Class miClient = objc_getClass("MIClientConnection");
+	Class miB = objc_getClass("MIBundle");
+	Class miI = objc_getClass("MIInstallableBundle");
+	Class miC = objc_getClass("MIDaemonConfiguration");
+	Class nsb = objc_getClass("NSBundle");
+	Class nsd = objc_getClass("NSDictionary");
+	Class nsm = objc_getClass("NSMutableDictionary");
 
-	if (miCfg) {
-		LITryHook(miCfg, @selector(skipDeviceFamilyCheck), (IMP)hook_skipFam, (IMP *)&orig_skipFam);
-		LITryHook(miCfg, @selector(skipThinningCheck), (IMP)hook_skipThin, (IMP *)&orig_skipThin);
+	if (miC) {
+		LITryHook(miC, @selector(skipDeviceFamilyCheck), (IMP)hook_skipF, (IMP *)&orig_skipF);
+		LITryHook(miC, @selector(skipThinningCheck), (IMP)hook_skipT, (IMP *)&orig_skipT);
 	}
-	if (miBundle) {
-		LITryHook(miBundle, @selector(minimumOSVersion), (IMP)hook_minOS, (IMP *)&orig_minOS);
-		LITryHook(miBundle, @selector(supportedDevices), (IMP)hook_devices, (IMP *)&orig_devices);
-		LITryHook(miBundle, @selector(isApplicableToCurrentDeviceFamilyWithError:), (IMP)hook_famErr, (IMP *)&orig_famErr);
-		LITryHook(miBundle, @selector(isApplicableToCurrentOSVersionWithError:), (IMP)hook_osErr, (IMP *)&orig_osErr);
-		LITryHook(miBundle, @selector(isApplicableToOSVersion:error:), (IMP)hook_osVerErr, (IMP *)&orig_osVerErr);
-		LITryHook(miBundle, @selector(isApplicableToCurrentDeviceCapabilitiesWithError:), (IMP)hook_capErr, (IMP *)&orig_capErr);
-		LITryHook(miBundle, @selector(thinningMatchesCurrentDeviceWithError:), (IMP)hook_thinErr, (IMP *)&orig_thinErr);
-		LITryHook(miBundle, @selector(validateAppMetadataWithError:), (IMP)hook_valApp, (IMP *)&orig_valApp);
-		LITryHook(miBundle, @selector(validatePluginMetadataWithError:), (IMP)hook_valPlug, (IMP *)&orig_valPlug);
-		LITryHook(miBundle, @selector(isApplicableToCurrentDeviceWithError:), (IMP)hook_devErr, (IMP *)&orig_devErr);
-		LITryHook(miBundle, @selector(isCompatibleWithDeviceFamily:), (IMP)hook_compatFam, (IMP *)&orig_compatFam);
+	if (miB) {
+		LITryHook(miB, @selector(minimumOSVersion), (IMP)hook_minOS, (IMP *)&orig_minOS);
+		LITryHook(miB, @selector(supportedDevices), (IMP)hook_devs, (IMP *)&orig_devs);
+		LITryHook(miB, @selector(isApplicableToCurrentDeviceFamilyWithError:), (IMP)hook_famErr, (IMP *)&orig_famErr);
+		LITryHook(miB, @selector(isApplicableToCurrentOSVersionWithError:), (IMP)hook_osErr, (IMP *)&orig_osErr);
+		LITryHook(miB, @selector(isApplicableToOSVersion:error:), (IMP)hook_osVer, (IMP *)&orig_osVer);
+		LITryHook(miB, @selector(isApplicableToCurrentDeviceCapabilitiesWithError:), (IMP)hook_capErr, (IMP *)&orig_capErr);
+		LITryHook(miB, @selector(thinningMatchesCurrentDeviceWithError:), (IMP)hook_thinErr, (IMP *)&orig_thinErr);
+		LITryHook(miB, @selector(validateAppMetadataWithError:), (IMP)hook_valApp, (IMP *)&orig_valApp);
+		LITryHook(miB, @selector(validatePluginMetadataWithError:), (IMP)hook_valPlug, (IMP *)&orig_valPlug);
+		LITryHook(miB, @selector(isApplicableToCurrentDeviceWithError:), (IMP)hook_devErr, (IMP *)&orig_devErr);
+		LITryHook(miB, @selector(isCompatibleWithDeviceFamily:), (IMP)hook_fam, (IMP *)&orig_fam);
 	}
-	if (miInstallable) {
-		// Only bypass *validation* — never skip the real performInstallation (would brick the update flow)
-		LITryHook(miInstallable, @selector(_verifyBundleMetadataWithError:), (IMP)hook_verifyMeta, (IMP *)&orig_verifyMeta);
-		LITryHook(miInstallable, @selector(_verifySubBundleMetadataWithError:), (IMP)hook_verifySub, (IMP *)&orig_verifySub);
+	if (miI) {
+		LITryHook(miI, @selector(_verifyBundleMetadataWithError:), (IMP)hook_vMeta, (IMP *)&orig_vMeta);
+		LITryHook(miI, @selector(_verifySubBundleMetadataWithError:), (IMP)hook_vSub, (IMP *)&orig_vSub);
 	}
-	(void)miInstaller;
-	(void)miClient;
-	(void)hook_installErr;
-	(void)hook_launchErr;
-	os_log(LILog(), "installd hooks miBundle=%d miInstallable=%d", miBundle != nil, miInstallable != nil);
+	// Critical: Info.plist MinimumOSVersion readers inside installd only
+	if (nsb) LITryHook(nsb, @selector(objectForInfoDictionaryKey:), (IMP)hook_bundleInfo, (IMP *)&orig_bundleInfo);
+	if (nsd) LITryHook(nsd, @selector(objectForKey:), (IMP)hook_dictKey, (IMP *)&orig_dictKey);
+	if (nsm && nsm != nsd) LITryHook(nsm, @selector(objectForKey:), (IMP)hook_mdictKey, (IMP *)&orig_mdictKey);
+
+	os_log(LILog(), "installd hooks ready miBundle=%d", miB != nil);
 }
 
-#pragma mark - Store request hooks
+#pragma mark - Store hooks
 
 %group StoreHooks
 
 %hook NSMutableURLRequest
-
 - (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field {
-	if (gEnabled && field && value && [field caseInsensitiveCompare:@"User-Agent"] == NSOrderedSame) {
-		value = LIRewriteVersionTokens(value);
-	}
+	if (gEnabled && field && value && [field caseInsensitiveCompare:@"User-Agent"] == NSOrderedSame)
+		value = LIRewrite(value);
 	%orig(value, field);
 }
-
 - (void)addValue:(NSString *)value forHTTPHeaderField:(NSString *)field {
-	if (gEnabled && field && value && [field caseInsensitiveCompare:@"User-Agent"] == NSOrderedSame) {
-		value = LIRewriteVersionTokens(value);
-	}
+	if (gEnabled && field && value && [field caseInsensitiveCompare:@"User-Agent"] == NSOrderedSame)
+		value = LIRewrite(value);
 	%orig(value, field);
 }
-
-- (void)setAllHTTPHeaderFields:(NSDictionary *)headerFields {
-	if (gEnabled && headerFields.count) {
-		NSMutableDictionary *mut = [headerFields mutableCopy];
-		for (NSString *key in headerFields) {
-			if ([key caseInsensitiveCompare:@"User-Agent"] == NSOrderedSame) {
-				id v = headerFields[key];
-				if ([v isKindOfClass:[NSString class]]) mut[key] = LIRewriteVersionTokens(v);
-			}
-		}
-		headerFields = mut;
-	}
-	%orig(headerFields);
-}
-
 - (void)setHTTPBody:(NSData *)data {
-	if (gEnabled && data.length) data = LIRewriteBodyData(data);
+	if (gEnabled && data.length) data = LIRewriteData(data);
 	%orig(data);
 }
-
+- (void)setAllHTTPHeaderFields:(NSDictionary *)h {
+	if (gEnabled && h.count) {
+		NSMutableDictionary *m = [h mutableCopy];
+		for (NSString *k in h) {
+			if ([k caseInsensitiveCompare:@"User-Agent"] == NSOrderedSame && [h[k] isKindOfClass:[NSString class]])
+				m[k] = LIRewrite(h[k]);
+		}
+		h = m;
+	}
+	%orig(h);
+}
 %end
 
-// NSString formatting of version in AMS blobs sometimes goes through stringByAppending*
-// Catch dictionary serialization used for request bodies
 %hook NSJSONSerialization
-
 + (NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error {
-	NSData *data = %orig;
-	if (gEnabled && data.length) {
-		NSData *rewritten = LIRewriteBodyData(data);
-		if (rewritten != data) return rewritten;
+	NSData *d = %orig;
+	if (gEnabled && d.length) {
+		NSData *r = LIRewriteData(d);
+		if (r != d) return r;
 	}
-	return data;
+	return d;
 }
+%end
 
+// App Store UI: also force min-OS reads when browsing (harmless if not present)
+%hook NSBundle
+- (id)objectForInfoDictionaryKey:(NSString *)key {
+	id r = %orig;
+	// Do NOT rewrite arbitrary bundles in App Store UI — only system version presentation
+	return r;
+}
 %end
 
 %end
@@ -387,36 +397,32 @@ static void LIInstallInstalldHooks(void) {
 %ctor {
 	@autoreleasepool {
 		const char *prog = __progname ?: "";
-
-		if (LIIsDeniedProcess(prog)) return;
+		if (LIIsDenied(prog)) return;
 		if (!LIIsAllowed(prog)) return;
 
 		gCurrentDevice = [LICurrentMachine() copy];
 		gCurrentVersion = [LICurrentOSVersion() copy];
 		LILoadPrefs();
 
-		CFNotificationCenterAddObserver(
-			CFNotificationCenterGetDarwinNotifyCenter(),
-			NULL,
-			LIPrefsCallback,
-			CFSTR(PREFS_CHANGED),
-			NULL,
-			CFNotificationSuspensionBehaviorCoalesce
-		);
+		CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL,
+			LIPrefsCallback, CFSTR(PREFS_CHANGED), NULL, CFNotificationSuspensionBehaviorCoalesce);
 
-		os_log(LILog(), "1.3 active in %{public}s spoof=%{public}@ real=%{public}@", prog, LISpoof(), gCurrentVersion);
+		// Always write breadcrumb first so user can verify injection even if hooks fail
+		LIWriteBreadcrumb(prog, @"ctor");
 
-		// Gestalt for anyone allowed (store + installd + installcoordinationd)
 		%init(GestaltHooks);
 
-		if (LIIsInstalld(prog) || LIIsInstallCoord(prog)) {
+		if (LIIsInstalld(prog)) {
 			LIInstallInstalldHooks();
+			LIWriteBreadcrumb(prog, @"installd-hooks-installed");
 			return;
 		}
 
 		if (LIIsStore(prog)) {
-			LIHookUIDevice();
+			Class uid = objc_getClass("UIDevice");
+			if (uid) LITryHook(uid, @selector(systemVersion), (IMP)hook_ui, (IMP *)&orig_ui);
 			%init(StoreHooks);
+			LIWriteBreadcrumb(prog, @"store-hooks-installed");
 			return;
 		}
 	}

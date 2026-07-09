@@ -48,7 +48,7 @@
 												cell:PSEditTextCell
 												edit:nil];
 		[spec setProperty:@"SpoofVersion" forKey:@"key"];
-		[spec setProperty:@"18.5" forKey:@"default"];
+		[spec setProperty:@"99.0.0" forKey:@"default"];
 		[spec setProperty:@"com.julioverne.lowerinstall" forKey:@"defaults"];
 		[specs addObject:spec];
 
@@ -65,7 +65,17 @@
 		[specs addObject:spec];
 
 		spec = [PSSpecifier emptyGroupSpecifier];
-		[spec setProperty:@"If download starts then snaps back to Update: installd is rejecting the package. Reboot after install so installd/appstored load the tweak. Spoof must be 18.5+. App Store.app toggle alone is not enough." forKey:@"footerText"];
+		[spec setProperty:@"After reboot, check Filza: /var/mobile/Library/Logs/LowerInstall/ — you need installd.loaded AND appstored.loaded. If installd.loaded is missing, Bootstrap is not injecting installd and App Store updates cannot finish." forKey:@"footerText"];
+		[specs addObject:spec];
+
+		spec = [PSSpecifier preferenceSpecifierNamed:@"Open injection logs path"
+											  target:self
+												 set:nil
+												 get:nil
+											  detail:nil
+												cell:PSButtonCell
+												edit:nil];
+		spec->action = @selector(showLogHelp);
 		[specs addObject:spec];
 
 		spec = [PSSpecifier preferenceSpecifierNamed:@"Reset Settings"
@@ -115,6 +125,20 @@
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"LowerInstall"
 																   message:@"Settings reset. Kill installd / appstored or reboot for a clean state."
 															preferredStyle:UIAlertControllerStyleAlert];
+	[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+	[self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)showLogHelp {
+	NSString *dir = @"/var/mobile/Library/Logs/LowerInstall";
+	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:dir error:nil] ?: @[];
+	NSString *msg;
+	if (files.count == 0) {
+		msg = @"No breadcrumbs yet. Reboot, open App Store once, try an update, then check again.\n\nPath:\n/var/mobile/Library/Logs/LowerInstall/\n\nNeed: installd.loaded + appstored.loaded";
+	} else {
+		msg = [NSString stringWithFormat:@"Found:\n%@\n\nNeed both installd.loaded and appstored.loaded after reboot + opening App Store.", [files componentsJoinedByString:@"\n"]];
+	}
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Injection check" message:msg preferredStyle:UIAlertControllerStyleAlert];
 	[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
 	[self presentViewController:alert animated:YES completion:nil];
 }
