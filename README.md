@@ -13,6 +13,7 @@ This repo contains a first tranche of Bootstrap-compatible, roothide Theos tweak
 - SilentToast: small toast when silent mode changes.
 - ChargingAurora: charging edge glow on SpringBoard.
 - SpotifyReframe: Spotify-only UI redesign with glass cards, tuned artwork, player chrome, and Settings controls.
+- LowerInstall: install apps meant for newer iOS (installd + App Store version spoof; julioverne port for RootHide/iOS 15–17).
 
 Premium suite:
 

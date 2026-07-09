@@ -383,6 +383,22 @@ MD5sum: 4e5b38511056bcdeba4cd4f9ec630dfb
 SHA1: 4b13666f8cd769c7cb0aee0e436d055936708fe7
 SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
 
+Package: com.chasedavis.lowerinstall
+Name: LowerInstall
+Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
+Description: Install apps meant for newer iOS by spoofing installd + App Store version checks. RootHide/rootless port of julioverne's LowerInstall for iOS 15–17.
+Maintainer: Chase Davis
+Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 344
+Filename: debs/com.chasedavis.lowerinstall_1.0.0-1_iphoneos-arm64e.deb
+Size: 13982
+MD5sum: 4450d9289db45cdfc62b4f3c929c3e1c
+SHA1: 71d7bed40836b96776b1672f4c23e8a32ab76a78
+SHA256: aaf12abc875beec7e3e9c248c27a4b534866992c93fb93f679968e0aa46b7b9a
+
 Package: com.chasedavis.minimalcc
 Name: MinimalCC
 Depends: mobilesubstrate
