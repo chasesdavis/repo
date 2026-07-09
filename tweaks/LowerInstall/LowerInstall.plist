@@ -7,7 +7,8 @@
 			AppStore
 		);
 		Bundles = (
-			"com.apple.AppStore"
+			"com.apple.AppStore",
+			"com.apple.AppStoreDaemon"
 		);
 	};
 }

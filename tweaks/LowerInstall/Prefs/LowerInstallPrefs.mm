@@ -32,8 +32,8 @@
 		[spec setProperty:@"com.julioverne.lowerinstall" forKey:@"defaults"];
 		[specs addObject:spec];
 
-		spec = [PSSpecifier groupSpecifierWithName:@"App Store Spoof"];
-		[spec setProperty:@"SpoofVersion must be NEWER than your real iOS (default 18.4). After changes: reboot, or NewTerm: killall -9 installd appstored" forKey:@"footerText"];
+		spec = [PSSpecifier groupSpecifierWithName:@"Version spoof"];
+		[spec setProperty:@"Must be NEWER than your real iOS. Default 18.5. After any change: reboot (or killall -9 installd appstored AppStore)." forKey:@"footerText"];
 		[specs addObject:spec];
 
 		struct utsname systemInfo;
@@ -48,7 +48,7 @@
 												cell:PSEditTextCell
 												edit:nil];
 		[spec setProperty:@"SpoofVersion" forKey:@"key"];
-		[spec setProperty:@"18.4" forKey:@"default"];
+		[spec setProperty:@"18.5" forKey:@"default"];
 		[spec setProperty:@"com.julioverne.lowerinstall" forKey:@"defaults"];
 		[specs addObject:spec];
 
@@ -65,7 +65,7 @@
 		[specs addObject:spec];
 
 		spec = [PSSpecifier emptyGroupSpecifier];
-		[spec setProperty:@"RootHide Bootstrap: ensure daemon injection is active (Bootstrap 2.x). installd + appstored must load this tweak. App Store must be enabled in App List if required." forKey:@"footerText"];
+		[spec setProperty:@"CRITICAL on RootHide: App Store.app injection alone is not enough. The appstored daemon must load LowerInstall (Bootstrap resign list). Enabling only App Store in App List will not spoof updates. Reboot after install." forKey:@"footerText"];
 		[specs addObject:spec];
 
 		spec = [PSSpecifier preferenceSpecifierNamed:@"Reset Settings"
