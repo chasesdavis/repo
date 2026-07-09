@@ -386,18 +386,18 @@ SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Description: iOS 18 App Store spoof without Safe Mode. 1.2.1 hard-blocks SpringBoard injection and removes crashy system hooks from 1.2.
+Description: Finish App Store updates that require iOS 18+. Spoofs ProductVersion (Gestalt), UA/JSON bodies, and installd validation. Safe Mode hardened.
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks
 Architecture: iphoneos-arm64e
-Version: 1.2.1-1
+Version: 1.3.0-1
 Installed-Size: 380
-Filename: debs/com.chasedavis.lowerinstall_1.2.1-1_iphoneos-arm64e.deb
-Size: 17900
-MD5sum: b704d6a31e283d02bab6dc8f753ba84d
-SHA1: ad1d07528e350d3f009d97c7dfb5f4b83e861334
-SHA256: c85c71565bc3a9b630d9aa149a80809287ea2f66a215fb2c8b6709ebd8cfc877
+Filename: debs/com.chasedavis.lowerinstall_1.3.0-1_iphoneos-arm64e.deb
+Size: 18874
+MD5sum: e03a66c833c1ee10394ae39302157d22
+SHA1: 3b72a8590c5325fd91fd36d5571667888b6efb8d
+SHA256: eda15b7aa84acd2b8c950ab442db69849a90d8c37dab40f37f1c5536682f6c78
 
 Package: com.chasedavis.minimalcc
 Name: MinimalCC

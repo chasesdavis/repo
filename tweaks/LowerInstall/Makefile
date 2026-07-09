@@ -12,6 +12,8 @@ TWEAK_NAME = LowerInstall
 LowerInstall_FILES = Tweak/LowerInstall.xm
 LowerInstall_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-function
 LowerInstall_FRAMEWORKS = Foundation
+# Needed for %hookf(MGCopyAnswer) on ElleKit/Substrate
+LowerInstall_LIBRARIES = MobileGestalt
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

@@ -65,7 +65,7 @@
 		[specs addObject:spec];
 
 		spec = [PSSpecifier emptyGroupSpecifier];
-		[spec setProperty:@"CRITICAL on RootHide: App Store.app injection alone is not enough. The appstored daemon must load LowerInstall (Bootstrap resign list). Enabling only App Store in App List will not spoof updates. Reboot after install." forKey:@"footerText"];
+		[spec setProperty:@"If download starts then snaps back to Update: installd is rejecting the package. Reboot after install so installd/appstored load the tweak. Spoof must be 18.5+. App Store.app toggle alone is not enough." forKey:@"footerText"];
 		[specs addObject:spec];
 
 		spec = [PSSpecifier preferenceSpecifierNamed:@"Reset Settings"
