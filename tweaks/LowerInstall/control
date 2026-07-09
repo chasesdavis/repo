@@ -1,9 +1,9 @@
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Version: 1.2.0-1
+Version: 1.2.1-1
 Architecture: iphoneos-arm64
-Description: Spoof iOS version for App Store updates that require iOS 18+. Hooks appstored + MobileGestalt ProductVersion + installd (not just App Store.app).
+Description: iOS 18 App Store spoof without Safe Mode. 1.2.1 hard-blocks SpringBoard injection and removes crashy system hooks from 1.2.
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks
