@@ -386,18 +386,18 @@ SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Description: Install apps meant for newer iOS. 1.1 fixes modern App Store User-Agent spoof (iOS/x.y.z) + stronger installd hooks for RootHide/iOS 15–17.
+Description: Spoof iOS version for App Store updates that require iOS 18+. Hooks appstored + MobileGestalt ProductVersion + installd (not just App Store.app).
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks
 Architecture: iphoneos-arm64e
-Version: 1.1.0-1
-Installed-Size: 344
-Filename: debs/com.chasedavis.lowerinstall_1.1.0-1_iphoneos-arm64e.deb
-Size: 15656
-MD5sum: 6d96ceaddd7b923652d0364f3410d2ae
-SHA1: 38cb7230f71c6c470f62d49abcf6057201a0c05b
-SHA256: 2605e110492bd5eb222e4fa62dbf1c401b33136675b52a3c35977944fbe3cee7
+Version: 1.2.0-1
+Installed-Size: 380
+Filename: debs/com.chasedavis.lowerinstall_1.2.0-1_iphoneos-arm64e.deb
+Size: 18994
+MD5sum: 0e0a443878e684ec33c9312a74788d48
+SHA1: b214a7690e98b76e056073628ad32526ea6ee989
+SHA256: 3b0eda118c2f52f1b1743a013bc76c961d6618dee5ec646c688597372b06666a
 
 Package: com.chasedavis.minimalcc
 Name: MinimalCC
