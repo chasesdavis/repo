@@ -1,13 +1,13 @@
 {
 	Filter = {
-		Bundles = (
-			"com.apple.mobile.installd",
-			"com.apple.AppStore",
-		);
 		Executables = (
 			installd,
 			appstored,
 			itunesstored,
+			AppStore
+		);
+		Bundles = (
+			"com.apple.AppStore"
 		);
 	};
 }

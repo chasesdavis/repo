@@ -46,4 +46,4 @@ rsync -a --delete \
 )
 
 git worktree remove --force "$tmp/gh-pages" 2>/dev/null || true
-echo "Done. Source: https://chasesdavis.github.io/ios17-tweaks-sileo-repo/"
+echo "Done. Source: https://chasesdavis.github.io/repo/"

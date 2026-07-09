@@ -33,13 +33,12 @@
 		[specs addObject:spec];
 
 		spec = [PSSpecifier groupSpecifierWithName:@"App Store Spoof"];
-		[spec setProperty:@"Spoof the User-Agent iOS version and device model for App Store downloads. installd always uses your real machine for supportedDevices injection." forKey:@"footerText"];
+		[spec setProperty:@"SpoofVersion must be NEWER than your real iOS (default 18.4). After changes: reboot, or NewTerm: killall -9 installd appstored" forKey:@"footerText"];
 		[specs addObject:spec];
 
 		struct utsname systemInfo;
 		uname(&systemInfo);
-		NSString *device = [NSString stringWithUTF8String:systemInfo.machine] ?: @"iPhone";
-		NSString *version = [[UIDevice currentDevice] systemVersion] ?: @"17.0";
+		NSString *device = [NSString stringWithUTF8String:systemInfo.machine] ?: @"iPhone15,2";
 
 		spec = [PSSpecifier preferenceSpecifierNamed:@"Spoof iOS Version"
 											  target:self
@@ -49,7 +48,7 @@
 												cell:PSEditTextCell
 												edit:nil];
 		[spec setProperty:@"SpoofVersion" forKey:@"key"];
-		[spec setProperty:version forKey:@"default"];
+		[spec setProperty:@"18.4" forKey:@"default"];
 		[spec setProperty:@"com.julioverne.lowerinstall" forKey:@"defaults"];
 		[specs addObject:spec];
 
@@ -66,7 +65,7 @@
 		[specs addObject:spec];
 
 		spec = [PSSpecifier emptyGroupSpecifier];
-		[spec setProperty:@"Examples: SpoofVersion 18.2 · SpoofDevice iPhone17,1. After changing, kill installd (or reboot) and reopen App Store." forKey:@"footerText"];
+		[spec setProperty:@"RootHide Bootstrap: ensure daemon injection is active (Bootstrap 2.x). installd + appstored must load this tweak. App Store must be enabled in App List if required." forKey:@"footerText"];
 		[specs addObject:spec];
 
 		spec = [PSSpecifier preferenceSpecifierNamed:@"Reset Settings"
@@ -102,6 +101,9 @@
 	if (value) prefs[key] = value;
 	else [prefs removeObjectForKey:key];
 	[prefs writeToFile:PLIST_PATH atomically:YES];
+	// Also write CFPreferences so daemons reading the domain see updates
+	CFPreferencesSetAppValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)value, CFSTR("com.julioverne.lowerinstall"));
+	CFPreferencesAppSynchronize(CFSTR("com.julioverne.lowerinstall"));
 	notify_post(PREFS_CHANGED);
 }
 

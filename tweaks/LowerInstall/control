@@ -1,9 +1,9 @@
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Version: 1.0.0-1
+Version: 1.1.0-1
 Architecture: iphoneos-arm64
-Description: Install apps meant for newer iOS by spoofing installd + App Store version checks. RootHide/rootless port of julioverne's LowerInstall for iOS 15–17.
+Description: Install apps meant for newer iOS. 1.1 fixes modern App Store User-Agent spoof (iOS/x.y.z) + stronger installd hooks for RootHide/iOS 15–17.
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks

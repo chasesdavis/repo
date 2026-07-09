@@ -60,7 +60,7 @@ Static repo flow:
 Published repo URL:
 
 ```text
-https://chasesdavis.github.io/ios17-tweaks-sileo-repo/
+https://chasesdavis.github.io/repo/
 ```
 
 For local network testing, serve the folder from the Mac:
@@ -87,7 +87,7 @@ git add -A && git commit -m "..." && git push origin main
 Sileo source URL:
 
 ```text
-https://chasesdavis.github.io/ios17-tweaks-sileo-repo/
+https://chasesdavis.github.io/repo/
 ```
 
 If a package is on `main` but missing in Sileo, you forgot `publish-pages.sh`.

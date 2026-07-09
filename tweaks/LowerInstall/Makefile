@@ -10,8 +10,8 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = LowerInstall
 
 LowerInstall_FILES = Tweak/LowerInstall.xm
-LowerInstall_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
-LowerInstall_FRAMEWORKS = Foundation UIKit
+LowerInstall_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-function
+LowerInstall_FRAMEWORKS = Foundation
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

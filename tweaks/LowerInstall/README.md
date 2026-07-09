@@ -1,25 +1,38 @@
-# LowerInstall
+# LowerInstall 1.1
 
-RootHide / rootless port of [julioverne/LowerInstall](https://github.com/julioverne/LowerInstall) for iOS 15–17 Bootstrap.
+RootHide / rootless port of [julioverne/LowerInstall](https://github.com/julioverne/LowerInstall) for iOS 15–17.
 
-Hooks `installd` compatibility checks and spoofs App Store (`appstored` / `itunesstored`) User-Agent version/device so you can install apps that declare a higher minimum OS.
+## What it does
 
-## Settings
+| Target | Action |
+|--------|--------|
+| **appstored** | Spoofs modern `User-Agent` (`iOS/18.4` style) so App Store may serve newer listings |
+| **installd** | Relaxes min-OS / device family / thinning checks so IPAs can install |
 
-Settings → LowerInstall
+## Setup (RootHide Bootstrap)
 
-- Enabled
-- Spoof iOS Version (e.g. `18.2`)
-- Spoof Device machine (e.g. `iPhone17,1`)
+1. Install **LowerInstall** from this repo.
+2. **Reboot** (or `killall -9 installd appstored` after install).
+3. Settings → **LowerInstall**
+   - Enabled: ON  
+   - Spoof iOS Version: **`18.4`** (or higher — must be newer than your real iOS)  
+   - Spoof Device: leave default machine unless App Store still blocks model  
+4. Bootstrap App List: enable **App Store** if your build requires per-app injection.
+5. Bootstrap 2.x should inject **installd** + **appstored** (they’re on the resign list).
 
-After changes: reboot or `killall -9 installd appstored itunesstored`.
+## If it still fails
 
-## Notes
+| Symptom | Likely cause |
+|---------|----------------|
+| App Store still says “requires iOS X” | SpoofVersion not high enough, or appstored not injected — reboot, set 18.4/99.0 |
+| Download starts then install fails | installd not hooked — need daemon injection / full rootless JB |
+| Install OK, app crashes on launch | App needs newer OS APIs — LowerInstall cannot fix runtime |
+| No Settings pane | Install PreferenceLoader |
 
-- Not a signing/DRM bypass — only version/device compatibility gates.
-- App may still fail at runtime if it needs a newer OS SDK.
-- On RootHide Bootstrap, ensure daemon injection is available for `installd` / `appstored`.
+## Reality check
+
+Apple often **does not host** an older binary. Spoofing may let you **purchase** or **see** the app; install can still fail if no compatible slice exists. For purchase-only workflows see [AppStoreTroller](https://github.com/mineek/appstoretroller).
 
 ## Credits
 
-Original by julioverne. iOS 17 / RootHide packaging by Chase Davis.
+julioverne (original) · Chase Davis (1.1 RootHide port) · UA pattern notes from mineek/appstoretroller
