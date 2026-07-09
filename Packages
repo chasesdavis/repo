@@ -55,13 +55,13 @@ Author: Chase Davis
 Section: Tweaks
 Tag: role::hacker
 Architecture: iphoneos-arm64e
-Version: 1.0.2-1
+Version: 1.0.0-1
 Installed-Size: 352
-Filename: debs/com.chasedavis.appguardpro_1.0.2-1_iphoneos-arm64e.deb
-Size: 14346
-MD5sum: 2b6e42cd558e4901455d216f143a9ea5
-SHA1: 8ecbec60c018e2e65618d8b565e8442c581c8520
-SHA256: fb1593e6b1801ab37768879eb6cb9fa3ec1d1d78eb15b1c1d8bf74ba50ae8aef
+Filename: debs/com.chasedavis.appguardpro_1.0.0-1_iphoneos-arm64e.deb
+Size: 13020
+MD5sum: acaa4f67a9f697997e63303201ca48b1
+SHA1: ccb72454961426a8dc921f765f4f3be0eef557d5
+SHA256: 0e622fa058517915a3585d533312f75e7074c9944fb1bfd521d1c097bc22fa1d
 
 Package: com.chasedavis.applaunchecho
 Name: AppLaunchEcho
@@ -383,6 +383,22 @@ MD5sum: 4e5b38511056bcdeba4cd4f9ec630dfb
 SHA1: 4b13666f8cd769c7cb0aee0e436d055936708fe7
 SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
 
+Package: com.chasedavis.lowerinstall
+Name: LowerInstall
+Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
+Description: Install apps meant for newer iOS by spoofing installd + App Store version checks. RootHide/rootless port of julioverne's LowerInstall for iOS 15–17.
+Maintainer: Chase Davis
+Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 344
+Filename: debs/com.chasedavis.lowerinstall_1.0.0-1_iphoneos-arm64e.deb
+Size: 13982
+MD5sum: 4450d9289db45cdfc62b4f3c929c3e1c
+SHA1: 71d7bed40836b96776b1672f4c23e8a32ab76a78
+SHA256: aaf12abc875beec7e3e9c248c27a4b534866992c93fb93f679968e0aa46b7b9a
+
 Package: com.chasedavis.minimalcc
 Name: MinimalCC
 Depends: mobilesubstrate
@@ -398,22 +414,6 @@ Size: 9360
 MD5sum: 8cb529ead06f2a9d553c2d1531bb0a23
 SHA1: d477427b81b794aff41f7811c7bb29f62ebcd65c
 SHA256: 10c6f57f468b669fa0693e3c71a909972bf3b6db9b5f4737eff0a64cf487e0db
-
-Package: com.chasedavis.notchy
-Name: Notchy
-Depends: mobilesubstrate, preferenceloader
-Description: Premium Dynamic Island: notifications through the island, battery ring, persistent Now Playing, custom presentables, per-app rules. Works on real Dynamic Island and notched devices.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks
-Architecture: iphoneos-arm64e
-Version: 1.1.0
-Installed-Size: 464
-Filename: debs/com.chasedavis.notchy_1.1.0_iphoneos-arm64e.deb
-Size: 49224
-MD5sum: f0ed85dd46025c1a71b3ef3ccc730b18
-SHA1: 9f29ef788737c9bcf4f8bbedf2861aeac6a198f5
-SHA256: 5f0e943cb4850b2231abdc216808ff7fcddb979773f2aacd53d9a17f45633631
 
 Package: com.chasedavis.notificationforge
 Name: NotificationForge
