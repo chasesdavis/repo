@@ -71,3 +71,24 @@ cd "/Users/chase/ios17 tweaks"
 ```
 
 Then add the printed `http://<mac-lan-ip>:8088/` URL to Sileo.
+
+## Publishing to Sileo (important)
+
+GitHub Pages serves the **`gh-pages` branch**, not `main`.
+
+After building packages into `repo/`:
+
+```bash
+./scripts/package-repo.sh
+git add -A && git commit -m "..." && git push origin main
+./scripts/publish-pages.sh   # syncs repo/ → gh-pages
+```
+
+Sileo source URL:
+
+```text
+https://chasesdavis.github.io/ios17-tweaks-sileo-repo/
+```
+
+If a package is on `main` but missing in Sileo, you forgot `publish-pages.sh`.
+
