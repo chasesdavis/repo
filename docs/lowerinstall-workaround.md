@@ -53,7 +53,16 @@ You already have **TrollStore** (Bootstrap requires it). TrollStore installs IPA
 Own Apple ID → download IPA on Mac → patch MinimumOSVersion → TrollStore install
 ```
 
-### 1) Download an IPA you own (Mac)
+### 0) Decrypt from a running install (preferred)
+
+```bash
+./scripts/decrypt-app.sh -l
+./scripts/decrypt-app.sh com.example.app 15.0
+```
+
+Requires Frida on device + app that *launches* on your iOS. See script header for Bootstrap notes.
+
+### 1) Download an IPA you own (Mac) — encrypted
 
 [`ipatool`](https://github.com/majd/ipatool) (official App Store download for **your** account):
 
