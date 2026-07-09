@@ -1,9 +1,8 @@
 {
 	Filter = {
 		Executables = (
-			appstored,
-			itunesstored,
-			AppStore
+			installd,
+			installcoordinationd
 		);
 	};
 }

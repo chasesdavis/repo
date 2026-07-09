@@ -386,18 +386,18 @@ SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Description: App Store iOS 18+ update spoof. Spoofs ProductVersion, UA/JSON, installd MinimumOSVersion. Writes /var/mobile/Library/Logs/LowerInstall/ breadcrumbs to verify injection.
+Description: Dual-dylib package (AppSync-style): LowerInstall → appstored/AppStore, LowerInstallInstalld → installd only. Check /var/mobile/Library/Logs/LowerInstall/ for installd.loaded after reboot.
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks
 Architecture: iphoneos-arm64e
-Version: 1.4.0-1
-Installed-Size: 412
-Filename: debs/com.chasedavis.lowerinstall_1.4.0-1_iphoneos-arm64e.deb
-Size: 21440
-MD5sum: 16a435d48f0e896d957aa8942d479cf4
-SHA1: e6ed3099be327d14bc1d2be1c391530efcfb6756
-SHA256: 4ef22feee67a12046941b85cb0fdbc789c9a717057e6ae018d330290dc35cad1
+Version: 1.4.1-1
+Installed-Size: 648
+Filename: debs/com.chasedavis.lowerinstall_1.4.1-1_iphoneos-arm64e.deb
+Size: 22248
+MD5sum: 8877c61e40970c6a3b66ea7e12ca8c2c
+SHA1: 3bf2451b069c8e212ec14765660cbd340edf0b18
+SHA256: 929707e9675009ceaeb15932eb0841d0df15d59987b5f836806f66741872eb91
 
 Package: com.chasedavis.minimalcc
 Name: MinimalCC

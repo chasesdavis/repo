@@ -1,9 +1,9 @@
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Version: 1.4.0-1
+Version: 1.4.1-1
 Architecture: iphoneos-arm64
-Description: App Store iOS 18+ update spoof. Spoofs ProductVersion, UA/JSON, installd MinimumOSVersion. Writes /var/mobile/Library/Logs/LowerInstall/ breadcrumbs to verify injection.
+Description: Dual-dylib package (AppSync-style): LowerInstall → appstored/AppStore, LowerInstallInstalld → installd only. Check /var/mobile/Library/Logs/LowerInstall/ for installd.loaded after reboot.
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks

@@ -65,7 +65,7 @@
 		[specs addObject:spec];
 
 		spec = [PSSpecifier emptyGroupSpecifier];
-		[spec setProperty:@"After reboot, check Filza: /var/mobile/Library/Logs/LowerInstall/ — you need installd.loaded AND appstored.loaded. If installd.loaded is missing, Bootstrap is not injecting installd and App Store updates cannot finish." forKey:@"footerText"];
+		[spec setProperty:@"DIAGNOSTIC: After install, REBOOT, open App Store, try an update. Then Filza → /var/mobile/Library/Logs/LowerInstall/\n\nNeed installd.loaded (finishes install) + appstored.loaded or AppStore.loaded (store spoof).\n\nIf you only see AppStore.loaded, Bootstrap is NOT injecting installd — updates will always snap back. Try: NewTerm `killall -9 installd` then open App Store again. Bootstrap 2.x with daemon injection required." forKey:@"footerText"];
 		[specs addObject:spec];
 
 		spec = [PSSpecifier preferenceSpecifierNamed:@"Open injection logs path"

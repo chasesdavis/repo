@@ -1,0 +1,6 @@
+#!/bin/sh
+# Force daemons to relaunch so the new dylibs load (installd especially)
+killall -9 installd installcoordinationd appstored itunesstored 2>/dev/null || true
+# App Store UI
+killall -9 AppStore 2>/dev/null || true
+exit 0
