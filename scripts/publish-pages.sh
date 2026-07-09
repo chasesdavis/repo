@@ -32,6 +32,9 @@ git worktree add --force "$tmp/gh-pages" gh-pages
 rsync -a --delete \
   --exclude '.git' \
   "$tmp/site/" "$tmp/gh-pages/"
+touch "$tmp/gh-pages/.nojekyll"
+# never ship source trees on the pages branch
+rm -rf "$tmp/gh-pages/tweaks" "$tmp/gh-pages/docs" "$tmp/gh-pages/scripts" 2>/dev/null || true
 
 (
   cd "$tmp/gh-pages"
