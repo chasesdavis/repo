@@ -1,3 +1,22 @@
+Name: Unbound
+Description: Discord mobile client aimed at providing the user control, stability and customizability.
+Package: app.unbound.ios
+Maintainer: eternal, acquitelol, Adrian Castro
+Author: Unbound Team
+Section: Tweaks
+Depends: ellekit
+SileoDepiction: https://repo.unbound.rip/depictions/unbound.json
+Icon: https://assets.unbound.rip/logo/logo.png
+Conflicts: app.enmity, mod.vendetta, app.pyoncord
+Architecture: iphoneos-arm64e
+Version: 2.4.0
+Installed-Size: 1072
+Filename: debs/app.unbound.ios_2.4.0_iphoneos-arm64e.deb
+Size: 209292
+MD5sum: 3d5fde96232e0315dd2c27454d166abe
+SHA1: 57122231b7bed56d4524ab68616767fde4889a92
+SHA256: 2bb5c9eb2a1cedfffee1cb75ef4a5910e4fa39233f9a606a0fbdf58777e6f768
+
 Package: com.chasedavis.airplanecomet
 Name: AirplaneComet
 Depends: mobilesubstrate
