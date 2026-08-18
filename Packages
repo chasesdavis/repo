@@ -33,6 +33,22 @@ MD5sum: b8712082ba2742bc206fbd173db2f1b2
 SHA1: 37cb52a1c937d0cf9c5d50ec1596536a5688bda1
 SHA256: 09c8bb77cf14e112db6a41e1d0a2a61264eac3c0655345ff161aca8430d900ca
 
+Package: com.chase.tubelocal
+Name: TubeLocal
+Description: Save permitted non-DRM YouTube audio to Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Architecture: iphoneos-arm64e
+Version: 1.0.1
+Installed-Size: 47956
+Filename: debs/com.chase.tubelocal_1.0.1_iphoneos-arm64e.deb
+Size: 8035808
+MD5sum: 01b0a82c01d6120b82e8233e64036c27
+SHA1: f601d65adff2c49de6b19e38da82a62dc2688bcc
+SHA256: c4b4f42abede20cf8881c3730560793c029ede703772c1df5db046019e07fddb
+
 Package: com.chasedavis.airplanecomet
 Name: AirplaneComet
 Depends: mobilesubstrate
