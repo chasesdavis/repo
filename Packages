@@ -1,3 +1,38 @@
+Name: Unbound
+Description: Discord mobile client aimed at providing the user control, stability and customizability.
+Package: app.unbound.ios
+Maintainer: eternal, acquitelol, Adrian Castro
+Author: Unbound Team
+Section: Tweaks
+Depends: ellekit
+SileoDepiction: https://repo.unbound.rip/depictions/unbound.json
+Icon: https://assets.unbound.rip/logo/logo.png
+Conflicts: app.enmity, mod.vendetta, app.pyoncord
+Architecture: iphoneos-arm64e
+Version: 2.4.0
+Installed-Size: 1072
+Filename: debs/app.unbound.ios_2.4.0_iphoneos-arm64e.deb
+Size: 209292
+MD5sum: 3d5fde96232e0315dd2c27454d166abe
+SHA1: 57122231b7bed56d4524ab68616767fde4889a92
+SHA256: 2bb5c9eb2a1cedfffee1cb75ef4a5910e4fa39233f9a606a0fbdf58777e6f768
+
+Package: com.chase.tubelocal
+Name: TubeLocal
+Description: Save permitted non-DRM YouTube audio to Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Architecture: iphoneos-arm64e
+Version: 1.0.0
+Installed-Size: 47952
+Filename: debs/com.chase.tubelocal_1.0.0_iphoneos-arm64e.deb
+Size: 8034840
+MD5sum: b8712082ba2742bc206fbd173db2f1b2
+SHA1: 37cb52a1c937d0cf9c5d50ec1596536a5688bda1
+SHA256: 09c8bb77cf14e112db6a41e1d0a2a61264eac3c0655345ff161aca8430d900ca
+
 Package: com.chasedavis.airplanecomet
 Name: AirplaneComet
 Depends: mobilesubstrate
@@ -386,18 +421,18 @@ SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
 Package: com.chasedavis.lowerinstall
 Name: LowerInstall
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
-Description: Spoof iOS version for App Store updates that require iOS 18+. Hooks appstored + MobileGestalt ProductVersion + installd (not just App Store.app).
+Description: Dual-dylib package (AppSync-style): LowerInstall → appstored/AppStore, LowerInstallInstalld → installd only. Check /var/mobile/Library/Logs/LowerInstall/ for installd.loaded after reboot.
 Maintainer: Chase Davis
 Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
 Section: Tweaks
 Architecture: iphoneos-arm64e
-Version: 1.2.0-1
-Installed-Size: 380
-Filename: debs/com.chasedavis.lowerinstall_1.2.0-1_iphoneos-arm64e.deb
-Size: 18994
-MD5sum: 0e0a443878e684ec33c9312a74788d48
-SHA1: b214a7690e98b76e056073628ad32526ea6ee989
-SHA256: 3b0eda118c2f52f1b1743a013bc76c961d6618dee5ec646c688597372b06666a
+Version: 1.4.1-1
+Installed-Size: 648
+Filename: debs/com.chasedavis.lowerinstall_1.4.1-1_iphoneos-arm64e.deb
+Size: 22248
+MD5sum: 8877c61e40970c6a3b66ea7e12ca8c2c
+SHA1: 3bf2451b069c8e212ec14765660cbd340edf0b18
+SHA256: 929707e9675009ceaeb15932eb0841d0df15d59987b5f836806f66741872eb91
 
 Package: com.chasedavis.minimalcc
 Name: MinimalCC
