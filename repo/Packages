@@ -113,6 +113,38 @@ MD5sum: 98825cdde7a648ca825cd196a94f5cac
 SHA1: 0ad55b434b1da6552e08c280b578e315ce10422b
 SHA256: 5d93be6c93916fc4aeb25ae6b51e41b02ce6d2f540bd0fbb7440ef3054239c72
 
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.3.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Device-aware catalog, source health, install queue, and dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.3.0_iphoneos-arm64.deb
+Size: 10953820
+MD5sum: 4ede9f7ffeee219fe728959e3d10b632
+SHA1: 60a767e6f134fbeab5bc752d7fe80fe5ff5e647d
+SHA256: 9734a594baa0e27d50fed925ab33e3424619b9839ac08f2a167c74d19966ce5b
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.3.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Device-aware catalog, source health, install queue, and dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.3.0_iphoneos-arm64e.deb
+Size: 10953820
+MD5sum: 979f253b4bf04c99e595de49dece2bcf
+SHA1: a8e6a2459f7c8b7da5e17028fb0a0465bcb43b42
+SHA256: 014cee209b063d175e4a1fa0df38aced4e3995e623810691016c631f49cc11a9
+
 Package: com.chase.tubelocal
 Name: TubeLocal
 Description: Save permitted non-DRM YouTube audio to Spotify Local Files.
