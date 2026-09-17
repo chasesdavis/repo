@@ -3,3 +3,6 @@
 tweaks/*/.theos/
 tweaks/*/packages/
 /tmp/
+/Claude.app
+/Claude.ipa
+/Claude-minos17.0.ipa
