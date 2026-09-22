@@ -372,24 +372,21 @@ SHA256: 7bc1eaad42c54488731154cbd4f41ec6900c4638e35739f816af99ef18f47a7b
 
 Package: com.chasedavis.codex
 Name: Codex
-Version: 0.155.1-3
+Version: 0.155.1-4
 Architecture: iphoneos-arm64e
 Section: Utilities
 Priority: optional
-Depends: firmware (>= 15.0), ca-certificates, xz
-Conflicts: wiki.qaq.codex
-Replaces: wiki.qaq.codex
 Description: Codex for the iOS 17 RootHide bootstrap
- OpenAI's terminal coding agent, packed only for RootHide Bootstrap.
- Install Codex, then run codex in a shell. It does not need libroot.
+ OpenAI's terminal coding agent for RootHide Bootstrap.
+ Install this small package, then run codex. The first launch downloads the agent.
 Maintainer: Chase Davis
 Author: OpenAI <https://github.com/openai/codex>
-Installed-Size: 270492
-Filename: debs/com.chasedavis.codex_0.155.1-3_iphoneos-arm64e.deb
-Size: 63335998
-MD5sum: 5430e974248078f04247028f746c659e
-SHA1: 96592ea943463e13ab2052dbd37820a5e4e38db2
-SHA256: 914e923687ba8034313b8b7fb13c4d84f9792189b8375238b4369a8084eb615b
+Installed-Size: 400
+Filename: debs/com.chasedavis.codex_0.155.1-4_iphoneos-arm64e.deb
+Size: 6670
+MD5sum: 9ab2f1e6a2799e2195fc6e64d0007073
+SHA1: c83e85ce8d2222888dbcbab07b7c365716c09179
+SHA256: d14183969b132fd9c1889df9e43472269d9e0fd47019c78a9974bf65bfe84c7e
 
 Package: com.chasedavis.controlcenterstudio
 Name: ControlCenter Studio

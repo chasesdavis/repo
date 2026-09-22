@@ -1,15 +1,12 @@
 Package: com.chasedavis.codex
 Name: Codex
-Version: 0.155.1-3
+Version: 0.155.1-4
 Architecture: iphoneos-arm64e
 Section: Utilities
 Priority: optional
-Depends: firmware (>= 15.0), ca-certificates, xz
-Conflicts: wiki.qaq.codex
-Replaces: wiki.qaq.codex
 Description: Codex for the iOS 17 RootHide bootstrap
- OpenAI's terminal coding agent, packed only for RootHide Bootstrap.
- Install Codex, then run codex in a shell. It does not need libroot.
+ OpenAI's terminal coding agent for RootHide Bootstrap.
+ Install this small package, then run codex. The first launch downloads the agent.
 Maintainer: Chase Davis
 Author: OpenAI <https://github.com/openai/codex>
-Installed-Size: 270492
+Installed-Size: 400

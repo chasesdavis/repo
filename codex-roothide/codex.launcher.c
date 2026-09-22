@@ -2,10 +2,18 @@
 #include <errno.h>
 #include <limits.h>
 #include <mach-o/dyld.h>
+#include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
+
+#ifndef OG_PAYLOAD_URL
+#define OG_PAYLOAD_URL "https://chasesdavis.github.io/repo/payloads/codex-0.155.1.tar.lzma"
+#endif
+
+extern char **environ;
 
 #ifndef OG_PROGRAM
 #error OG_PROGRAM must name the packaged executable
@@ -45,7 +53,7 @@ static int payload_exists(const char *prefix) {
 
 static int store_prefix(char *dest, size_t dest_size, const char *prefix) {
     size_t length;
-    if (!prefix || prefix[0] != '/' || !payload_exists(prefix)) return 0;
+    if (!prefix || prefix[0] != '/') return 0;
     length = strlen(prefix);
     while (length > 1 && prefix[length - 1] == '/') length--;
     if (length >= dest_size) return 0;
@@ -133,6 +141,84 @@ static void configure_environment(const char *prefix) {
         access(candidate, X_OK) == 0) setenv("BROWSER", candidate, 1);
 }
 
+static int tool_path(char output[PATH_MAX], const char *prefix, const char *name) {
+    const char *directories[] = {"/usr/bin/", "/bin/", "/usr/local/bin/"};
+    for (size_t index = 0; index < sizeof(directories) / sizeof(directories[0]); index++) {
+        if (snprintf(output, PATH_MAX, "%s%s%s", prefix, directories[index], name) < PATH_MAX &&
+            access(output, X_OK) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int run_tool(const char *path, char *const argv[]) {
+    pid_t pid;
+    int status;
+    if (posix_spawn(&pid, path, NULL, NULL, argv, environ) != 0) return 0;
+    if (waitpid(pid, &status, 0) < 0) return 0;
+    return WIFEXITED(status) && WEXITSTATUS(status) == 0;
+}
+
+static int ensure_payload(const char *prefix) {
+    char directory[PATH_MAX];
+    char archive[PATH_MAX];
+    char entitlements[PATH_MAX];
+    char binary[PATH_MAX];
+    char host[PATH_MAX];
+    char curl_bin[PATH_MAX];
+    char shell_bin[PATH_MAX];
+    char ldid_bin[PATH_MAX];
+    char link_path[PATH_MAX];
+    char script[PATH_MAX * 3];
+    char sign_argument[PATH_MAX + 3];
+    if (payload_exists(prefix)) return 1;
+    if (!join_path(directory, prefix, "/usr/libexec/" OG_PROGRAM)) return 0;
+    if (!join_path(archive, prefix, "/usr/libexec/" OG_PROGRAM "/payload.tar.lzma")) return 0;
+    if (!join_path(entitlements, prefix, "/usr/libexec/" OG_PROGRAM "/codex.entitlements")) return 0;
+    if (!join_path(binary, prefix, "/usr/libexec/" OG_PROGRAM "/codex")) return 0;
+    if (!join_path(host, prefix, "/usr/libexec/" OG_PROGRAM "/codex-code-mode-host")) return 0;
+    fprintf(stderr, "codex: downloading the RootHide bootstrap build\n");
+    fflush(stderr);
+    if (!tool_path(curl_bin, prefix, "curl")) {
+        fprintf(stderr, "codex: curl is not installed in the bootstrap\n");
+        return 0;
+    }
+    char *curl_argv[] = {curl_bin, "-fL", "--retry", "3", "-o", archive, OG_PAYLOAD_URL, NULL};
+    if (!run_tool(curl_bin, curl_argv)) {
+        fprintf(stderr, "codex: download failed\n");
+        unlink(archive);
+        return 0;
+    }
+    if (!tool_path(shell_bin, prefix, "sh")) {
+        fprintf(stderr, "codex: sh is not installed in the bootstrap\n");
+        return 0;
+    }
+    if (snprintf(script, sizeof(script),
+                 "cd '%s' && (lzma -dc payload.tar.lzma || xz -dc -F lzma payload.tar.lzma) | tar -xf - && "
+                 "rm -f payload.tar.lzma && chmod 755 codex codex-code-mode-host",
+                 directory) >= (int)sizeof(script)) {
+        return 0;
+    }
+    char *shell_argv[] = {shell_bin, "-c", script, NULL};
+    if (!run_tool(shell_bin, shell_argv)) {
+        fprintf(stderr, "codex: could not unpack the download\n");
+        return 0;
+    }
+    if (tool_path(ldid_bin, prefix, "ldid") &&
+        snprintf(sign_argument, sizeof(sign_argument), "-S%s", entitlements) < (int)sizeof(sign_argument)) {
+        char *sign_codex[] = {ldid_bin, sign_argument, binary, NULL};
+        char *sign_host[] = {ldid_bin, sign_argument, host, NULL};
+        run_tool(ldid_bin, sign_codex);
+        run_tool(ldid_bin, sign_host);
+    }
+    if (snprintf(link_path, sizeof(link_path), "%s/.jbroot", directory) < (int)sizeof(link_path)) {
+        unlink(link_path);
+        symlink(prefix, link_path);
+    }
+    return payload_exists(prefix);
+}
+
 int main(int argc, char **argv) {
     (void)argc;
     const char *prefix = bootstrap_prefix();
@@ -141,6 +227,7 @@ int main(int argc, char **argv) {
         return 127;
     }
     configure_environment(prefix);
+    if (!ensure_payload(prefix)) return 1;
     char executable[PATH_MAX];
     if (!join_path(executable, prefix, "/usr/libexec/" OG_PROGRAM "/" OG_PROGRAM)) return 127;
     argv[0] = executable;

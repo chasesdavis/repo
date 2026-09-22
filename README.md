@@ -14,7 +14,7 @@ This repo contains a first tranche of Bootstrap-compatible, roothide Theos tweak
 - ChargingAurora: charging edge glow on SpringBoard.
 - SpotifyReframe: Spotify-only UI redesign with glass cards, tuned artwork, player chrome, and Settings controls.
 - LowerInstall: install apps meant for newer iOS (installd + App Store version spoof; julioverne port for RootHide/iOS 15–17).
-- Codex `0.155.1-3`: OpenAI's terminal coding agent built only for the iOS 17 RootHide bootstrap. The package is gzip plus lzma, like the other tweaks. The launcher is arm64 and arm64e. The agent binaries are unpacked after install so Sileo does not have to rewrite them. It does not need libroot.
+- Codex `0.155.1-4`: a small RootHide Bootstrap package. Sileo only installs the launcher. The first time you run `codex`, it downloads the agent.
 
 Premium suite:
 
