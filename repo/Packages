@@ -915,8 +915,8 @@ SHA1: 7168336aa9e5b459f9d1b879be10fb2ae80d9644
 SHA256: d8ea93d47f876d98ded7eecc7e3b2cc7f4021a6708232de0ab72a17e2d3edee5
 
 Package: libroot-roothide
-Name: libroot (RootHide)
-Version: 1.0.1
+Name: libroot
+Version: 1.0.2
 Architecture: iphoneos-arm64e
 Section: System
 Priority: optional
@@ -924,35 +924,36 @@ Depends: firmware (>= 15.0)
 Maintainer: Chase Davis
 Author: Chase Davis
 Description: libroot path API for an iOS 17 RootHide bootstrap
- Installs /usr/lib/libroot.dylib. It reports the physical RootHide
- bootstrap root so command-line tools can find their files without vroot.
+ Installs usr/lib/libroot.dylib with arm64 and arm64e slices. It reports
+ the physical RootHide bootstrap root.
 Installed-Size: 164
-Filename: debs/libroot-roothide_1.0.1_iphoneos-arm64e.deb
-Size: 4430
-MD5sum: efdd3380ed7f47e399b6c6eb15012f14
-SHA1: 7723abb90857a693661447cdf6e1373722528331
-SHA256: 7b50aad1c5a684526f54cb09c232b9ff15044f95bf2de0c11d9f5447f66480d3
+Filename: debs/libroot-roothide_1.0.2_iphoneos-arm64e.deb
+Size: 6570
+MD5sum: 87d854387fd955cb5012ab41e1edf6a3
+SHA1: 26fb5d617802784189dfcf79d82bd072787682a0
+SHA256: 5a0a1e64ed077fc4b6e976f517629d2e0f638c916c3e66d324d7d19f2e4055ff
 
 Package: wiki.qaq.codex
 Name: codex
-Version: 0.155.1-1
+Version: 0.155.1-2
 Architecture: iphoneos-arm64e
 Description: OpenAI's Codex coding agent, on your device
  Ask for a change in plain language and Codex reads your files, writes the code
  and runs the commands to make it happen. Run `codex` in a terminal and sign in
- with your ChatGPT account or an API key. This RootHide build finds the
- iOS 17 bootstrap from the executable, so it does not need libroot preinstalled.
+ with your ChatGPT account or an API key.
+ This RootHide build finds the iOS 17 bootstrap from the executable.
+ The launcher includes arm64 and arm64e.
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Author: OpenAI <https://github.com/openai/codex>
 Section: Utilities
 Priority: optional
 Depends: firmware (>= 15.0), uikittools, ca-certificates
-Installed-Size: 270412
+Installed-Size: 270492
 Depiction: https://owngoal-dev.github.io/codex/
 SileoDepiction: https://owngoal-dev.github.io/codex/depiction.json
-Filename: debs/wiki.qaq.codex_0.155.1-1_iphoneos-arm64e.deb
-Size: 104402964
-MD5sum: ab4eba6ab30266a06fb6a57115a0708e
-SHA1: a1867aaca155b51db3f145b25e04f49565a2d057
-SHA256: dabe50eb5ee7746c2c25fe541826f8e3cf555bddeb0fcc1ca54a2f323a94febd
+Filename: debs/wiki.qaq.codex_0.155.1-2_iphoneos-arm64e.deb
+Size: 62520230
+MD5sum: 2dfb4369d8fb26a850b0c92e78bf1a40
+SHA1: 10fee21d37092e9b877990ad01aabffa25d4f4c1
+SHA256: 82a65e814cefb146e4baf12dd5e61d4559dfae164335f418c046923fa73be41c
 

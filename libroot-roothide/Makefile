@@ -1,5 +1,5 @@
 SDK := $(shell xcrun --sdk iphoneos --show-sdk-path)
-VERSION := 1.0.1
+VERSION := 1.0.2
 PACKAGE := libroot-roothide
 ARCH := iphoneos-arm64e
 DEB := $(PACKAGE)_$(VERSION)_$(ARCH).deb
@@ -26,7 +26,7 @@ deb: libroot.dylib control
 	installed=$$(du -sk stage/usr | awk '{print $$1}'); \
 	sed -e "s/@INSTALLED_SIZE@/$$installed/" control > stage/DEBIAN/control
 	chmod 0644 stage/DEBIAN/control
-	dpkg-deb --root-owner-group -Zzstd -b stage $(DEB)
+	dpkg-deb --root-owner-group -Zgzip -z9 -b stage $(DEB)
 	rm -rf stage
 
 clean:
