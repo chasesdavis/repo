@@ -1,0 +1,13 @@
+Package: libroot-roothide
+Name: libroot (RootHide)
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Section: System
+Priority: optional
+Depends: firmware (>= 15.0)
+Maintainer: Chase Davis
+Author: Chase Davis
+Description: libroot path API for an iOS 17 RootHide bootstrap
+ Installs /usr/lib/libroot.dylib. It reports the physical RootHide
+ bootstrap root so command-line tools can find their files without vroot.
+Installed-Size: @INSTALLED_SIZE@
