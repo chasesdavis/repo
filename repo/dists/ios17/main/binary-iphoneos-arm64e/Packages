@@ -1,0 +1,934 @@
+Name: Unbound
+Description: Discord mobile client aimed at providing the user control, stability and customizability.
+Package: app.unbound.ios
+Maintainer: eternal, acquitelol, Adrian Castro
+Author: Unbound Team
+Section: Tweaks
+Depends: ellekit
+SileoDepiction: https://repo.unbound.rip/depictions/unbound.json
+Icon: https://assets.unbound.rip/logo/logo.png
+Conflicts: app.enmity, mod.vendetta, app.pyoncord
+Architecture: iphoneos-arm64e
+Version: 2.4.0
+Installed-Size: 1072
+Filename: debs/app.unbound.ios_2.4.0_iphoneos-arm64e.deb
+Size: 209292
+MD5sum: 3d5fde96232e0315dd2c27454d166abe
+SHA1: 57122231b7bed56d4524ab68616767fde4889a92
+SHA256: 2bb5c9eb2a1cedfffee1cb75ef4a5910e4fa39233f9a606a0fbdf58777e6f768
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. v1 browses repositories and uses a demo installer. It does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.0.0_iphoneos-arm64.deb
+Size: 8765936
+MD5sum: b0cf3037445c44eb1a7f84d0832e1820
+SHA1: 71b986242561a9bbe9fb113aa18275cce255ab07
+SHA256: 45a1b65305dd8e4ea3935f9f17f482545155cadaf44460d2505082da0dfdf3a8
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. v1 browses repositories and uses a demo installer. It does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.0.0_iphoneos-arm64e.deb
+Size: 8766176
+MD5sum: 58cc72cd7b122dc284744368f54895f8
+SHA1: 6a2809e87d38684bf014b319de06a6a1ed7fe2d3
+SHA256: 963f50bb1fc48d30d988d7c891cfb7ccc02e0f7c209065fe86bfddde324bd21b
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.1.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Downloads real debs and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.1.0_iphoneos-arm64.deb
+Size: 10688790
+MD5sum: 2bdf8016bafce890621ecf00e8ab72bb
+SHA1: 61aa8f2caf0b5b9b4fcfe8af53b0fd6ee0c60dc9
+SHA256: 3da018d9fb08a1d2c4ac903a620dbdd8b1536d36072ee1f4460f2b3f9c32b614
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.1.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Downloads real debs and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.1.0_iphoneos-arm64e.deb
+Size: 10688788
+MD5sum: d4e5b241ca49dae73aeec0bea92298ba
+SHA1: 50efcab154b7c4d86d759722878d23d197ffacd5
+SHA256: eed38900978f116336fc46a535d2385e58f15caea4351188cb2f8469253cdf18
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.2.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Downloads real debs, tracks installed versions, and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.2.0_iphoneos-arm64.deb
+Size: 10779566
+MD5sum: abb51234d06b492ab481365310e4a104
+SHA1: b955d492d7efaafd5c93f64d8b5394d6f79fe377
+SHA256: eb50d93eaaa6f1a9bd4165d741ab0342cdb1a85271468b0baded4b515237800b
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.2.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Downloads real debs, tracks installed versions, and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.2.0_iphoneos-arm64e.deb
+Size: 10779568
+MD5sum: 98825cdde7a648ca825cd196a94f5cac
+SHA1: 0ad55b434b1da6552e08c280b578e315ce10422b
+SHA256: 5d93be6c93916fc4aeb25ae6b51e41b02ce6d2f540bd0fbb7440ef3054239c72
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.3.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Device-aware catalog, source health, install queue, and dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.3.0_iphoneos-arm64.deb
+Size: 10953820
+MD5sum: 4ede9f7ffeee219fe728959e3d10b632
+SHA1: 60a767e6f134fbeab5bc752d7fe80fe5ff5e647d
+SHA256: 9734a594baa0e27d50fed925ab33e3424619b9839ac08f2a167c74d19966ce5b
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.3.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Device-aware catalog, source health, install queue, and dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.3.0_iphoneos-arm64e.deb
+Size: 10953820
+MD5sum: 979f253b4bf04c99e595de49dece2bcf
+SHA1: a8e6a2459f7c8b7da5e17028fb0a0465bcb43b42
+SHA256: 014cee209b063d175e4a1fa0df38aced4e3995e623810691016c631f49cc11a9
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.4.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Fetches real repo indexes including dist-layout sources, queues installs, and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.4.0_iphoneos-arm64.deb
+Size: 10990446
+MD5sum: f008f0887faa60fb44424ec2c63e2b32
+SHA1: 17e22c448f2b05056502ad406dbb2efdb5766c05
+SHA256: cbb0f7446f096860252c5090c1f79b0ec332fdaf649b58fe5e293ed03223e9dc
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.4.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Fetches real repo indexes including dist-layout sources, queues installs, and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.4.0_iphoneos-arm64e.deb
+Size: 10990446
+MD5sum: f819774eaa3a18dcdbd82dd9e8e9a5ad
+SHA1: 11f33276f12e76396a8da5cf207b5334325a175a
+SHA256: 17748be70ce5abe68e9e9a3676e96cfa3a8a7ac944c76e631200719026b92c42
+
+Package: com.chase.tubelocal
+Name: TubeLocal
+Description: Save permitted non-DRM YouTube audio to Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Architecture: iphoneos-arm64e
+Version: 1.0.0
+Installed-Size: 47952
+Filename: debs/com.chase.tubelocal_1.0.0_iphoneos-arm64e.deb
+Size: 8034840
+MD5sum: b8712082ba2742bc206fbd173db2f1b2
+SHA1: 37cb52a1c937d0cf9c5d50ec1596536a5688bda1
+SHA256: 09c8bb77cf14e112db6a41e1d0a2a61264eac3c0655345ff161aca8430d900ca
+
+Package: com.chase.tubelocal
+Name: TubeLocal
+Description: Save permitted non-DRM YouTube audio to Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Architecture: iphoneos-arm64e
+Version: 1.0.1
+Installed-Size: 47956
+Filename: debs/com.chase.tubelocal_1.0.1_iphoneos-arm64e.deb
+Size: 8035808
+MD5sum: 01b0a82c01d6120b82e8233e64036c27
+SHA1: f601d65adff2c49de6b19e38da82a62dc2688bcc
+SHA256: c4b4f42abede20cf8881c3730560793c029ede703772c1df5db046019e07fddb
+
+Package: com.chase.tubelocal
+Name: TubeLocal
+Description: Customize and save permitted non-DRM YouTube audio to Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Architecture: iphoneos-arm64e
+Version: 1.1.0
+Installed-Size: 47916
+Filename: debs/com.chase.tubelocal_1.1.0_iphoneos-arm64e.deb
+Size: 8043360
+MD5sum: a0968a1d505a7efe11fc4aca559df743
+SHA1: 71dea03bd15cfe5a5b84a1fc8865dd10f3abe11a
+SHA256: 5fa6a34872379fc5454a2fcd549071d4ebc6853a017ab5d974ae7f90672595f2
+
+Package: com.chase.tubelocal
+Name: TubeLocal
+Version: 1.2.0
+Architecture: iphoneos-arm64e
+Description: A polished on-device editor for permitted non-DRM YouTube audio in Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Installed-Size: 48024
+Filename: debs/com.chase.tubelocal_1.2.0_iphoneos-arm64e.deb
+Size: 8058240
+MD5sum: 8a69567e609fa9967b860851a0d27c77
+SHA1: 293e4a44f75ba5e40986d758426f6a74c343e58b
+SHA256: 972f88773282e67143fee00bfa9f98db4c9a5c0b07d353bdd281ae750dd92baf
+
+Package: com.chase.tubelocal
+Name: TubeLocal
+Version: 1.2.1
+Architecture: iphoneos-arm64e
+Description: A polished on-device editor for permitted non-DRM YouTube audio in Spotify Local Files.
+Maintainer: Chase
+Author: Chase
+Section: Tweaks
+Depends: firmware (>= 17.0), roothide, mobilesubstrate, ffmpeg (>= 5.1.2)
+Installed-Size: 48028
+Filename: debs/com.chase.tubelocal_1.2.1_iphoneos-arm64e.deb
+Size: 8052724
+MD5sum: 96a647c5b11c317baaf06abc82517723
+SHA1: 3c5893b54c1be35f6dd156374870dd7b2c2124e9
+SHA256: 6f71c07be05fe1406feb1b95e5d410847836bbc9bb9ce380387eea997202bc98
+
+Package: com.chasedavis.airplanecomet
+Name: AirplaneComet
+Depends: mobilesubstrate
+Description: Shows a small comet-style toast when airplane or network mode notifications fire.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.airplanecomet_1.0.0-1_iphoneos-arm64e.deb
+Size: 9324
+MD5sum: 9857f661cb2b19b17850aba6f8f49ab5
+SHA1: 444651028c162bd6e4e2eafa00683f82c2afbd74
+SHA256: 33357dae5ee724b348aa0f97d8eba11d15d40c8f9824a0176d9bb679b630240f
+
+Package: com.chasedavis.ambientbattery
+Name: AmbientBattery
+Depends: mobilesubstrate
+Description: Adds an edge glow that shifts color with battery level on SpringBoard.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.ambientbattery_1.0.0-1_iphoneos-arm64e.deb
+Size: 10010
+MD5sum: 8d23f22a3fc2986f258b0792b6c6c8fe
+SHA1: b9ae6b339f187c7e337f11ad2dddcb508c2cd474
+SHA256: 57417a3364c79c1a8123a8819a5d7ea2fd9691135185d949673cf4e496ea8f66
+
+Package: com.chasedavis.aperturefx
+Name: ApertureFX
+Depends: mobilesubstrate, preferenceloader
+Description: Premium SpringBoard animation pack for app launches, folders, banners, lock glyphs, and island surfaces.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 352
+Filename: debs/com.chasedavis.aperturefx_1.0.4-1_iphoneos-arm64e.deb
+Size: 17506
+MD5sum: 8aed6dee14f76b5e62c55b4e8b09efb1
+SHA1: 72471867bc593400cd7f603be3f383601de202f7
+SHA256: 68b93f220f7b5147b2923ff0e145d74fee0f76f7e4c428549ac8375d89b20878
+
+Package: com.chasedavis.appguardpro
+Name: AppGuard Pro
+Description: Per-app Face ID / passcode lock, hidden apps, and a fake-crash decoy for prying eyes. Built for iOS 15-17 RootHide.
+Depends: mobilesubstrate, preferenceloader
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Tag: role::hacker
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 352
+Filename: debs/com.chasedavis.appguardpro_1.0.0-1_iphoneos-arm64e.deb
+Size: 13020
+MD5sum: acaa4f67a9f697997e63303201ca48b1
+SHA1: ccb72454961426a8dc921f765f4f3be0eef557d5
+SHA256: 0e622fa058517915a3585d533312f75e7074c9944fb1bfd521d1c097bc22fa1d
+
+Package: com.chasedavis.applaunchecho
+Name: AppLaunchEcho
+Depends: mobilesubstrate
+Description: Adds a quick halo echo when SpringBoard app icons are tapped.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.applaunchecho_1.0.0-1_iphoneos-arm64e.deb
+Size: 9808
+MD5sum: ebd0bafe1ab86b75d0ebb6bdc71587b6
+SHA1: 14b46929fd37833f873d96c3892965c5b58b7f6d
+SHA256: 3ec154f542ced1778150e7fbb68c1d1069e82d247b312eefd8b24506959b0d9f
+
+Package: com.chasedavis.auradock
+Name: AuraDock
+Depends: mobilesubstrate
+Description: Adds a soft animated glow behind the SpringBoard dock for iOS 17 Bootstrap.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 168
+Filename: debs/com.chasedavis.auradock_1.0.0-1_iphoneos-arm64e.deb
+Size: 6622
+MD5sum: 9a97767d1ce632e7d487691cb916e05a
+SHA1: 73440255e3025efa62b7612e66724ca50c69e736
+SHA256: c75a5137001bbb5706036c5a0a27ba4b69a2d522107d5700dc5d677ee08bb4d6
+
+Package: com.chasedavis.chargingaurora
+Name: ChargingAurora
+Depends: mobilesubstrate
+Description: Adds an animated aurora edge glow while the device is charging on SpringBoard.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.chargingaurora_1.0.0-1_iphoneos-arm64e.deb
+Size: 6858
+MD5sum: 7a069b2e39d0c6a1d79b82888fb80e2d
+SHA1: fbac14292890b7c7555d1632fb7d5eef643861e7
+SHA256: 7bc1eaad42c54488731154cbd4f41ec6900c4638e35739f816af99ef18f47a7b
+
+Package: com.chasedavis.codex
+Name: Codex
+Version: 0.155.1-4
+Architecture: iphoneos-arm64e
+Section: Utilities
+Priority: optional
+Description: Codex for the iOS 17 RootHide bootstrap
+ OpenAI's terminal coding agent for RootHide Bootstrap.
+ Install this small package, then run codex. The first launch downloads the agent.
+Maintainer: Chase Davis
+Author: OpenAI <https://github.com/openai/codex>
+Installed-Size: 400
+Filename: debs/com.chasedavis.codex_0.155.1-4_iphoneos-arm64e.deb
+Size: 6670
+MD5sum: 9ab2f1e6a2799e2195fc6e64d0007073
+SHA1: c83e85ce8d2222888dbcbab07b7c365716c09179
+SHA256: d14183969b132fd9c1889df9e43472269d9e0fd47019c78a9974bf65bfe84c7e
+
+Package: com.chasedavis.controlcenterstudio
+Name: ControlCenter Studio
+Depends: mobilesubstrate, preferenceloader
+Description: Premium Control Center theme engine with module styling, glyph packs, compact surfaces, and animation polish.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 356
+Filename: debs/com.chasedavis.controlcenterstudio_1.0.4-1_iphoneos-arm64e.deb
+Size: 18006
+MD5sum: 3c5832d793a2ab939923929ffe0f4909
+SHA1: a86df563d9414b60e03d650730fe38f6245882b3
+SHA256: d38c0a6ba601702513a03c183658c7dc167f5b1fd4374703b281e52e106df418
+
+Package: com.chasedavis.controlglyphs
+Name: ControlGlyphs
+Depends: mobilesubstrate
+Description: Adds polish, tint, and pop motion to Control Center glyph images.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.controlglyphs_1.0.0-1_iphoneos-arm64e.deb
+Size: 9592
+MD5sum: c76448fb687cb39f395920508b879271
+SHA1: ce4cf2b97cbbd4ef3cf8cb036775e754f3baca37
+SHA256: e10536cb2318d00e1bf1b500d8572f6b9b5f2fa60108201980d47cfde68ad3a0
+
+Package: com.chasedavis.diminactivepages
+Name: DimInactivePages
+Depends: mobilesubstrate
+Description: Subtly fades off-center SpringBoard page views for a calmer home screen.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.diminactivepages_1.0.0-1_iphoneos-arm64e.deb
+Size: 9664
+MD5sum: 36553fcc08a42bb8376e6ee510fbae5a
+SHA1: 324eed6ce5d781ed132fadd6cb316069fe12e11c
+SHA256: 7497712a0c5369dcf3a4e3e98fd9be9c2ecb25b7e8fc5e08c11a2d5bf3cba478
+
+Package: com.chasedavis.dockbadgesonly
+Name: DockBadgesOnly
+Depends: mobilesubstrate
+Description: Hides dock icon labels while keeping dock notification badges visually prominent.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.dockbadgesonly_1.0.0-1_iphoneos-arm64e.deb
+Size: 9556
+MD5sum: 537434cc40f5f70ddb15bdcd43896016
+SHA1: 2f2f97515df93d4392250dd10e4e3354fbeea914
+SHA256: 31efcc6a3c6e1a1ed9224a93bf152b563d19984b2e42721f37f8906b72b63803
+
+Package: com.chasedavis.dockshelfpro
+Name: DockShelf Pro
+Depends: mobilesubstrate, preferenceloader
+Description: Premium expanding dock shelf with gesture reveal, quick lanes, dock glow, and productivity presets.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 372
+Filename: debs/com.chasedavis.dockshelfpro_1.0.4-1_iphoneos-arm64e.deb
+Size: 19674
+MD5sum: 5dd39d5e942a9e578eef5e3d0e3d6384
+SHA1: 3ea0098f25efe4e58ff47070abff48830b778568
+SHA256: 14112d9f72cced64fce5a41fc8295180e133c7cf1e60367dcec681d9196f92c8
+
+Package: com.chasedavis.focuslenspro
+Name: FocusLens Pro
+Depends: mobilesubstrate, preferenceloader
+Description: Premium per-context home screen focus lens with quiet-hours dimming, badge softening, and Focus visual profiles.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 356
+Filename: debs/com.chasedavis.focuslenspro_1.0.4-1_iphoneos-arm64e.deb
+Size: 18454
+MD5sum: d74f9f9d59205be09f996be67d6b3a62
+SHA1: b08ec7c249b617d5b2ffd1b473ab056c56d209f1
+SHA256: b13f2db97d0917c7183735b40a71e1946f38c8a76ae90404a5e41ee1a88d4418
+
+Package: com.chasedavis.ghostdock
+Name: GhostDock
+Depends: mobilesubstrate
+Description: Auto-hides the SpringBoard dock after inactivity and reveals it with a bottom gesture.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.ghostdock_1.0.0-1_iphoneos-arm64e.deb
+Size: 6302
+MD5sum: a4d34554b4741810788123c7adfd52ec
+SHA1: 7552e236e99d8fee761c730ed0b8a8b7beeb6e2b
+SHA256: a4330a180a794c1a9f25799422373320f751b5be671723052055dba9967d30d1
+
+Package: com.chasedavis.halotouches
+Name: HaloTouches
+Depends: mobilesubstrate
+Description: Adds a soft halo ripple to SpringBoard touch starts.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.halotouches_1.0.0-1_iphoneos-arm64e.deb
+Size: 10346
+MD5sum: 2b5fc7d2978bffb33b1ad84b12515cd6
+SHA1: b320c57217da3911fa54ce7b5792c6e0c8c687f3
+SHA256: a16cd63a5398bbaa4ae8c5d3dd3ea1bd061536aa7322319dc881d536e5cb70a8
+
+Package: com.chasedavis.homescreenzenpro
+Name: HomeScreenZen Pro
+Depends: mobilesubstrate, preferenceloader
+Description: Premium home screen declutter mode with label hiding, badge softening, page dimming, and Zen presets.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 356
+Filename: debs/com.chasedavis.homescreenzenpro_1.0.4-1_iphoneos-arm64e.deb
+Size: 18006
+MD5sum: b2fd0c376b96a40beffebeb6cd67ba5e
+SHA1: 3d273166dfe937819424d44228d6250cd1fd0148
+SHA256: 77b043c523d047639c7989fe506872589c76cf71bc5d25917a55f364d1977ea0
+
+Package: com.chasedavis.iconlabelpro
+Name: IconLabelPro
+Depends: mobilesubstrate
+Description: Refines SpringBoard icon labels with cleaner typography, shadows, and hidden dock labels.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 168
+Filename: debs/com.chasedavis.iconlabelpro_1.0.0-1_iphoneos-arm64e.deb
+Size: 5318
+MD5sum: 4b380be1a62107bdcc6d807ebabfd8ed
+SHA1: 7b0d00a686af2fbfdc14576596a2236541e6940b
+SHA256: 953198556b9262d5cffd1ea87350f0ad88f7271193c0727dc0337840e5981e27
+
+Package: com.chasedavis.islandcommandpro
+Name: IslandCommand Pro
+Depends: mobilesubstrate, preferenceloader
+Description: Premium Dynamic Island command surface with live status, quick-state styling, SpringBoard command panels, and Settings controls.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 388
+Filename: debs/com.chasedavis.islandcommandpro_1.0.4-1_iphoneos-arm64e.deb
+Size: 20292
+MD5sum: 2421b691c16114f72addbf53a40f3a13
+SHA1: 205db1757f51d8f3473dfb58cbbca3a9c95b4af3
+SHA256: 7f7bbeb16542c81d24eeb196653d5fcf8077edbbb7983d55b617950d92dc063a
+
+Package: com.chasedavis.islandhub
+Name: IslandHub
+Depends: mobilesubstrate, preferenceloader
+Description: Dynamic Island command center, priority stack, module dashboard, and theme engine for SpringBoard.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.1.1-1
+Installed-Size: 528
+Filename: debs/com.chasedavis.islandhub_1.1.1-1_iphoneos-arm64e.deb
+Size: 62572
+MD5sum: 974e7486806b471ac3132d4e57e84c0d
+SHA1: a5506da7dd4885d86ddf5b07f76922b0575054d4
+SHA256: 6c8f945e75f110b5d499838e483bd1b32cd33569e9785c33caeea68c61a22f02
+
+Package: com.chasedavis.islandinbox
+Name: Island Inbox
+Depends: mobilesubstrate, preferenceloader
+Description: Dynamic Island notification queue with app chips, a compact inbox panel, swipe archiving, swipe-to-open, and quick reply controls.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 460
+Filename: debs/com.chasedavis.islandinbox_1.0.0-1_iphoneos-arm64e.deb
+Size: 41410
+MD5sum: ea4fc6c6bd0ece196a8d05714141c5ba
+SHA1: 1e5832ec725e288a8764858207e9455859ecbf9b
+SHA256: 96410f613a426d5c23da648e62f6229aaba3c83cdeb2a0ea8172f8b0c221c24e
+
+Package: com.chasedavis.kineticbadges
+Name: KineticBadges
+Depends: mobilesubstrate
+Description: Adds subtle pop and pulse animations to SpringBoard notification badges.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 168
+Filename: debs/com.chasedavis.kineticbadges_1.0.0-1_iphoneos-arm64e.deb
+Size: 5312
+MD5sum: fb29ce4e84d9b033f1b4a2503bbb4ec7
+SHA1: 1709d70bd028117d75d19b2035584af8705db7b9
+SHA256: fb052ad152b82933c727a462931660161665d84669da8379063ceb0ea1a0dd0f
+
+Package: com.chasedavis.liquidfolders
+Name: LiquidFolders
+Depends: mobilesubstrate
+Description: Gives SpringBoard folder surfaces a softer liquid-glass look.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.liquidfolders_1.0.0-1_iphoneos-arm64e.deb
+Size: 9406
+MD5sum: 657954d8bc3c5952a9347021be2d93ed
+SHA1: 5a43094af31d798fb2fbc2525592fd0b181a3aef
+SHA256: a67e98c56c27893067f5114624075748bfb2470b348e71e837aba39424bd898a
+
+Package: com.chasedavis.lockglyph
+Name: LockGlyph
+Depends: mobilesubstrate
+Description: Adds glow and gentle motion to SpringBoard lock glyph surfaces.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.lockglyph_1.0.0-1_iphoneos-arm64e.deb
+Size: 9546
+MD5sum: 9e778e1f33a533c69322ef98a2682725
+SHA1: 4f3377a5887861cef797480a4f81768ddcfcb4ba
+SHA256: cb387303be6402b648e33b2fc8a71a97bc319559ee8bea4be66eff07c3e2cffd
+
+Package: com.chasedavis.lockscreenatmosphere
+Name: LockScreen Atmosphere
+Depends: mobilesubstrate, preferenceloader
+Description: Premium lock screen visual engine with clock tinting, charging atmosphere, edge glows, and now-playing ambience.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 356
+Filename: debs/com.chasedavis.lockscreenatmosphere_1.0.4-1_iphoneos-arm64e.deb
+Size: 18262
+MD5sum: 4e5b38511056bcdeba4cd4f9ec630dfb
+SHA1: 4b13666f8cd769c7cb0aee0e436d055936708fe7
+SHA256: 2dca1a69319c6a66a15091700c1b3d74f458d2ae553386a03fa6f4d8ca291387
+
+Package: com.chasedavis.lowerinstall
+Name: LowerInstall
+Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
+Description: Dual-dylib package (AppSync-style): LowerInstall → appstored/AppStore, LowerInstallInstalld → installd only. Check /var/mobile/Library/Logs/LowerInstall/ for installd.loaded after reboot.
+Maintainer: Chase Davis
+Author: julioverne (original), Chase Davis (iOS 17/RootHide port)
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.4.1-1
+Installed-Size: 648
+Filename: debs/com.chasedavis.lowerinstall_1.4.1-1_iphoneos-arm64e.deb
+Size: 22248
+MD5sum: 8877c61e40970c6a3b66ea7e12ca8c2c
+SHA1: 3bf2451b069c8e212ec14765660cbd340edf0b18
+SHA256: 929707e9675009ceaeb15932eb0841d0df15d59987b5f836806f66741872eb91
+
+Package: com.chasedavis.minimalcc
+Name: MinimalCC
+Depends: mobilesubstrate
+Description: Tightens Control Center module surfaces with calmer translucent styling.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.minimalcc_1.0.0-1_iphoneos-arm64e.deb
+Size: 9360
+MD5sum: 8cb529ead06f2a9d553c2d1531bb0a23
+SHA1: d477427b81b794aff41f7811c7bb29f62ebcd65c
+SHA256: 10c6f57f468b669fa0693e3c71a909972bf3b6db9b5f4737eff0a64cf487e0db
+
+Package: com.chasedavis.notificationforge
+Name: NotificationForge
+Depends: mobilesubstrate, preferenceloader
+Description: Premium notification redesign with priority lane accents, compact platter styling, and quiet-hours visuals.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 356
+Filename: debs/com.chasedavis.notificationforge_1.0.4-1_iphoneos-arm64e.deb
+Size: 18120
+MD5sum: 396b879c8e6f3087532a3a4770f82fad
+SHA1: bbd30a78f4b5cd2d327003d2d6bbf297faec218b
+SHA256: 172360c5f227729f940dcc6e423011d3905d4ed08e9e55999ac3394e13aa2464
+
+Package: com.chasedavis.prismstatus
+Name: PrismStatus
+Depends: mobilesubstrate
+Description: Gives SpringBoard status bar text and glyphs a subtle prismatic tint and shadow.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.prismstatus_1.0.0-1_iphoneos-arm64e.deb
+Size: 9734
+MD5sum: 590d736a47059a018f551268fe19883e
+SHA1: 4f79f8aa3d6c56026c438fab93ba77a7395fb09d
+SHA256: c0b0cc7c2142861b15f709c87fa68a11da77594aa2b7bc8ff67645bb8143aaa3
+
+Package: com.chasedavis.quietbadges
+Name: QuietBadges
+Depends: mobilesubstrate
+Description: Dims SpringBoard notification badges at night while preserving badge visibility.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.quietbadges_1.0.0-1_iphoneos-arm64e.deb
+Size: 9486
+MD5sum: 53c15cb86505ee3612f20f5407ab804d
+SHA1: 27524e9420d7743de7721cb459728ab563917edc
+SHA256: e0251a891393dd02be11935da4455bb1c0f8ff000829f743d0d5fa7943b358c9
+
+Package: com.chasedavis.screenshotflashplus
+Name: ScreenshotFlashPlus
+Depends: mobilesubstrate
+Description: Replaces the plain screenshot flash with a short prismatic SpringBoard flash.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.screenshotflashplus_1.0.0-1_iphoneos-arm64e.deb
+Size: 10432
+MD5sum: da0c831417fa831cd9d420391ef7e621
+SHA1: cabe514f7175441d2edd5bee35af890c62e7ef6f
+SHA256: d9c4c157550e38addaf80043c20a6e7102d36f9b89d2b1af40a59ea710fbc730
+
+Package: com.chasedavis.signalbloom
+Name: SignalBloom
+Depends: mobilesubstrate
+Description: Adds a gentle bloom pulse to SpringBoard signal, Wi-Fi, and status glyph surfaces.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.signalbloom_1.0.0-1_iphoneos-arm64e.deb
+Size: 9554
+MD5sum: 1db1f38aca1c9428088cb20933df2972
+SHA1: 44de1f8663b245e7939556f1c0b30ccfb5ad0272
+SHA256: 1338a39ed5c5b261f08cf61fd8aba3d6da0b15a10794499dda6d5042f8e71bbe
+
+Package: com.chasedavis.silenttoast
+Name: SilentToast
+Depends: mobilesubstrate
+Description: Shows a small SpringBoard toast when the hardware silent state changes.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.silenttoast_1.0.0-1_iphoneos-arm64e.deb
+Size: 6852
+MD5sum: 445c2e7902e6a66ed1a0dd8683650581
+SHA1: 787203a7d68133df731e0afd53074ece7a64acfb
+SHA256: 14001897dddf198e3037ce388815e587c72227bb311605e703e4cd4b815fc3c2
+
+Package: com.chasedavis.sleepyspringboard
+Name: SleepySpringBoard
+Depends: mobilesubstrate
+Description: Adds a slow, subtle breathing animation to SpringBoard icon surfaces.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.sleepyspringboard_1.0.0-1_iphoneos-arm64e.deb
+Size: 9370
+MD5sum: ed45f6f0abe27a3cf9cd7716a4dc916d
+SHA1: b13f71020711453d8c7c64f04bd3ca06a1c9b338
+SHA256: 40225ebc48541890d17b3508666110d3767128d27d82fbc539e464fb69172bd3
+
+Package: com.chasedavis.snapgrid
+Name: SnapGrid
+Depends: mobilesubstrate
+Description: Shows a temporary alignment grid while SpringBoard icon surfaces are touched.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.snapgrid_1.0.0-1_iphoneos-arm64e.deb
+Size: 10488
+MD5sum: 5b1506b556772ccf58438abbc2a84bb9
+SHA1: 34db3db83c466787ba2c09ba2600f5383bff709e
+SHA256: 6d82420860b598da1f5b88e7de0fab369ebbefbfdf6b7ab0f62793f31f64389b
+
+Package: com.chasedavis.spotifyreframe
+Name: SpotifyReframe
+Depends: mobilesubstrate, preferenceloader
+Description: Native-only Spotify refinement with the replacement player shell removed, safer defaults, and subtle original-app polish.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 2.0.1-1
+Installed-Size: 460
+Filename: debs/com.chasedavis.spotifyreframe_2.0.1-1_iphoneos-arm64e.deb
+Size: 41178
+MD5sum: 00e5cd6d7bd18a938e8375bc5fd7ff5c
+SHA1: 2198eafee33ceabfa5b7ff0a75fcddef4dd007ee
+SHA256: befd48689c777d0bc51569111452c8d03dc54ef2dc7f48913d5540d5652d588a
+
+Package: com.chasedavis.springboardautomations
+Name: SpringBoard Automations
+Depends: mobilesubstrate, preferenceloader
+Description: Premium local trigger/action engine for SpringBoard visual profiles, charging states, ringer events, and time modes.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 372
+Filename: debs/com.chasedavis.springboardautomations_1.0.4-1_iphoneos-arm64e.deb
+Size: 19774
+MD5sum: 7460e2fc562980d13ac2bdf591baeb8f
+SHA1: 84d4cdda986078ad4ee014c55e8ce62e6e31714a
+SHA256: fffe5881fa16ea0afc1045c8340f9cf48542800faf655b8ef770a9fd4ec8fceb
+
+Package: com.chasedavis.springtrails
+Name: SpringTrails
+Depends: mobilesubstrate
+Description: Adds tiny fading trails behind dragged SpringBoard icon surfaces.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.springtrails_1.0.0-1_iphoneos-arm64e.deb
+Size: 9936
+MD5sum: 541e34067f92af67294885d0334600cd
+SHA1: cf36adeff16794a02b3676a208e37b4043c18fee
+SHA256: aff417e1e2eb07a1f9ac823d71a75e97491527546ba5611d954a2f4ca13a31bc
+
+Package: com.chasedavis.statuslabpro
+Name: StatusLab Pro
+Depends: mobilesubstrate, preferenceloader
+Description: Premium status bar customization suite with signal glow, battery styling, activity tinting, and time polish.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.4-1
+Installed-Size: 356
+Filename: debs/com.chasedavis.statuslabpro_1.0.4-1_iphoneos-arm64e.deb
+Size: 17802
+MD5sum: bd0fc115fd4f62694e523eddfa47612b
+SHA1: 1a8c7d154c2eed8844a16a2241ea82815fa738c8
+SHA256: 99b04457266612037acf9b65136a519e5eff37984e2e9a8e6bf327529c24ddf6
+
+Package: com.chasedavis.velvetalerts
+Name: VelvetAlerts
+Depends: mobilesubstrate
+Description: Softens SpringBoard notification and banner surfaces with calmer animation and shadow treatment.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 168
+Filename: debs/com.chasedavis.velvetalerts_1.0.0-1_iphoneos-arm64e.deb
+Size: 5780
+MD5sum: 53a287c9355192ca563e721e236cb4c1
+SHA1: 2582d11ac0d3b9936c4edb6ef49295c63b264815
+SHA256: 3781db5ec20b5b4f77783c4da980de362f920bed16cd2223480bf7dc585b7612
+
+Package: com.chasedavis.volumeribbon
+Name: VolumeRibbon
+Depends: mobilesubstrate
+Description: Restyles SpringBoard volume HUD surfaces into a compact translucent ribbon.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 168
+Filename: debs/com.chasedavis.volumeribbon_1.0.0-1_iphoneos-arm64e.deb
+Size: 5748
+MD5sum: 5fef7ea6853d799bfa7e4f34f5ff3f12
+SHA1: 3e5c9f2a034572214994bc366f4e932fa231ad83
+SHA256: f764d366b4036706f4e682809f79255282f5fd519e16784701ab61498072aa2f
+
+Package: com.chasedavis.wallpaperdepthtint
+Name: WallpaperDepthTint
+Depends: mobilesubstrate
+Description: Tints SpringBoard icon labels using a brightness-aware wallpaper-style palette.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-1
+Installed-Size: 172
+Filename: debs/com.chasedavis.wallpaperdepthtint_1.0.0-1_iphoneos-arm64e.deb
+Size: 9854
+MD5sum: d79b3a22018e779b5b6921dee3e5167b
+SHA1: 7168336aa9e5b459f9d1b879be10fb2ae80d9644
+SHA256: d8ea93d47f876d98ded7eecc7e3b2cc7f4021a6708232de0ab72a17e2d3edee5
+
