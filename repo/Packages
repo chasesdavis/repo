@@ -916,7 +916,7 @@ SHA256: d8ea93d47f876d98ded7eecc7e3b2cc7f4021a6708232de0ab72a17e2d3edee5
 
 Package: libroot-roothide
 Name: libroot (RootHide)
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm64e
 Section: System
 Priority: optional
@@ -926,12 +926,12 @@ Author: Chase Davis
 Description: libroot path API for an iOS 17 RootHide bootstrap
  Installs /usr/lib/libroot.dylib. It reports the physical RootHide
  bootstrap root so command-line tools can find their files without vroot.
-Installed-Size: 68
-Filename: debs/libroot-roothide_1.0.0_iphoneos-arm64e.deb
-Size: 3542
-MD5sum: 24d17cf308e440dc68f4a66de347c5ab
-SHA1: 0141a7482f994e8b04cc66ec5850e82425774847
-SHA256: badf58369dfc8e631202aab6776dc6086699ed4c3ddfe2d4d64dd46f8c2d00ba
+Installed-Size: 164
+Filename: debs/libroot-roothide_1.0.1_iphoneos-arm64e.deb
+Size: 4430
+MD5sum: efdd3380ed7f47e399b6c6eb15012f14
+SHA1: 7723abb90857a693661447cdf6e1373722528331
+SHA256: 7b50aad1c5a684526f54cb09c232b9ff15044f95bf2de0c11d9f5447f66480d3
 
 Package: wiki.qaq.codex
 Name: codex

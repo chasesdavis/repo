@@ -15,7 +15,7 @@ This repo contains a first tranche of Bootstrap-compatible, roothide Theos tweak
 - SpotifyReframe: Spotify-only UI redesign with glass cards, tuned artwork, player chrome, and Settings controls.
 - LowerInstall: install apps meant for newer iOS (installd + App Store version spoof; julioverne port for RootHide/iOS 15–17).
 - Codex `0.155.1-1`: OpenAI's terminal coding agent for this RootHide bootstrap. The launcher finds the jailbreak root from the `.jbroot` link, so iOS 17 does not need a preinstalled libroot.
-- libroot `1.0.0`: optional `/usr/lib/libroot.dylib` for other tools that call `libroot_get_jbroot_prefix`.
+- libroot `1.0.1`: optional `/usr/lib/libroot.dylib` for other tools that call `libroot_get_jbroot_prefix`. The library is arm64 and arm64e.
 
 Premium suite:
 

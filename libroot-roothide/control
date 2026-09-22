@@ -1,6 +1,6 @@
 Package: libroot-roothide
 Name: libroot (RootHide)
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm64e
 Section: System
 Priority: optional

@@ -1,11 +1,10 @@
 SDK := $(shell xcrun --sdk iphoneos --show-sdk-path)
-TARGET := arm64-apple-ios15.0
-VERSION := 1.0.0
+VERSION := 1.0.1
 PACKAGE := libroot-roothide
 ARCH := iphoneos-arm64e
 DEB := $(PACKAGE)_$(VERSION)_$(ARCH).deb
 
-CFLAGS := -Os -Wall -Wextra -fvisibility=hidden
+CFLAGS := -Os -Wall -Wextra -Werror -fvisibility=hidden -miphoneos-version-min=15.0
 LDFLAGS := -Wl,-dead_strip -install_name @loader_path/.jbroot/usr/lib/libroot.dylib
 
 .PHONY: all clean deb
@@ -13,8 +12,11 @@ LDFLAGS := -Wl,-dead_strip -install_name @loader_path/.jbroot/usr/lib/libroot.dy
 all: libroot.dylib
 
 libroot.dylib: libroot.c
-	xcrun clang -target $(TARGET) -isysroot $(SDK) $(CFLAGS) -dynamiclib $(LDFLAGS) -o $@ $<
+	xcrun clang -arch arm64 -isysroot $(SDK) $(CFLAGS) -dynamiclib $(LDFLAGS) -o libroot.arm64.dylib $<
+	xcrun clang -arch arm64e -isysroot $(SDK) $(CFLAGS) -dynamiclib $(LDFLAGS) -o libroot.arm64e.dylib $<
+	lipo -create -output $@ libroot.arm64.dylib libroot.arm64e.dylib
 	ldid -S $@
+	rm -f libroot.arm64.dylib libroot.arm64e.dylib
 
 deb: libroot.dylib control
 	rm -rf stage
@@ -28,4 +30,4 @@ deb: libroot.dylib control
 	rm -rf stage
 
 clean:
-	rm -rf libroot.dylib stage $(DEB)
+	rm -rf libroot.dylib libroot.arm64.dylib libroot.arm64e.dylib stage $(PACKAGE)_*_$(ARCH).deb
