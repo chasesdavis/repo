@@ -1,0 +1,29 @@
+#!/bin/sh
+# Runs after dpkg has unpacked this package. The agent binaries are stored as
+# lzma, not as Mach-O, so the RootHide installer does not have to rewrite them.
+set -e
+dir=/usr/libexec/codex
+payload="$dir/payload.tar.lzma"
+if [ ! -f "$payload" ]; then
+    exit 0
+fi
+if command -v lzma >/dev/null 2>&1; then
+    lzma -dc "$payload" | tar -xf - -C "$dir"
+elif command -v xz >/dev/null 2>&1; then
+    xz -dc -F lzma "$payload" | tar -xf - -C "$dir"
+else
+    echo "codex: this RootHide bootstrap needs the xz package to finish install" >&2
+    exit 1
+fi
+rm -f "$payload"
+chmod 755 "$dir/codex" "$dir/codex-code-mode-host"
+if [ -x /usr/bin/ldid ]; then
+    /usr/bin/ldid -S"$dir/codex.entitlements" "$dir/codex"
+    /usr/bin/ldid -S"$dir/codex.entitlements" "$dir/codex-code-mode-host"
+fi
+if command -v jbroot >/dev/null 2>&1; then
+    root=$(jbroot /)
+    root=${root%/}
+    ln -sfn "$root" "$dir/.jbroot"
+fi
+exit 0
