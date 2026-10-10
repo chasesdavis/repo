@@ -1,0 +1,9 @@
+{
+    entry = {
+        bundle = ChatGPTCompatibilityPrefs;
+        cell = PSLinkCell;
+        detail = CGCPreferencesController;
+        isController = 1;
+        label = "ChatGPT Compatibility";
+    };
+}

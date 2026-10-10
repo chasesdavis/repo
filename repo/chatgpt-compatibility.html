@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChatGPT Compatibility — Experimental Beta</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b0f14; color: #ecf6ff; }
+    main { width: min(680px, calc(100% - 40px)); margin: 48px auto; }
+    h1 { font-size: 28px; margin-bottom: 12px; }
+    h2 { font-size: 20px; margin-top: 32px; }
+    p, li { color: #b7c7d6; line-height: 1.6; }
+    a, code { color: #9be7ff; overflow-wrap: anywhere; }
+    strong { color: #ecf6ff; }
+  </style>
+</head>
+<body><main>
+  <p><a href="./">Chase Davis Sileo repository</a></p>
+  <h1>ChatGPT Compatibility</h1>
+  <p><strong>Experimental 0.1.0~beta1. Disabled by default. Not device-tested.</strong></p>
+  <p>A narrowly scoped RootHide experiment for iPhone16,2 on iOS 17.0, targeting official ChatGPT 1.2026.272. Successful installation, launch, and dot access have not been verified.</p>
+  <p><a href="debs/com.chasedavis.chatgptcompat_0.1.0~beta1_iphoneos-arm64e.deb">Download the RootHide package</a></p>
+  <h2>In Sileo</h2>
+  <p>Add or refresh <code>https://chasesdavis.github.io/repo/</code>, then search for <strong>ChatGPT Compatibility (Experimental)</strong>. Publishing this package does not install it on your phone.</p>
+  <h2>What changes</h2>
+  <p>Only identified single-product ChatGPT store requests and the target bundle's minimum-OS comparison qualify. Unknown or unsupported cases keep their original behavior. The tweak does not patch app files, modify signatures or receipts, bypass account access, or spoof global OS APIs.</p>
+  <p>The package requires existing Bootstrap daemon injection. It does not enable injection into ChatGPT or restart any process. It conflicts with LowerInstall and AppStoreTroller to avoid stacking broad spoofers.</p>
+  <h2>Enable or remove</h2>
+  <p>After an installation you choose to perform, open <strong>Settings → ChatGPT Compatibility</strong>. The experiment is off until you enable its switch. Turn the switch off before removing the package in Sileo. Already-loaded code leaves memory when the process exits normally; no restart is performed automatically.</p>
+  <p><strong>This is not a confirmed update fix.</strong> It does not supply missing iOS 18 APIs or guarantee dots. An official App Store update replaces the installed app; removing the tweak does not undo that update.</p>
+  <h2>Local verification</h2>
+  <p>116 policy/ABI assertions and 33 mock hook-integration assertions passed. Both arm64 and arm64e slices built against the iOS 17 SDK. These checks do not establish real-device compatibility.</p>
+  <p><a href="https://github.com/chasesdavis/repo/tree/main/tweaks/ChatGPTCompatibility">Source, tests, exact scope, and removal notes</a></p>
+</main></body>
+</html>
