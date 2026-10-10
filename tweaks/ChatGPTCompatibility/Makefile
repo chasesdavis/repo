@@ -2,6 +2,7 @@ THEOS ?= /Users/chase/theos
 THEOS_PACKAGE_SCHEME = roothide
 TARGET = iphone:clang:17.0:17.0
 ARCHS = arm64 arm64e
+export CLANG_MODULE_CACHE_PATH := $(CURDIR)/.theos/module-cache
 
 include $(THEOS)/makefiles/common.mk
 

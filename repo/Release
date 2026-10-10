@@ -5,25 +5,25 @@ Codename: ios17
 Architectures: iphoneos-arm64 iphoneos-arm64e
 Components: main
 Description: Local roothide Bootstrap tweak repo
-Date: Sat, 10 Oct 2026 12:25:42 +0000
+Date: Sat, 10 Oct 2026 23:02:25 UTC
 MD5Sum:
- f02677a9e2bd9d6f437063d22c21c044            34863 Packages
- cfd9962a4c0fe4013b78409fdfb6b517             9934 Packages.gz
- 44562d4fb93d1ad5b555f25e89b6f77a             9088 Packages.xz
- 8397220b2ef75d7535ace3ed02fd6922             9174 Packages.bz2
- 3b9f8930f9c971b3daf5864dbb82971c             9043 Packages.lzma
- cc6c93fb89662edb137961d8161f5759             9197 Packages.zst
+ 075ee6a26d625685124331ec7bfa5c7d            35797 Packages
+ dc0bda8568b6f71b47ec3a796e53ef39            10175 Packages.gz
+ 791e635f874df163f73990599a5f0f21             9268 Packages.xz
+ 06df66ae3bee7639274be027b27cfc63             9364 Packages.zst
+ 79842205750795399e60d295b675c77d             9380 Packages.bz2
+ 87a5e8ba8dd526c1b19ddeee1d9e4df1             9213 Packages.lzma
 SHA1:
- 2192cf74aecd40519adc74a261ab0b1f25894214            34863 Packages
- 695d5a264b041e876eb19247d26d414aae233a01             9934 Packages.gz
- f48ae57f9b7b715926930f5776d3b3207826387a             9088 Packages.xz
- 8a21a488bcc744939417b9837bc5d5e06eba75ae             9174 Packages.bz2
- 648a58295ab06ac0cb9ef90a4b84feafd78582ef             9043 Packages.lzma
- 432633ec5a04792166bdbdcab0058a84630d7ad5             9197 Packages.zst
+ c525e8196acfc1edbf1e949d85b29bf20ae7c416            35797 Packages
+ 89f7bf42823f334a97b65d4d1e49ceb04b50f9b4            10175 Packages.gz
+ e4732ea5ea680fb4714497382853529e9a802db2             9268 Packages.xz
+ a8aed734bbf9ab9b8e17a81551aa3bbbd4f511fc             9364 Packages.zst
+ c643ee031e1f0df0385538540687c1769b927d56             9380 Packages.bz2
+ e35e44ef2008023b5fb3d26fdc5978a1bc1fc1aa             9213 Packages.lzma
 SHA256:
- 8d0f6f1e184a0e947ccdf01c4e18a75e8df61618d1f15e8f315dae2b7888257f            34863 Packages
- afcc318f8a93b0c5a1ea7736de319fbf8f36b930781735c908a5f3b68d3fb9e9             9934 Packages.gz
- a46f1d4aa1ff37f2a93d2e40f1f19667ce3780d6cc9456f05d979822d293d7a1             9088 Packages.xz
- eb647fff3d4022f85c273c53257b44f1a8d9ad860488eb01c53b8e4422e173cb             9174 Packages.bz2
- f11b96c9c067f44e8463b63f88439d582869a2505b191edde211781c0bd51e61             9043 Packages.lzma
- bed259b26901afc81f0f68aa1754af462b3a6a4dab474592476e36e5b3187063             9197 Packages.zst
+ d58b8c9b7a8481c25be47aa0d4088206f2496b0a889674325d3f5a0df6c0fa92            35797 Packages
+ faefe23cb90198ae0b5203a2079fdf9a61bd7f2e1b406b530b66d363e8e5a181            10175 Packages.gz
+ 541928fbe959c5eb687fc8e90649f165057aec6bfd45434071144e5c4ff9fc53             9268 Packages.xz
+ 0932ff2027d6bf8a553d55f15c0cdde28d77431f04bc6daafac2f54699eb2266             9364 Packages.zst
+ c4d6f857a887e3891d16d66362ab4c65b6e61a7b231557467b36856b69026639             9380 Packages.bz2
+ 413994ee778988ad8b15fc1c66e1bf2ed3dbfd01298f16a19a66316453e55333             9213 Packages.lzma

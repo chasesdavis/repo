@@ -9,6 +9,17 @@
 @end
 
 @implementation CGCPreferencesController
+- (NSString *)runtimeStatusText {
+    return [NSString stringWithFormat:
+        @"appstored loaded: %@\nLate store hook installed: %@\nMatching ChatGPT request seen: %@\n\ninstalld loaded: %@\nInstaller hook installed: %@\nMatching 1.2026.272 bundle seen: %@",
+        CGCReadStatus(CGC_STATUS_APPSTORED_LOADED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_STORE_HOOKED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_STORE_MATCHED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_INSTALLD_LOADED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_INSTALLER_HOOKED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_INSTALLER_MATCHED) ? @"YES" : @"NO"];
+}
+
 - (NSArray *)specifiers {
     if (!_specifiers) {
         PSSpecifier *group = [PSSpecifier groupSpecifierWithName:@"Experimental beta"];
@@ -17,11 +28,19 @@
         [toggle setProperty:@NO forKey:@"default"];
         PSSpecifier *scope = [PSSpecifier emptyGroupSpecifier];
         [scope setProperty:@"OFF by default. Only identified single-ChatGPT store requests and the target bundle's minimum-OS comparison can change. Signatures, receipts, account access, other apps, and app files are untouched by this tweak. A normal App Store update still replaces the installed app." forKey:@"footerText"];
+        PSSpecifier *status = [PSSpecifier groupSpecifierWithName:@"Runtime status"];
+        [status setProperty:[self runtimeStatusText] forKey:@"footerText"];
+        PSSpecifier *refresh = [PSSpecifier preferenceSpecifierNamed:@"Refresh runtime status" target:self set:nil get:nil detail:Nil cell:PSButtonCell edit:Nil];
+        refresh->action = @selector(refreshRuntimeStatus);
         PSSpecifier *remove = [PSSpecifier emptyGroupSpecifier];
         [remove setProperty:@"Disable this switch to return loaded hooks to their original behavior. Remove ChatGPT Compatibility in Sileo to remove its package files. No process is restarted automatically. Removing this tweak does not roll back an App Store update. Existing Bootstrap daemon injection is required; do not enable injection into ChatGPT itself." forKey:@"footerText"];
-        _specifiers = [@[group, toggle, scope, remove] mutableCopy];
+        _specifiers = [@[group, toggle, scope, status, refresh, remove] mutableCopy];
     }
     return _specifiers;
+}
+- (void)refreshRuntimeStatus {
+    _specifiers = nil;
+    [self reloadSpecifiers];
 }
 - (id)readEnabled:(PSSpecifier *)specifier {
     return @(CGCPreferencesEnabled([NSDictionary dictionaryWithContentsOfFile:CGCPreferencesPath()]));

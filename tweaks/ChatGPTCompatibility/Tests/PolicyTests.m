@@ -49,6 +49,15 @@ static void TestRequests(void) {
     CHECK([[prepared valueForHTTPHeaderField:@"X-Fixture"] isEqual:[request valueForHTTPHeaderField:@"X-Fixture"]]);
     CHECK(CGCPreparedRequest(prepared, YES) == prepared);
     CHECK(CGCPreparedRequest(nil, YES) == nil);
+    NSMutableURLRequest *lateHeader = Request(valid);
+    [lateHeader setValue:nil forHTTPHeaderField:@"User-Agent"];
+    NSURLRequest *earlyResult = CGCPreparedRequest(lateHeader, YES);
+    CHECK(earlyResult == lateHeader);
+    NSString *lateValue = CGCPreparedHeaderValue(lateHeader, @{@"salableAdamId":@6448311069LL, @"productType":@"C"}, @"User-Agent", @"AppStore/3.0 iOS/17.0 model/iPhone16,2", YES);
+    CHECK([lateValue isEqualToString:@"AppStore/3.0 iOS/18.0 model/iPhone16,2"]);
+    CHECK([CGCPreparedHeaderValue(lateHeader, @{@"salableAdamId":@1, @"productType":@"C"}, @"User-Agent", @"AppStore/3.0 iOS/17.0", YES) isEqualToString:@"AppStore/3.0 iOS/17.0"]);
+    CHECK([CGCPreparedHeaderValue(lateHeader, @{@"salableAdamId":@6448311069LL, @"productType":@"C"}, @"X-Fixture", @"iOS/17.0", YES) isEqualToString:@"iOS/17.0"]);
+    CHECK([CGCPreparedHeaderValue(lateHeader, @{@"salableAdamId":@6448311069LL, @"productType":@"C"}, @"User-Agent", @"AppStore/3.0 iOS/17.0", NO) isEqualToString:@"AppStore/3.0 iOS/17.0"]);
     for (NSString *body in @[@"", @"salableAdamId=1&productType=C", @"productType=C", @"salableAdamId=6448311069&productType=A", @"salableAdamId=64483110690&productType=C", @"salableAdamId=6448311069x&productType=C", @"salableAdamId=6448311069&productType=C&salableAdamId=1", @"salableAdamId=6448311069&productType=C&salable%41damId=1", @"salableAdamId=6448311069&productType=C&appAdamId=1", @"salableAdamId=6448311069&productType=C&bid=com.other.app", @"salableAdamId=6448311069&productType=C&items=x", @"salableAdamId=6448311069&productType=C&items[]=x", @"salableAdamId=6448311069&productType=C&x=%ZZ", @"salableAdamId=6448311069&productType=C&broken"]) {
         NSMutableURLRequest *other = Request(body);
         CHECK(!CGCRequestTargetsChatGPT(other));

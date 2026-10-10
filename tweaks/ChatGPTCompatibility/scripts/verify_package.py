@@ -86,12 +86,12 @@ def verify_binary(data: bytes) -> list[dict]:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
-    package = Path(sys.argv[1]) if len(sys.argv) > 1 else root / "packages/com.chasedavis.chatgptcompat_0.1.0~beta1_iphoneos-arm64e.deb"
+    package = Path(sys.argv[1]) if len(sys.argv) > 1 else root / "packages/com.chasedavis.chatgptcompat_0.2.0~beta2_iphoneos-arm64e.deb"
     control = archive_members(package, "--ctrl-tarfile")
     assert set(control) == {"control"}, "No maintainer scripts are allowed"
     fields = dict(line.split(": ", 1) for line in control["control"].decode().splitlines() if ": " in line)
     assert fields["Package"] == "com.chasedavis.chatgptcompat"
-    assert fields["Version"] == "0.1.0~beta1" and fields["Architecture"] == "iphoneos-arm64e"
+    assert fields["Version"] == "0.2.0~beta2" and fields["Architecture"] == "iphoneos-arm64e"
     payload = archive_members(package, "--fsys-tarfile")
     dylib = "Library/MobileSubstrate/DynamicLibraries/ChatGPTCompatibility.dylib"
     bundle = "Library/PreferenceBundles/ChatGPTCompatibilityPrefs.bundle/ChatGPTCompatibilityPrefs"

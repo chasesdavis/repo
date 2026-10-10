@@ -1,7 +1,7 @@
 # ChatGPT Compatibility
 
 ## Overview
-Default-off experimental RootHide tweak for iPhone16,2 on iOS 17.0 and official ChatGPT 1.2026.272. Objective-C, Foundation/UIKit, Xcode 26.6 with Apple clang 21.0.0, iOS 17 SDK, RootHide Theos; GNU Make builds an arm64/arm64e Debian package. No dependency downloads.
+Default-off experimental RootHide tweak for iPhone16,2 on iOS 17.0 and official ChatGPT 1.2026.272. Beta 2 rewrites the scoped User-Agent at the late `AMSURLRequest` encoder boundary and reports hook status. Objective-C, Foundation/UIKit, Xcode 26.6 with Apple clang 21.0.0, iOS 17 SDK, RootHide Theos; GNU Make builds an arm64/arm64e Debian package. No dependency downloads.
 
 ## Commands
 - Setup: `export THEOS=/Users/chase/theos`
@@ -37,5 +37,7 @@ Unknown formats, mixed identities, missing metadata, unsupported selectors, and 
 - No Settings entry: verify PreferenceLoader and the RootHide architecture before changing anything.
 - Toggle has no effect: daemon injection or the observed transport may not match; absence of effect is not proof of runtime compatibility.
 - Update still refused: unsupported request format/UI gate fails closed; do not broaden to process-wide spoofing.
+- All runtime statuses show NO: the updated dylib has not loaded into the daemons; a userspace reboot is needed after package upgrade.
+- Hooks show YES but request match is NO: the App Store did not traverse the typed ChatGPT purchase path; collect the exact screen/state before changing scope.
 - Install succeeds but launch fails: missing iOS 18 APIs are outside this tweak; do not alter signatures or app files.
 - Build cannot find SDK: verify the existing `iPhoneOS17.0.sdk` under `$THEOS/sdks`.

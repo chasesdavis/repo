@@ -1,10 +1,10 @@
 Package: com.chasedavis.chatgptcompat
 Name: ChatGPT Compatibility (Experimental)
-Version: 0.1.0~beta1
+Version: 0.2.0~beta2
 Architecture: iphoneos-arm64e
 Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 17.0), firmware (<< 17.1)
 Conflicts: com.chasedavis.lowerinstall, dev.mineek.appstoretroller
-Description: Default-off ChatGPT-only compatibility experiment for iPhone16,2 on iOS 17.0. Targets 1.2026.272. Locally tested; device installation, launch, and dot access are NOT verified. No app patching or global OS spoof.
+Description: Default-off ChatGPT-only compatibility experiment for iPhone16,2 on iOS 17.0. Beta 2 fixes late AppleMediaServices User-Agent encoding and adds runtime status. Device installation, launch, and dot access remain unverified.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Tweaks

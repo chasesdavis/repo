@@ -26,7 +26,7 @@ English-only strings and identifiers; all settings use the `CGC` prefix.
 Foundation/UIKit from the iOS 17 SDK, the Preferences private framework, and PreferenceLoader on the phone. No downloads.
 
 ## Config
-The only stored key is Boolean `Enabled`; absent, invalid, and false values disable the experiment.
+The only persisted key is Boolean `Enabled`; absent, invalid, and false values disable the experiment. Read-only Darwin notification states report daemon load, hook registration, and matching operations without storing request data.
 
 ## Error Handling
 An unsuccessful preference write shows an alert, reloads the switch, and sends no settings-change notification. No error payload or private data is logged.
@@ -35,3 +35,4 @@ An unsuccessful preference write shows an alert, reloads the switch, and sends n
 - No Settings entry: check PreferenceLoader and RootHide package architecture.
 - Save fails: verify access to this package's translated preferences path, not system-wide settings.
 - No effect after saving: daemon loading and the actual request path remain device-validation requirements.
+- Runtime status remains NO after upgrading: perform one Bootstrap userspace reboot so the updated daemon dylib can load, then refresh this page.

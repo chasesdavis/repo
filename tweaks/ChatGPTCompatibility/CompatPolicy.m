@@ -108,14 +108,8 @@ static BOOL CGCStoreIDMatches(id value) {
     return [value isEqualToNumber:@6448311069LL];
 }
 
-BOOL CGCRequestTargetsChatGPT(NSURLRequest *request) {
-    if (![request isKindOfClass:NSURLRequest.class]) return NO;
-    NSURL *url = request.URL;
-    NSString *host = url.host.lowercaseString;
-    if (![url.scheme.lowercaseString isEqualToString:@"https"] || url.user || url.password || url.fragment || url.query.length || (url.port && url.port.integerValue != 443)) return NO;
-    if (![host isEqualToString:@"itunes.apple.com"] && ![host hasSuffix:@".itunes.apple.com"]) return NO;
-    if (![url.path isEqualToString:@"/WebObjects/MZBuy.woa/wa/buyProduct"] || ![request.HTTPMethod isEqualToString:@"POST"]) return NO;
-    NSDictionary *values = CGCRequestParameters(request);
+static BOOL CGCPurchaseParametersTargetChatGPT(NSDictionary *values) {
+    if (![values isKindOfClass:NSDictionary.class]) return NO;
     if (!CGCStoreIDMatches(values[@"salableAdamId"]) || ![values[@"productType"] isEqual:@"C"]) return NO;
     for (NSString *key in @[@"adamId", @"appAdamId", @"itemId", @"itemID", @"trackId"]) {
         if (values[key] && !CGCStoreIDMatches(values[key])) return NO;
@@ -129,21 +123,45 @@ BOOL CGCRequestTargetsChatGPT(NSURLRequest *request) {
     return YES;
 }
 
-NSURLRequest *CGCPreparedRequest(NSURLRequest *request, BOOL enabled) {
-    if (!enabled || !CGCRequestTargetsChatGPT(request)) return request;
-    NSString *agent = [request valueForHTTPHeaderField:@"User-Agent"];
-    if (!agent.length || agent.length > 4096) return request;
+static BOOL CGCRequestUsesPurchaseEndpoint(NSURLRequest *request) {
+    if (![request isKindOfClass:NSURLRequest.class]) return NO;
+    NSURL *url = request.URL;
+    NSString *host = url.host.lowercaseString;
+    if (![url.scheme.lowercaseString isEqualToString:@"https"] || url.user || url.password || url.fragment || url.query.length || (url.port && url.port.integerValue != 443)) return NO;
+    if (![host isEqualToString:@"itunes.apple.com"] && ![host hasSuffix:@".itunes.apple.com"]) return NO;
+    return [url.path isEqualToString:@"/WebObjects/MZBuy.woa/wa/buyProduct"] && [request.HTTPMethod isEqualToString:@"POST"];
+}
+
+BOOL CGCRequestTargetsChatGPT(NSURLRequest *request) {
+    return CGCRequestUsesPurchaseEndpoint(request) && CGCPurchaseParametersTargetChatGPT(CGCRequestParameters(request));
+}
+
+static NSString *CGCPreparedUserAgent(NSString *agent) {
+    if (![agent isKindOfClass:NSString.class] || !agent.length || agent.length > 4096) return agent;
     NSRegularExpression *tokens = [NSRegularExpression regularExpressionWithPattern:@"(?:^| )iOS/[^ ]+" options:0 error:NULL];
     NSRange all = NSMakeRange(0, agent.length);
     NSArray<NSTextCheckingResult *> *matches = [tokens matchesInString:agent options:0 range:all];
-    if (matches.count != 1) return request;
+    if (matches.count != 1) return agent;
     NSRange range = matches.firstObject.range;
     NSString *token = [[agent substringWithRange:range] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];
-    if (![@[@"iOS/17.0", @"iOS/17.0.0"] containsObject:token]) return request;
-    NSString *replacement = [agent stringByReplacingCharactersInRange:range withString:[agent characterAtIndex:range.location] == ' ' ? @" iOS/18.0" : @"iOS/18.0"];
+    if (![@[@"iOS/17.0", @"iOS/17.0.0"] containsObject:token]) return agent;
+    return [agent stringByReplacingCharactersInRange:range withString:[agent characterAtIndex:range.location] == ' ' ? @" iOS/18.0" : @"iOS/18.0"];
+}
+
+NSURLRequest *CGCPreparedRequest(NSURLRequest *request, BOOL enabled) {
+    if (!enabled || !CGCRequestTargetsChatGPT(request)) return request;
+    NSString *agent = [request valueForHTTPHeaderField:@"User-Agent"];
+    NSString *replacement = CGCPreparedUserAgent(agent);
+    if (replacement == agent || [replacement isEqualToString:agent]) return request;
     NSMutableURLRequest *copy = [request mutableCopy];
     [copy setValue:replacement forHTTPHeaderField:@"User-Agent"];
     return copy;
+}
+
+NSString *CGCPreparedHeaderValue(NSURLRequest *request, NSDictionary *purchaseParameters, NSString *field, NSString *value, BOOL enabled) {
+    if (!enabled || ![field isKindOfClass:NSString.class] || [field caseInsensitiveCompare:@"User-Agent"] != NSOrderedSame) return value;
+    if (!CGCRequestUsesPurchaseEndpoint(request) || !CGCPurchaseParametersTargetChatGPT(purchaseParameters)) return value;
+    return CGCPreparedUserAgent(value);
 }
 
 BOOL CGCBundleMatchesTarget(NSString *identifier, NSURL *bundleURL) {
