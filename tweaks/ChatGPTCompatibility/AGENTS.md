@@ -1,7 +1,7 @@
 # ChatGPT Compatibility
 
 ## Overview
-Default-off experimental RootHide tweak for iPhone16,2 on iOS 17.0 and official ChatGPT 1.2026.272. Beta 2 rewrites the scoped User-Agent at the late `AMSURLRequest` encoder boundary and reports hook status. Objective-C, Foundation/UIKit, Xcode 26.6 with Apple clang 21.0.0, iOS 17 SDK, RootHide Theos; GNU Make builds an arm64/arm64e Debian package. No dependency downloads.
+Default-off experimental RootHide tweak for iPhone16,2 on iOS 17.0.x and official ChatGPT 1.2026.272. Beta 3 accepts iOS 17.0 patch releases, while retaining beta 2's late `AMSURLRequest` User-Agent hook and runtime status. Objective-C, Foundation/UIKit, Xcode 26.6 with Apple clang 21.0.0, iOS 17 SDK, RootHide Theos; GNU Make builds an arm64/arm64e Debian package. No dependency downloads.
 
 ## Commands
 - Setup: `export THEOS=/Users/chase/theos`

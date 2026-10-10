@@ -14,7 +14,7 @@ BOOL CGCPreferencesEnabled(id preferences) {
 BOOL CGCRuntimeAllowed(NSString *process, NSString *machine, NSOperatingSystemVersion version) {
     return ([process isEqualToString:@"appstored"] || [process isEqualToString:@"installd"])
         && [machine isEqualToString:@"iPhone16,2"]
-        && version.majorVersion == 17 && version.minorVersion == 0 && version.patchVersion == 0;
+        && version.majorVersion == 17 && version.minorVersion == 0;
 }
 
 // Accept only flat XML plists and reject duplicate keys before Foundation parses them.

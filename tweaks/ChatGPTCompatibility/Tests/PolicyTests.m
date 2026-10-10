@@ -137,7 +137,9 @@ int main(void) {
         CHECK(CGCRuntimeAllowed(@"appstored", @"iPhone16,2", os)); CHECK(CGCRuntimeAllowed(@"installd", @"iPhone16,2", os));
         CHECK(!CGCRuntimeAllowed(@"ChatGPT", @"iPhone16,2", os)); CHECK(!CGCRuntimeAllowed(@"SpringBoard", @"iPhone16,2", os));
         CHECK(!CGCRuntimeAllowed(@"appstored", @"iPhone16,1", os));
-        os.patchVersion = 1; CHECK(!CGCRuntimeAllowed(@"appstored", @"iPhone16,2", os));
+        os.patchVersion = 1; CHECK(CGCRuntimeAllowed(@"appstored", @"iPhone16,2", os));
+        os.patchVersion = 3; CHECK(CGCRuntimeAllowed(@"installd", @"iPhone16,2", os));
+        os.minorVersion = 1; CHECK(!CGCRuntimeAllowed(@"appstored", @"iPhone16,2", os));
         Method method = class_getInstanceMethod(CGCSignatureFixture.class, @selector(check:os:required:error:));
         CHECK(CGCMethodMatches(method, @encode(BOOL), @[@"@", @":", @"@", @"@", @"Q", @"^@"]));
         CHECK(!CGCMethodMatches(method, "@", @[@"@", @":", @"@", @"@", @"Q", @"^@"]));

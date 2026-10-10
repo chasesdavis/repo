@@ -1,10 +1,10 @@
 # ChatGPT Compatibility — Experimental Beta
 
-**0.2.0~beta2 is locally tested, not device-tested.** Beta 2 fixes beta 1's confirmed interception-order bug: AppleMediaServices could attach its User-Agent after beta 1 inspected the request. The new hook operates at that late header-setting boundary and verifies the request's typed ChatGPT purchase metadata before changing anything.
+**0.2.0~beta3 is locally tested, not device-tested.** Beta 3 fixes beta 2's overly strict runtime gate: iOS 17.0 patch releases such as 17.0.1–17.0.3 now qualify. Beta 2's late User-Agent hook and typed ChatGPT purchase checks remain unchanged.
 
 ## Scope
 
-- iPhone16,2, **iOS 17.0 exactly**, RootHide Bootstrap with working `appstored` and `installd` injection.
+- iPhone16,2, **iOS 17.0.x**, RootHide Bootstrap with working `appstored` and `installd` injection.
 - Official ChatGPT store ID `6448311069`, bundle ID `com.openai.chat`.
 - Installer changes are limited to main app version **1.2026.272**, and matching app extensions inside that exact app bundle, when comparing minimum OS 18.0 against 17.0.
 - **Disabled by default.** Other devices, OS versions, apps, ambiguous requests, missing metadata, and incompatible method signatures keep their original behavior.
@@ -45,7 +45,7 @@ python3 scripts/verify_package.py
 
 Host policy tests cover default-off settings, device/process/OS scope, single-app identity, malformed and duplicate parameters, ambiguous/mixed-app input, preservation of request data, exact bundle-version checks, and ABI mismatch. Hook integration tests execute the production adapters against a **mock** installer/hook provider and verify that original errors/results and other arguments survive. These are not iOS device tests. Builds use the existing iOS 17 SDK and produce arm64/arm64e slices with RootHide dependencies.
 
-The beta 1 failure is locked down by a regression test: the original early interception sees no User-Agent, then the beta 2 late-header policy receives the typed ChatGPT metadata and rewrites only the subsequently attached `iOS/17.0` token.
+The beta 1 interception-order failure and beta 2 runtime-gate failure are locked down by regression tests: the late-header policy receives typed ChatGPT metadata and rewrites only the subsequently attached token, while iOS 17.0 patch releases pass the runtime gate and iOS 17.1 does not.
 
 The package verifier checks the exact five-file payload, absence of maintainer scripts or enabled preferences, both architectures, minimum/SDK versions, and embedded CodeDirectory page hashes. Theos uses `ldid -S` pseudo-signing; macOS `codesign --verify --strict` reports these images as unsigned. The embedded page hashes are checked separately. This is an integrity check, not proof of device loading or Apple signing trust.
 

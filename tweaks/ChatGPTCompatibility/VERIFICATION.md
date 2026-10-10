@@ -1,13 +1,14 @@
-# Beta 2 Verification
+# Beta 3 Verification
 
-Date: 2026-10-10. Package: `com.chasedavis.chatgptcompat`, version `0.2.0~beta2`, architecture `iphoneos-arm64e`.
+Date: 2026-10-10. Package: `com.chasedavis.chatgptcompat`, version `0.2.0~beta3`, architecture `iphoneos-arm64e`.
 
 ## Passed locally
 
-- 121 policy and runtime-ABI assertions.
+- 123 policy and runtime-ABI assertions.
 - 36 production-adapter integration assertions against a mock installer and hook provider.
 - Regression reproduction before the fix: beta 1 inspected a ChatGPT purchase request before its User-Agent existed; attaching `iOS/17.0` afterward reached the next stage unchanged.
 - Regression after the fix: beta 2's late-header policy receives the typed ChatGPT purchase dictionary and rewrites the subsequently attached token to `iOS/18.0`; unrelated products, headers, and disabled state remain unchanged.
+- Beta 3 regression: iOS 17.0.1 and 17.0.3 pass the device gate; iOS 17.1 remains excluded.
 - Three property-list validations.
 - Both tweak and Settings bundle compiled for arm64 and arm64e with minimum OS and SDK 17.0.
 - Exact five-file package payload; no maintainer scripts or pre-enabled preference file.
@@ -21,6 +22,6 @@ No phone was connected, installed, modified, restarted, or tested. Daemon inject
 
 The existing Theos recipe invokes `ldid -S`. macOS strict `codesign` verification reports the pseudo-signed images as unsigned. The package's embedded CodeDirectory hashes pass the independent verifier; this does not establish device loading or Apple trust. The linker also emits its existing `-multiply_defined is obsolete` toolchain warning. There are no source compile warnings under the selected warning-as-error flags.
 
-Package SHA-256: `e41baad24912e4e600c95a49ee0c19409c0da57e2c0e1ec7f5c071d43bb14313`.
+Package SHA-256: `fa26d91041ed2b429fce6c9130d1977133dcc60d6dcae2355065884dc8026b6e`.
 
 Reproduce source tests with `bash scripts/test.sh`, build with the README command, and verify the resulting archive with `python3 scripts/verify_package.py`. Archive timestamps can change a rebuilt package's SHA-256.
