@@ -1,6 +1,6 @@
 # ChatGPT Compatibility — Experimental Beta
 
-**0.2.0~beta5 is locally tested, not device-tested.** Beta 5 adds a StoreKitUI/App Store compatibility decision hook for the exact ChatGPT store item. It retains the alternate store-process, late User-Agent, typed ChatGPT, and installer guards.
+**0.2.0~beta6 is locally tested, not device-tested.** Beta 6 adds the StoreKitUIService product-page host to the StoreKitUI compatibility decision hook for the exact ChatGPT store item. It retains the App Store and alternate store-process, late User-Agent, typed ChatGPT, and installer guards.
 
 ## Scope
 
@@ -11,7 +11,7 @@
 
 ## What it actually changes
 
-1. Inside the App Store process, hooks iOS 17 `SKUIIPhoneProductPageViewController` and `SUUIIPhoneProductPageViewController` `_isIncompatibleItem`. Only the item with bundle ID `com.openai.chat` and store ID `6448311069` is treated as compatible for the UI path. It does not alter unrelated apps.
+1. Inside the App Store and `StoreKitUIService` product-page hosts, hooks iOS 17 `SKUIIPhoneProductPageViewController` and `SUUIIPhoneProductPageViewController` `_isIncompatibleItem`. Only the item with bundle ID `com.openai.chat` and store ID `6448311069` is treated as compatible for the UI path. It does not alter unrelated apps.
 2. Inside store processes, hooks the iOS 17 `AMSURLRequest` User-Agent setter after AppleMediaServices has attached typed `AMSPurchaseInfo` and `AMSBuyParams`. Only an HTTPS POST to the `itunes.apple.com` buyProduct endpoint whose purchase dictionary identifies the single ChatGPT product qualifies. It changes the existing `iOS/17.0` token to `iOS/18.0`. The request body and every other header are preserved. Selected task-creation hooks remain as a fallback. No network request is initiated by the tweak itself.
 3. Inside `installd`, checks the runtime ABI before hooking `_isMinimumOSVersion:applicableToOSVersion:requiredOS:error:`. For the exact target bundle it calls the original method with the OS comparison argument set to 18.0. It does **not** return unconditional success. The original method's return value, minimum requirement, required-OS argument, and error pointer are preserved.
 
@@ -22,6 +22,8 @@ There are no global `UIDevice`, `NSProcessInfo`, `sysctl`, or MobileGestalt hook
 Runtime injection, the actual App Store refusal path, successful download/installation, launch, and dot access are **unverified**. This package does not supply iOS 18 frameworks or symbols and cannot enable server-side entitlements or missing client UI.
 
 The store path does not force or invent a build ID; it preserves the version requested by the App Store. The installer exception is pinned to 1.2026.272. Batch updates, streamed/compressed/binary/JSON bodies, query-bearing URLs, alternative transports, and unsupported UI gates are deliberately not handled. Do not broaden these guards simply because an update still fails.
+
+The supplied 1.2026.272 IPA was inspected without modifying it. Its main executable, `ChatGPT.framework`, and `OpenAIXPlat.framework` all declare an iOS 18.0 minimum in their Mach-O build commands; the app executable is arm64. This tweak can change the store/installer decision path only. It does not make that iOS 18 binary runnable on iOS 17 or supply missing system frameworks.
 
 ## Install and control
 

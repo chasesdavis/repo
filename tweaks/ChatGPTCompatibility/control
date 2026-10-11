@@ -1,10 +1,10 @@
 Package: com.chasedavis.chatgptcompat
 Name: ChatGPT Compatibility (Experimental)
-Version: 0.2.0~beta5
+Version: 0.2.0~beta6
 Architecture: iphoneos-arm64e
 Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 17.0), firmware (<< 17.1)
 Conflicts: com.chasedavis.lowerinstall, dev.mineek.appstoretroller
-Description: Default-off ChatGPT-only compatibility experiment for iPhone16,2 on iOS 17.0.x. Beta 5 adds a ChatGPT-only StoreKitUI incompatibility decision hook plus the existing store and installer guards. Device installation, launch, and dot access remain unverified.
+Description: Default-off ChatGPT-only compatibility experiment for iPhone16,2 on iOS 17.0.x. Beta 6 adds the StoreKitUIService product-page host to the ChatGPT-only StoreKitUI incompatibility decision hook plus the existing store and installer guards. Device installation, launch, and dot access remain unverified.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Tweaks

@@ -12,7 +12,7 @@ BOOL CGCPreferencesEnabled(id preferences) {
 }
 
 BOOL CGCRuntimeAllowed(NSString *process, NSString *machine, NSOperatingSystemVersion version) {
-    return ([process isEqualToString:@"appstored"] || [process isEqualToString:@"itunesstored"] || [process isEqualToString:@"AppStore"] || [process isEqualToString:@"installd"])
+    return ([process isEqualToString:@"appstored"] || [process isEqualToString:@"itunesstored"] || [process isEqualToString:@"AppStore"] || [process isEqualToString:@"StoreKitUIService"] || [process isEqualToString:@"installd"])
         && [machine isEqualToString:@"iPhone16,2"]
         && version.majorVersion == 17 && version.minorVersion == 0;
 }

@@ -136,6 +136,7 @@ int main(void) {
         NSOperatingSystemVersion os = {17,0,0};
         CHECK(CGCRuntimeAllowed(@"appstored", @"iPhone16,2", os)); CHECK(CGCRuntimeAllowed(@"installd", @"iPhone16,2", os));
         CHECK(CGCRuntimeAllowed(@"itunesstored", @"iPhone16,2", os)); CHECK(CGCRuntimeAllowed(@"AppStore", @"iPhone16,2", os));
+        CHECK(CGCRuntimeAllowed(@"StoreKitUIService", @"iPhone16,2", os));
         CHECK(!CGCRuntimeAllowed(@"ChatGPT", @"iPhone16,2", os)); CHECK(!CGCRuntimeAllowed(@"SpringBoard", @"iPhone16,2", os));
         CHECK(!CGCRuntimeAllowed(@"appstored", @"iPhone16,1", os));
         os.patchVersion = 1; CHECK(CGCRuntimeAllowed(@"appstored", @"iPhone16,2", os));
