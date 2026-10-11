@@ -11,6 +11,18 @@ static NSUInteger installerCalls;
 static id mockRequestProperties;
 static NSString *capturedHeaderValue, *capturedHeaderField;
 
+@interface CGCMockItem : NSObject
+@property(nonatomic) NSString *bundleIdentifier;
+@property(nonatomic) long long itemIdentifier;
+@end
+@implementation CGCMockItem
+@end
+@interface CGCMockPage : NSObject
+@property(nonatomic) CGCMockItem *item;
+@end
+@implementation CGCMockPage
+@end
+
 @interface CGCMockBuyParams : NSObject
 @property(nonatomic) NSDictionary *dictionary;
 @end
@@ -61,6 +73,7 @@ static id OriginalOne(id self, SEL selector, NSURLRequest *request) { capturedRe
 static id OriginalTwo(id self, SEL selector, NSURLRequest *request, id completion) { capturedCompletion = completion; return OriginalOne(self, selector, request); }
 static id OriginalThree(id self, SEL selector, NSURLRequest *request, unsigned long long signpost, id completion) { capturedSignpost = signpost; return OriginalTwo(self, selector, request, completion); }
 static void OriginalHeaderSetter(id self, SEL selector, NSString *value, NSString *field) { capturedHeaderValue = value; capturedHeaderField = field; }
+static BOOL OriginalUI(id self, SEL selector) { return YES; }
 
 int main(void) {
     @autoreleasepool {
@@ -121,6 +134,18 @@ int main(void) {
         params.dictionary = @{@"salableAdamId":@1, @"productType":@"C"};
         CGCSetHeaderValue(request, @selector(setValue:forHTTPHeaderField:), @"AppStore/3.0 iOS/17.0", @"User-Agent");
         CHECK([capturedHeaderValue isEqualToString:@"AppStore/3.0 iOS/17.0"]);
+        CGCMockItem *item = [CGCMockItem new]; item.bundleIdentifier = CGCBundleIdentifier; item.itemIdentifier = 6448311069LL;
+        CGCMockPage *page = [CGCMockPage new]; page.item = item;
+        CGCOriginalSKUIIncompatible = OriginalUI;
+        CGCOriginalSUUIIncompatible = OriginalUI;
+        atomic_store(&CGCEnabled, true);
+        CHECK(!CGCSKUIIncompatible(page, @selector(_isIncompatibleItem)));
+        item.itemIdentifier = 1;
+        CHECK(CGCSKUIIncompatible(page, @selector(_isIncompatibleItem)));
+        item.itemIdentifier = 6448311069LL; item.bundleIdentifier = @"com.other.app";
+        CHECK(CGCSUUIIncompatible(page, @selector(_isIncompatibleItem)));
+        atomic_store(&CGCEnabled, false); item.bundleIdentifier = CGCBundleIdentifier;
+        CHECK(CGCSKUIIncompatible(page, @selector(_isIncompatibleItem)));
         printf("PASS: %u hook integration assertions (mock installer/provider; no device or network access)\n", checks);
     }
     return 0;

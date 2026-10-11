@@ -14,6 +14,7 @@ static BOOL CGCIsStore;
 static BOOL CGCInstallerHooked;
 static BOOL CGCSessionHooked[5];
 static BOOL CGCHeaderHooked;
+static BOOL CGCUIHooked;
 
 static void CGCLoadPreferences(void) {
     @autoreleasepool {
@@ -50,6 +51,8 @@ static id CGCAMSThree(id self, SEL command, NSURLRequest *request, unsigned long
 
 typedef void (*CGCHeaderSetter)(id, SEL, NSString *, NSString *);
 static CGCHeaderSetter CGCOriginalHeaderSetter;
+static BOOL (*CGCOriginalSKUIIncompatible)(id, SEL);
+static BOOL (*CGCOriginalSUUIIncompatible)(id, SEL);
 
 static id CGCObjectValue(id object, const char *selectorName) {
     if (!object) return nil;
@@ -70,6 +73,34 @@ static void CGCSetHeaderValue(id self, SEL command, NSString *value, NSString *f
     NSString *prepared = CGCPreparedHeaderValue(self, CGCPurchaseParametersFromRequest(self), field, value, atomic_load(&CGCEnabled));
     if (prepared != value && ![prepared isEqualToString:value]) CGCMarkStatus(CGC_STATUS_STORE_MATCHED);
     CGCOriginalHeaderSetter(self, command, prepared, field);
+}
+
+static BOOL CGCPageTargetsChatGPT(id self) {
+    id item = CGCObjectValue(self, "item");
+    id bundleIdentifier = CGCObjectValue(item, "bundleIdentifier");
+    if (![bundleIdentifier isEqualToString:CGCBundleIdentifier]) return NO;
+    SEL itemIdentifier = sel_registerName("itemIdentifier");
+    if (!CGCMethodMatches(class_getInstanceMethod(object_getClass(item), itemIdentifier), "q", @[@"@", @":"])) return NO;
+    long long identifier = ((long long (*)(id, SEL))objc_msgSend)(item, itemIdentifier);
+    return identifier == 6448311069LL;
+}
+
+static BOOL CGCSKUIIncompatible(id self, SEL command) {
+    BOOL original = CGCOriginalSKUIIncompatible(self, command);
+    if (atomic_load(&CGCEnabled) && CGCPageTargetsChatGPT(self) && original) {
+        CGCMarkStatus(CGC_STATUS_UI_MATCHED);
+        return NO;
+    }
+    return original;
+}
+
+static BOOL CGCSUUIIncompatible(id self, SEL command) {
+    BOOL original = CGCOriginalSUUIIncompatible(self, command);
+    if (atomic_load(&CGCEnabled) && CGCPageTargetsChatGPT(self) && original) {
+        CGCMarkStatus(CGC_STATUS_UI_MATCHED);
+        return NO;
+    }
+    return original;
 }
 
 static BOOL (*CGCOriginalMinimumOS)(id, SEL, id, id, unsigned long long, NSError *__autoreleasing *);
@@ -117,6 +148,15 @@ static void CGCTryHooks(void) {
                 CGCHeaderHooked = CGCInstallHook(amsRequest, setter, "v", @[@"@", @":", @"@", @"@"], (IMP)CGCSetHeaderValue, (IMP *)&CGCOriginalHeaderSetter);
             }
             if (CGCHeaderHooked) CGCMarkStatus(CGC_STATUS_STORE_HOOKED);
+            if (!CGCUIHooked) {
+                SEL selector = sel_registerName("_isIncompatibleItem");
+                Class skui = objc_getClass("SKUIIPhoneProductPageViewController");
+                Class suui = objc_getClass("SUUIIPhoneProductPageViewController");
+                BOOL skHooked = CGCInstallHook(skui, selector, "c", @[@"@", @":"], (IMP)CGCSKUIIncompatible, (IMP *)&CGCOriginalSKUIIncompatible);
+                BOOL suHooked = CGCInstallHook(suui, selector, "c", @[@"@", @":"], (IMP)CGCSUUIIncompatible, (IMP *)&CGCOriginalSUUIIncompatible);
+                CGCUIHooked = skHooked || suHooked;
+            }
+            if (CGCUIHooked) CGCMarkStatus(CGC_STATUS_UI_HOOKED);
         } else if (!CGCInstallerHooked) {
             Class cls = objc_getClass("MIBundle");
             if (!CGCMethodMatches(class_getInstanceMethod(cls, sel_registerName("identifier")), "@", @[@"@", @":"])

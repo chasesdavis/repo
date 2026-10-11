@@ -11,8 +11,10 @@
 @implementation CGCPreferencesController
 - (NSString *)runtimeStatusText {
     return [NSString stringWithFormat:
-        @"Store process loaded: %@\nLate store hook installed: %@\nMatching ChatGPT request seen: %@\n\ninstalld loaded: %@\nInstaller hook installed: %@\nMatching 1.2026.272 bundle seen: %@",
+        @"Store process loaded: %@\nStore UI hook installed: %@\nMatching ChatGPT UI item seen: %@\nLate store hook installed: %@\nMatching ChatGPT request seen: %@\n\ninstalld loaded: %@\nInstaller hook installed: %@\nMatching 1.2026.272 bundle seen: %@",
         CGCReadStatus(CGC_STATUS_STORE_PROCESS_LOADED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_UI_HOOKED) ? @"YES" : @"NO",
+        CGCReadStatus(CGC_STATUS_UI_MATCHED) ? @"YES" : @"NO",
         CGCReadStatus(CGC_STATUS_STORE_HOOKED) ? @"YES" : @"NO",
         CGCReadStatus(CGC_STATUS_STORE_MATCHED) ? @"YES" : @"NO",
         CGCReadStatus(CGC_STATUS_INSTALLD_LOADED) ? @"YES" : @"NO",

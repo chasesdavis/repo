@@ -8,6 +8,8 @@
 #define CGC_STATUS_STORE_PROCESS_LOADED "com.chasedavis.chatgptcompat/status/storeProcessLoaded"
 #define CGC_STATUS_STORE_HOOKED "com.chasedavis.chatgptcompat/status/storeHooked"
 #define CGC_STATUS_STORE_MATCHED "com.chasedavis.chatgptcompat/status/storeMatched"
+#define CGC_STATUS_UI_HOOKED "com.chasedavis.chatgptcompat/status/uiHooked"
+#define CGC_STATUS_UI_MATCHED "com.chasedavis.chatgptcompat/status/uiMatched"
 #define CGC_STATUS_INSTALLD_LOADED "com.chasedavis.chatgptcompat/status/installdLoaded"
 #define CGC_STATUS_INSTALLER_HOOKED "com.chasedavis.chatgptcompat/status/installerHooked"
 #define CGC_STATUS_INSTALLER_MATCHED "com.chasedavis.chatgptcompat/status/installerMatched"

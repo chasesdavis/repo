@@ -1,6 +1,6 @@
 # ChatGPT Compatibility — Experimental Beta
 
-**0.2.0~beta4 is locally tested, not device-tested.** Beta 4 adds `itunesstored` and `AppStore` as store-process injection targets. It retains the iOS 17.0.x gate, late User-Agent hook, typed ChatGPT checks, and `installd` hook.
+**0.2.0~beta5 is locally tested, not device-tested.** Beta 5 adds a StoreKitUI/App Store compatibility decision hook for the exact ChatGPT store item. It retains the alternate store-process, late User-Agent, typed ChatGPT, and installer guards.
 
 ## Scope
 
@@ -11,8 +11,9 @@
 
 ## What it actually changes
 
-1. Inside `appstored`, hooks the iOS 17 `AMSURLRequest` User-Agent setter after AppleMediaServices has attached typed `AMSPurchaseInfo` and `AMSBuyParams`. Only an HTTPS POST to the `itunes.apple.com` buyProduct endpoint whose purchase dictionary identifies the single ChatGPT product qualifies. It changes the existing `iOS/17.0` token to `iOS/18.0`. The request body and every other header are preserved. Selected task-creation hooks remain as a fallback. No network request is initiated by the tweak itself.
-2. Inside `installd`, checks the runtime ABI before hooking `_isMinimumOSVersion:applicableToOSVersion:requiredOS:error:`. For the exact target bundle it calls the original method with the OS comparison argument set to 18.0. It does **not** return unconditional success. The original method's return value, minimum requirement, required-OS argument, and error pointer are preserved.
+1. Inside the App Store process, hooks iOS 17 `SKUIIPhoneProductPageViewController` and `SUUIIPhoneProductPageViewController` `_isIncompatibleItem`. Only the item with bundle ID `com.openai.chat` and store ID `6448311069` is treated as compatible for the UI path. It does not alter unrelated apps.
+2. Inside store processes, hooks the iOS 17 `AMSURLRequest` User-Agent setter after AppleMediaServices has attached typed `AMSPurchaseInfo` and `AMSBuyParams`. Only an HTTPS POST to the `itunes.apple.com` buyProduct endpoint whose purchase dictionary identifies the single ChatGPT product qualifies. It changes the existing `iOS/17.0` token to `iOS/18.0`. The request body and every other header are preserved. Selected task-creation hooks remain as a fallback. No network request is initiated by the tweak itself.
+3. Inside `installd`, checks the runtime ABI before hooking `_isMinimumOSVersion:applicableToOSVersion:requiredOS:error:`. For the exact target bundle it calls the original method with the OS comparison argument set to 18.0. It does **not** return unconditional success. The original method's return value, minimum requirement, required-OS argument, and error pointer are preserved.
 
 There are no global `UIDevice`, `NSProcessInfo`, `sysctl`, or MobileGestalt hooks, no signature/receipt/entitlement bypasses, no app patching, and no request-data logging. Only fixed startup/hook-status messages enter the system log. The installer reads bundle metadata for identity and version; it does not write it.
 
@@ -26,7 +27,7 @@ The store path does not force or invent a build ID; it preserves the version req
 
 Publication does not install anything on your phone. In Sileo, refresh `https://chasesdavis.github.io/repo/` and find **ChatGPT Compatibility (Experimental)**. It is a native `iphoneos-arm64e` RootHide package, not a rootless package needing conversion. It conflicts with the broad LowerInstall and AppStoreTroller packages to avoid combining spoofers.
 
-After an installation you choose to perform, open **Settings → ChatGPT Compatibility**. The experiment remains disabled until you enable its switch. Beta 2 also shows whether `appstored`/`installd` loaded the package, installed their hooks, and encountered matching ChatGPT work. Changing the switch updates already-loaded hooks without killing a process. If the dylib has not loaded into the target daemon, toggling does not make it load; this package deliberately performs no automatic reboot, respring, or daemon restart. Do not enable injection into ChatGPT itself.
+After an installation you choose to perform, open **Settings → ChatGPT Compatibility**. The experiment remains disabled until you enable its switch. The Runtime status panel shows StoreKitUI, store-process, and installer hook/match state. Changing the switch updates already-loaded hooks without killing a process. If the dylib has not loaded into the target process, toggling does not make it load; this package deliberately performs no automatic reboot, respring, or daemon restart. Do not enable injection into ChatGPT itself.
 
 An official App Store update necessarily replaces the installed app. “No app patching” does not mean an update leaves the old app files unchanged.
 

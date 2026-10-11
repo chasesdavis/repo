@@ -442,6 +442,24 @@ MD5sum: b3359690381c9eb10ca3077dbf387d0d
 SHA1: ee96b580d4ab5fdb9026c64d71cd0f59eabac6b0
 SHA256: 0405f2f5a63a35d0cb1fc54fb717ab193d33289a69de10dab817a1f2f79aaf13
 
+Package: com.chasedavis.chatgptcompat
+Name: ChatGPT Compatibility (Experimental)
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 17.0), firmware (<< 17.1)
+Conflicts: com.chasedavis.lowerinstall, dev.mineek.appstoretroller
+Description: Default-off ChatGPT-only compatibility experiment for iPhone16,2 on iOS 17.0.x. Beta 5 adds a ChatGPT-only StoreKitUI incompatibility decision hook plus the existing store and installer guards. Device installation, launch, and dot access remain unverified.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Homepage: https://chasesdavis.github.io/repo/chatgpt-compatibility.html
+Architecture: iphoneos-arm64e
+Version: 0.2.0~beta5
+Installed-Size: 448
+Filename: debs/com.chasedavis.chatgptcompat_0.2.0~beta5_iphoneos-arm64e.deb
+Size: 27578
+MD5sum: 310fbabfb478d2e03b30d46a29ac5f43
+SHA1: 89be9b798ce72dfb9a83f77ed184f778a89ed0f4
+SHA256: 9d9a543a8e0bf435378abf92dc174ea2a0d98cea6d0eaf4a3762e1bebc99a23d
+
 Package: com.chasedavis.codex
 Name: Codex
 Version: 0.155.1-4
