@@ -1,6 +1,6 @@
 # ChatGPT Compatibility — Experimental Beta
 
-**0.2.0~beta3 is locally tested, not device-tested.** Beta 3 fixes beta 2's overly strict runtime gate: iOS 17.0 patch releases such as 17.0.1–17.0.3 now qualify. Beta 2's late User-Agent hook and typed ChatGPT purchase checks remain unchanged.
+**0.2.0~beta4 is locally tested, not device-tested.** Beta 4 adds `itunesstored` and `AppStore` as store-process injection targets. It retains the iOS 17.0.x gate, late User-Agent hook, typed ChatGPT checks, and `installd` hook.
 
 ## Scope
 

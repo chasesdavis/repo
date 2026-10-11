@@ -1,5 +1,5 @@
 {
     Filter = {
-        Executables = ("appstored", "installd");
+        Executables = ("appstored", "itunesstored", "AppStore", "installd");
     };
 }

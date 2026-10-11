@@ -5,6 +5,7 @@
 
 #define CGC_SETTINGS_NOTIFICATION "com.chasedavis.chatgptcompat/settingsChanged"
 #define CGC_STATUS_APPSTORED_LOADED "com.chasedavis.chatgptcompat/status/appstoredLoaded"
+#define CGC_STATUS_STORE_PROCESS_LOADED "com.chasedavis.chatgptcompat/status/storeProcessLoaded"
 #define CGC_STATUS_STORE_HOOKED "com.chasedavis.chatgptcompat/status/storeHooked"
 #define CGC_STATUS_STORE_MATCHED "com.chasedavis.chatgptcompat/status/storeMatched"
 #define CGC_STATUS_INSTALLD_LOADED "com.chasedavis.chatgptcompat/status/installdLoaded"

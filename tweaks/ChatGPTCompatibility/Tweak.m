@@ -145,8 +145,13 @@ __attribute__((constructor)) static void CGCInitialize(void) {
         NSProcessInfo *process = NSProcessInfo.processInfo;
         struct utsname machine;
         if (uname(&machine) != 0 || !CGCRuntimeAllowed(process.processName, [NSString stringWithUTF8String:machine.machine], process.operatingSystemVersion)) return;
-        CGCIsStore = [process.processName isEqualToString:@"appstored"];
-        CGCMarkStatus(CGCIsStore ? CGC_STATUS_APPSTORED_LOADED : CGC_STATUS_INSTALLD_LOADED);
+        CGCIsStore = ![process.processName isEqualToString:@"installd"];
+        if (CGCIsStore) {
+            CGCMarkStatus(CGC_STATUS_STORE_PROCESS_LOADED);
+            if ([process.processName isEqualToString:@"appstored"]) CGCMarkStatus(CGC_STATUS_APPSTORED_LOADED);
+        } else {
+            CGCMarkStatus(CGC_STATUS_INSTALLD_LOADED);
+        }
         CGCLoadPreferences();
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, CGCSettingsChanged, CFSTR(CGC_SETTINGS_NOTIFICATION), NULL, CFNotificationSuspensionBehaviorCoalesce);
         CGCTryHooks();
