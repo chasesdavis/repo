@@ -22,6 +22,8 @@ PY
 codesign --force --sign - "$app"
 xcrun simctl boot "$device" || true
 xcrun simctl bootstatus "$device" -b
+echo "AXN_UI_STAGE: installing test application"
 xcrun simctl install "$device" "$app"
+echo "AXN_UI_STAGE: launching test application"
 xcrun simctl launch --console --terminate-running-process "$device" com.chasesdavis.axonmounttest 2>&1 | tee "$work/result.txt"
 grep -q 'AXN_UI_TEST_PASS' "$work/result.txt"

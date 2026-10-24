@@ -54,6 +54,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
     return [view dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:path];
 }
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
+    fputs("AXN_UI_STAGE: application launched\n", stderr); fflush(stderr);
     self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
     UIViewController *controller = [UIViewController new];
     self.window.rootViewController = controller;
@@ -68,6 +69,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
     [list registerClass:UICollectionViewCell.class forCellWithReuseIdentifier:@"cell"];
     [controller.view addSubview:list];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        fputs("AXN_UI_STAGE: mounting collection\n", stderr); fflush(stderr);
         [list layoutIfNeeded];
         list.contentOffset = CGPointMake(0, -24);
         AXNListMount *mount = [[AXNListMount alloc] initWithScrollView:list];
@@ -92,6 +94,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(taps == 1 && [tapped isEqual:@"example.test"], "app capsule did not dispatch selection");
         [allButton sendActionsForControlEvents:UIControlEventTouchUpInside];
         Check(taps == 2 && tapped == nil, "All capsule did not dispatch reset");
+        fputs("AXN_UI_STAGE: capsule controls\n", stderr); fflush(stderr);
         NSArray *savedPins = AXNReadPreference(@"PinnedApps", @[]);
         AXNWritePreference(@"PinnedApps", @[]);
         AXNRailItem *secondItem = [AXNRailItem new]; secondItem.bundleID = @"example.second";
@@ -109,13 +112,16 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         [mount.rail updateWithItems:@[secondItem, item] selected:secondItem.bundleID];
         Check(capsules.arrangedSubviews[1] == secondButton, "favorite ordering did not survive refresh");
         [mount.rail layoutIfNeeded];
-        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:mount.rail.bounds.size];
+        fputs("AXN_UI_STAGE: capture preview\n", stderr); fflush(stderr);
+        UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat defaultFormat]; format.scale = 1;
+        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:mount.rail.bounds.size format:format];
         UIImage *preview = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
             [UIColor.blackColor setFill]; UIRectFill(mount.rail.bounds);
-            [mount.rail drawViewHierarchyInRect:mount.rail.bounds afterScreenUpdates:YES];
+            [mount.rail drawViewHierarchyInRect:mount.rail.bounds afterScreenUpdates:NO];
             (void)context;
         }];
         printf("AXN_RAIL_PREVIEW:%s\n", [UIImagePNGRepresentation(preview) base64EncodedStringWithOptions:0].UTF8String);
+        fputs("AXN_UI_STAGE: preview complete\n", stderr); fflush(stderr);
         [mount.rail togglePin:secondItem.bundleID];
         Check(![AXNReadPreference(@"PinnedApps", @[]) containsObject:secondItem.bundleID], "unpin did not persist");
         AXNWritePreference(@"PinnedApps", savedPins);
@@ -251,6 +257,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(!AXNReadDiagnosticResponse(request) && !AXNReadDiagnosticResponse(nextRequest), "stale diagnostic accepted");
         AXNPublishDiagnosticReport(AXNDiagnosticCollection, report);
         Check(AXNReadDiagnosticResponse(nextRequest) != nil && AXNReadDiagnosticResponse(request) == nil, "response correlation failed");
+        fputs("AXN_UI_STAGE: runtime tests\n", stderr); fflush(stderr);
         AXNRunRuntimeTests(^{
         puts("AXN_UI_TEST_PASS: bottom-aligned gap regression; short/long selection positioning; gesture preservation; alignment/inset restoration; resolver guards; layout privacy; diagnostic correlation");
         fflush(stdout); exit(0);

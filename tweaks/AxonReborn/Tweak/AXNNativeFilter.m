@@ -109,6 +109,7 @@ static void VoidCall(id object, NSString *name) {
     } @catch (NSException *exception) { (void)exception; self.focusStatus = @"exception"; }
 }
 - (BOOL)revealHistory {
+    self.focusStatus = @"not-requested";
     self.revealStatus = @"unavailable";
     SEL selector = NSSelectorFromString(@"revealNotificationHistory:animated:");
     if (!Matches(self.owner, selector, "Bc", "Bc")) return NO;
