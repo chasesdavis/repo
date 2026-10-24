@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40053352957). The RootHide `0.1.0~alpha2` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40082489721). The RootHide `0.1.0~alpha3` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -50,7 +50,13 @@ Rootful is the usual term for what is sometimes called “rooted.” Package for
 
 The [build workflow](../../.github/workflows/build-axon-reborn.yml) runs on Axon source changes and can also be started manually. It uses pinned RootHide Theos and a patched iOS 16.5 SDK, runs portable checks, compiles the tweak and Settings bundle for arm64/arm64e, packages all three variants, inspects metadata, and uploads separate artifacts. Use `axon-alpha-roothide` for the first device target. All three variants built successfully on October 24, 2026; this does not establish on-device compatibility. Running the workflow does not install anything on your phone.
 
-### Alpha2 device troubleshooting
+### Alpha3 iOS 17 mount
+
+The alpha2 device report confirmed list attachment but no selector mount. Alpha3 uses the notification collection itself on iOS 17, so it does not require the old adjunct controller or `_stackView`. The selector scrolls with the list; scroll to the top to find it. Disabling, leaving the list or detaching removes its reserved space. An unknown collection layout and an incomplete visible layout now have separate diagnostic replies.
+
+Portable inset tests cover 10,000 repeated layouts, text-size changes, absolute native inset rewrites, disable and re-enable. The CI UIKit simulator test covers actual mounting, separation from the first cell, repeated layout, resizing, disabling and detaching. This tests public UIKit behavior in the runner's available simulator; it does not emulate iOS 17 SpringBoard or prove physical-device compatibility.
+
+### Device troubleshooting
 
 Alpha2 removes the dependency between reporting adjunct content and an already visible rail, attaches the list earlier in its lifecycle, retries mounting during layout, and reconnects visible controllers when enabled. These changes address a possible blank-panel path; on-device confirmation is still required.
 
@@ -65,7 +71,7 @@ After updating, respring, enable Axon, and open the Lock Screen with a notificat
 5. Grouped/coalesced notification counts, bulk clears, Focus, Scheduled Summary, notification list modes, media controls, native quick actions, rotation, concurrent list controllers and authentication need physical-device tests. Counts represent distinct requests observed by this adapter and are not yet guaranteed to equal every visually nested notification.
 6. No custom notification body export, debug dump, analytics or network endpoint is implemented. Native request objects are retained temporarily in process memory for filtering; these objects may themselves contain message content.
 7. The adapter and Settings preference domain must be verified specifically under RootHide. A working package build does not prove successful injection or shared preference behavior.
-8. Unsupported native layouts have no speculative overlay fallback. If the `_stackView` mount is unavailable, the rail is not mounted and no user selection can start filtering.
+8. iOS 17 mounts a scrolling selector header in the notification controller's collection view, with reserved top content inset. It uses a checked `collectionView` getter or a bounded search for exactly one collection, and does not reparent native cards or replace their data source/delegate. iOS 15–16 retain the guarded adjunct-stack adapter. Unsupported or ambiguous layouts leave the native presentation active.
 
 ## Validation completed here
 
