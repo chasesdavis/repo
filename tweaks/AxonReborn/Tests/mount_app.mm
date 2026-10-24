@@ -173,6 +173,10 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(![report containsString:@"SECRET"], "report included notification text or identifiers");
         for (int i = 0; i < 100; ++i) { [native setNeedsLayout]; [native layoutIfNeeded]; [nativeMount updateVisible:YES]; }
         Check(fabs(native.contentInset.top - 196 - expected) < 0.5, "native scroll accumulated padding");
+        // Use an actual scrollable list for offset preservation. A positive
+        // offset on the 123-point fixture is overscroll; UIKit may clamp it.
+        native.fixtureHeight = 2100;
+        [native setNeedsLayout]; [native layoutIfNeeded];
         native.contentOffset = CGPointMake(0, 150);
         [nativeMount updateVisible:NO];
         Check(native.layoutFromBottom, "hide did not restore native bottom alignment");
