@@ -19,8 +19,29 @@ static void Require(BOOL condition, const char *message) {
 @property(nonatomic, strong) NSSet *hiddenNotificationRequests;
 @end
 @implementation TestSection @end
+@interface TestRevealCoordinator : NSObject
+@property(nonatomic) BOOL allowed;
+@property(nonatomic) BOOL transitionAllowed;
+@property(nonatomic, getter=isSectionRevealed) BOOL sectionRevealed;
+@property(nonatomic, getter=isSectionRevealedStateLocked) BOOL sectionRevealedStateLocked;
+@property(nonatomic) BOOL childRevealed;
+@property(nonatomic) NSUInteger refetchCalls;
+@end
+@implementation TestRevealCoordinator
+- (BOOL)_shouldAllowNotificationListReveal { return self.allowed; }
+- (BOOL)_shouldAllowNotificationListRevealTransition { return self.transitionAllowed; }
+- (void)_refetchSubListViews { ++self.refetchCalls; }
+- (void)_performRevealForSubviewsIfNecessary { self.childRevealed = self.sectionRevealed; }
+- (BOOL)isForceRevealed { return NO; }
+- (NSArray *)subLists { return @[]; }
+@end
+static TestRevealCoordinator *Coordinator(void) {
+    TestRevealCoordinator *coordinator = [TestRevealCoordinator new];
+    coordinator.allowed = YES; coordinator.transitionAllowed = YES; return coordinator;
+}
 @interface TestMaster : NSObject
 @property(nonatomic, strong) NSArray *notificationSections;
+@property(nonatomic, strong) TestRevealCoordinator *revealCoordinator;
 @end
 @implementation TestMaster @end
 @interface FilterOwner : UIViewController
@@ -74,6 +95,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     TestRequest *a1 = Request(@"a", @"1"), *a2 = Request(@"a", @"2"), *b = Request(@"b", @"1");
     section.allNotificationRequests = [NSMutableArray arrayWithArray:@[a1, a2, b]];
     owner.masterList = [TestMaster new]; owner.masterList.notificationSections = @[section];
+    owner.masterList.revealCoordinator = Coordinator();
     AXNAttachList(owner);
     AXNListState *state = objc_getAssociatedObject(owner, stateKey);
     Require(state.ready && state->index.size() == 3, "initial runtime snapshot failed");
@@ -81,6 +103,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     Require(AXNReconcile(state) && [owner.filteredApps isEqualToSet:[NSSet setWithObject:@"b"]], "select A did not filter B");
     Require(owner.removeCalls == 0 && owner.insertCalls == 0, "selection mutated request lifecycle");
     Require([state.nativeFilter revealHistory] && owner.historyRevealed, "selection history reveal failed");
+    Require(owner.masterList.revealCoordinator.childRevealed && owner.masterList.revealCoordinator.refetchCalls == 1, "child sections stayed collapsed after root history reveal");
     AXNAttachList(owner);
     Require(objc_getAssociatedObject(owner, stateKey) == state && state->index.selection() == std::optional<std::string>("a"), "repeated appearance reset selection");
     SEL predicate = NSSelectorFromString(@"notificationMasterList:shouldFilterNotificationRequest:");
@@ -110,11 +133,30 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     state->index.select(std::string("a")); Require(AXNReconcile(state), "selection before disappearance failed");
     AXNListWillDisappear(owner, @selector(viewWillDisappear:), NO);
     Require(!activeState && owner.filteredApps.count == 0, "leaving list left Axon filters applied");
+    Require(!owner.masterList.revealCoordinator.sectionRevealed && !owner.masterList.revealCoordinator.childRevealed, "leaving list did not restore section reveal state");
     AXNAttachList(owner); state = objc_getAssociatedObject(owner, stateKey);
     state->index.select(std::string("a")); owner.failNextToggle = YES;
     Require(!AXNReconcile(state) && !state.ready && owner.filteredApps.count == 0, "partial filter failure did not restore native list");
     AXNNativeFilter *unsupported = [[AXNNativeFilter alloc] initWithOwner:[NSObject new]];
     Require(!unsupported.available && ![unsupported revealHistory], "unsupported native signatures accepted");
+    FilterOwner *policyOwner = [FilterOwner new]; policyOwner.masterList = [TestMaster new];
+    TestRevealCoordinator *coordinator = Coordinator(); policyOwner.masterList.revealCoordinator = coordinator;
+    AXNNativeFilter *policyFilter = [[AXNNativeFilter alloc] initWithOwner:policyOwner];
+    coordinator.allowed = NO;
+    Require(![policyFilter revealHistory] && policyOwner.revealCalls == 0 && coordinator.refetchCalls == 0, "native reveal policy bypassed");
+    coordinator.allowed = YES; coordinator.transitionAllowed = NO;
+    Require(![policyFilter revealHistory] && policyOwner.revealCalls == 0, "native transition policy bypassed");
+    coordinator.transitionAllowed = YES; coordinator.sectionRevealedStateLocked = YES;
+    Require(![policyFilter revealHistory] && policyOwner.revealCalls == 0, "native state lock bypassed");
+    coordinator.sectionRevealedStateLocked = NO; coordinator.sectionRevealed = YES;
+    Require([policyFilter revealHistory] && coordinator.childRevealed && [policyFilter restoreReveal] && coordinator.sectionRevealed, "pre-existing native reveal state was changed");
+    coordinator.sectionRevealed = NO; coordinator.childRevealed = NO;
+    Require([policyFilter revealHistory] && coordinator.childRevealed, "collapsed sections did not reveal");
+    TestRevealCoordinator *replacement = Coordinator(); policyOwner.masterList.revealCoordinator = replacement;
+    Require([policyFilter revealHistory] && !coordinator.sectionRevealed && replacement.childRevealed, "coordinator replacement leaked old reveal state");
+    Require([policyFilter restoreReveal] && !replacement.sectionRevealed, "reveal cleanup failed");
+    policyOwner.masterList.revealCoordinator = nil;
+    Require(![policyFilter revealHistory], "missing coordinator was accepted");
     // Exercise deferred reveal against rapid selection and leaving the list.
     state.ready = YES; activeState = state; state.selectionTaps = 1;
     NSUInteger priorReveals = owner.revealCalls;
@@ -130,7 +172,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 Require(owner.revealCalls == priorReveals + 1, "offscreen selection revealed history");
                 enabled = false;
-                puts("AXN_RUNTIME_TEST_PASS: filtering, hide-before-restore, deferred reveal, stale/offscreen cancellation, cache-count privacy and rollback");
+                puts("AXN_RUNTIME_TEST_PASS: filtering, hide-before-restore, deferred reveal, stale/offscreen cancellation, cache-count privacy, child reveal, native permission/lock guards, reveal restoration and rollback");
                 completion();
             });
         });

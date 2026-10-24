@@ -176,11 +176,11 @@ static void AXNCaptureFilterReport(AXNListState *state) {
         @catch (NSException *exception) { (void)exception; hasCount = NO; }
     }
     state.nativeCountAvailable = hasCount; state.nativeVisibleCount = nativeCount;
-    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d expectedRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyRevealRequested=%d nativeCountAvailable=%d nativeVisibleCount=%lu",
+    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d expectedRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyRevealRequested=%d nativeCountAvailable=%d nativeVisibleCount=%lu coordinator=%@",
         (unsigned long)state.selectionTaps, state->index.selection().has_value(),
         (unsigned long)state->index.visibleKeys().size(), (unsigned long)state.nativeFilter.appliedCount,
         (unsigned long)predicateCalls, (unsigned long)predicateExclusions, state.revealedSelection,
-        hasCount, (unsigned long)nativeCount];
+        hasCount, (unsigned long)nativeCount, state.nativeFilter.revealStatus ?: @"not-requested"];
 }
 // Read only checked scalar getters; report raw values without guessing enum meanings.
 static NSString *AXNScalar(id object, NSString *name) {
@@ -222,6 +222,12 @@ static NSString *AXNModelReport(AXNListState *state) {
     NSMutableString *report = [NSMutableString stringWithFormat:@"Native model: historyRevealed=%@ contentToReveal=%@ displayStyle=%@ totalCount=%@ visibleCount=%@\n",
         AXNScalar(master, @"isNotificationHistoryRevealed"), AXNScalar(master, @"hasVisibleContentToReveal"),
         AXNScalar(master, @"currentListDisplayStyleSetting"), AXNScalar(master, @"totalNotificationCount"), AXNScalar(master, @"visibleNotificationCount")];
+    id coordinator = AXNObject(master, @"revealCoordinator");
+    [report appendFormat:@"Coordinator: class=%@ sectionRevealed=%@ stateLocked=%@ forceRevealed=%@ allowsReveal=%@ allowsTransition=%@ sublists=%lu\n",
+        coordinator ? NSStringFromClass([coordinator class]) : @"nil", AXNScalar(coordinator, @"isSectionRevealed"),
+        AXNScalar(coordinator, @"isSectionRevealedStateLocked"), AXNScalar(coordinator, @"isForceRevealed"),
+        AXNScalar(coordinator, @"_shouldAllowNotificationListReveal"), AXNScalar(coordinator, @"_shouldAllowNotificationListRevealTransition"),
+        (unsigned long)AXNArray(AXNObject(coordinator, @"subLists")).count];
     NSMutableArray *pending = [NSMutableArray arrayWithArray:AXNArray(AXNObject(master, @"notificationSections")) ?: @[]];
     NSHashTable *seen = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
     NSUInteger visited = 0;
@@ -266,6 +272,8 @@ static bool AXNRestore(AXNListState *state) {
     bool success = true;
     if (useListMount) {
         success = AXNApplyNativeFilter(state);
+        BOOL revealRestored = [state.nativeFilter restoreReveal];
+        success = success && revealRestored;
         if (!success) { state.ready = NO; diagnostic = AXNDiagnosticReplay; }
         return success;
     }
