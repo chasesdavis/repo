@@ -24,4 +24,4 @@ xcrun simctl boot "$device" || true
 xcrun simctl bootstatus "$device" -b
 xcrun simctl install "$device" "$app"
 xcrun simctl launch --console --terminate-running-process "$device" com.chasesdavis.axonmounttest 2>&1 | tee "$work/result.txt"
-rg -q 'AXN_UI_TEST_PASS' "$work/result.txt"
+grep -q 'AXN_UI_TEST_PASS' "$work/result.txt"
