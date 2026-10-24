@@ -423,11 +423,13 @@ static void AXNListDidLayout(id self, SEL command) {
     }
 }
 static void AXNListWillDisappear(id self, SEL command, BOOL animated) {
+    AXNListState *state = objc_getAssociatedObject(self, stateKey);
+    // Mark inactive before changing insets: synchronous layout must not remount
+    // a selector while the controller is disappearing.
+    if (activeState == state) activeState = nil;
     AXNListMount *mount = objc_getAssociatedObject(self, listMountKey);
     [mount updateVisible:NO];
-    AXNListState *state = objc_getAssociatedObject(self, stateKey);
     if (state) AXNRestore(state);
-    if (activeState == state) activeState = nil;
     AXNRefresh(); listWillDisappearOriginal(self, command, animated);
 }
 static void AXNHostDidLoad(id self, SEL command) { hostDidLoadOriginal(self, command); AXNMount(self); }
