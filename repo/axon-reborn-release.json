@@ -1,0 +1,177 @@
+{
+  "version": "0.2.0~beta1",
+  "source_commit": "a8f195011fcb45038073ac2f627d96a83c51533f",
+  "build_run": 40138163664,
+  "files": [
+    {
+      "path": "repo/Packages",
+      "bytes": 50772,
+      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+    },
+    {
+      "path": "repo/Packages.bz2",
+      "bytes": 11560,
+      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+    },
+    {
+      "path": "repo/Packages.gz",
+      "bytes": 12369,
+      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+    },
+    {
+      "path": "repo/Packages.lzma",
+      "bytes": 11092,
+      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+    },
+    {
+      "path": "repo/Packages.xz",
+      "bytes": 11136,
+      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+    },
+    {
+      "path": "repo/Packages.zst",
+      "bytes": 11248,
+      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+    },
+    {
+      "path": "repo/Release",
+      "bytes": 1626,
+      "sha256": "bc22705eb3d67bd16bd0876faa5581a0358436055482fecc584f52ab2ef61044"
+    },
+    {
+      "path": "repo/debs/com.chasesdavis.axonreborn_0.2.0~beta1_iphoneos-arm64e.deb",
+      "bytes": 86812,
+      "sha256": "61fb1e5a03c415c7adcf81cce5850e482eddfdf63cad173fbc30ae590db027c5"
+    },
+    {
+      "path": "repo/dists/ios17/Release",
+      "bytes": 3996,
+      "sha256": "076ccc0d271e87923ab65aa789d8588df47923797ec0727c365e8ed0641b72bd"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages",
+      "bytes": 50772,
+      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.bz2",
+      "bytes": 11560,
+      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.gz",
+      "bytes": 12369,
+      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.lzma",
+      "bytes": 11092,
+      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.xz",
+      "bytes": 11136,
+      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.zst",
+      "bytes": 11248,
+      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages",
+      "bytes": 50772,
+      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.bz2",
+      "bytes": 11560,
+      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.gz",
+      "bytes": 12369,
+      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.lzma",
+      "bytes": 11092,
+      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.xz",
+      "bytes": 11136,
+      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+    },
+    {
+      "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.zst",
+      "bytes": 11248,
+      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+    },
+    {
+      "path": "repo/dists/stable/Release",
+      "bytes": 3997,
+      "sha256": "c04030a9cafb1aa5e5abe8aad21c78bbdf140ae3d2f876eec141ee3a0c91e8cf"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages",
+      "bytes": 50772,
+      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.bz2",
+      "bytes": 11560,
+      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.gz",
+      "bytes": 12369,
+      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.lzma",
+      "bytes": 11092,
+      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.xz",
+      "bytes": 11136,
+      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.zst",
+      "bytes": 11248,
+      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages",
+      "bytes": 50772,
+      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.bz2",
+      "bytes": 11560,
+      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.gz",
+      "bytes": 12369,
+      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.lzma",
+      "bytes": 11092,
+      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.xz",
+      "bytes": 11136,
+      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+    },
+    {
+      "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.zst",
+      "bytes": 11248,
+      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+    }
+  ]
+}
