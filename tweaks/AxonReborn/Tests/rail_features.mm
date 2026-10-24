@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 #import "../Tweak/AXNRailView.h"
 #import "../Shared/AXNPreferences.h"
 #include <cstdio>
@@ -83,13 +84,14 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     Expect((beta.accessibilityTraits & UIAccessibilityTraitSelected) != 0, "deceleration changed selection presentation early");
     rail.simulatedDeceleration = NO; [rail scrollViewDidEndDecelerating:nil];
     Expect(!(beta.accessibilityTraits & UIAccessibilityTraitSelected), "scroll completion did not flush latest selection");
-    CGFloat previous = 0;
+    CGFloat previous = 0, previousCapsule = 0;
     for (NSNumber *density in @[@0, @1, @2]) {
         AXNWritePreference(@"Density", density); [rail updateWithItems:@[a, b] selected:b.bundleID];
         [host.view setNeedsLayout]; [host.view layoutIfNeeded];
         Expect(rail.preferredRailHeight > previous && fabs(rail.bounds.size.height - rail.preferredRailHeight) < 1,
             "density does not match shared geometry");
-        previous = rail.preferredRailHeight;
+        Expect(beta.bounds.size.height > previousCapsule, "density expanded header whitespace instead of capsules");
+        previousCapsule = beta.bounds.size.height; previous = rail.preferredRailHeight;
     }
     for (NSString *category in @[UIContentSizeCategoryLarge, UIContentSizeCategoryExtraExtraExtraLarge,
                                  UIContentSizeCategoryAccessibilityExtraExtraExtraLarge]) {
@@ -122,6 +124,14 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
             }
         }
     }
+    host.view.frame = CGRectMake(0, 0, 375, 700);
+    [rail updateWithItems:@[a, b] selected:b.bundleID]; [host.view layoutIfNeeded];
+    UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat defaultFormat]; format.scale = 1;
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:rail.bounds.size format:format];
+    UIImage *preview = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+        [UIColor.blackColor setFill]; UIRectFill(rail.bounds); [rail.layer renderInContext:context.CGContext];
+    }];
+    printf("AXN_LARGE_PREVIEW:%s\n", [UIImagePNGRepresentation(preview) base64EncodedStringWithOptions:0].UTF8String); fflush(stdout);
     AXNWritePreference(@"ShowCounts", @NO); AXNWritePreference(@"Compact", @YES);
     [rail updateWithItems:@[a, b] selected:b.bundleID]; [host.view layoutIfNeeded];
     Expect([beta.accessibilityValue hasPrefix:@"1001 notifications"], "visual count preference removed accessible count");

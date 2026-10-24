@@ -20,6 +20,21 @@ static BOOL MotionEnabled(void) {
 static UIFont *RailFont(UIFontTextStyle style, UITraitCollection *traits) {
     return [UIFont preferredFontForTextStyle:style compatibleWithTraitCollection:traits];
 }
+static UIFont *BadgeFont(UITraitCollection *traits) {
+    return [[UIFontMetrics metricsForTextStyle:UIFontTextStyleCaption1]
+        scaledFontForFont:[UIFont monospacedDigitSystemFontOfSize:12 weight:UIFontWeightBold] compatibleWithTraitCollection:traits];
+}
+static CGFloat HeaderHeight(UITraitCollection *traits) {
+    CGFloat heading = ceil(RailFont(UIFontTextStyleSubheadline, traits).lineHeight);
+    CGFloat summary = ceil(RailFont(UIFontTextStyleCaption1, traits).lineHeight);
+    return UIContentSizeCategoryIsAccessibilityCategory(traits.preferredContentSizeCategory)
+        ? heading + summary + 4 : MAX(heading, summary);
+}
+static CGFloat CapsuleHeight(UITraitCollection *traits) {
+    CGFloat text = MAX(RailFont(UIFontTextStyleHeadline, traits).lineHeight,
+        MAX(RailFont(UIFontTextStyleSubheadline, traits).lineHeight, BadgeFont(traits).lineHeight));
+    return MAX(48, ceil(text) + 24) + 12 * [AXNReadPreference(@"Density", @1) integerValue];
+}
 static NSMutableArray<NSString *> *PinnedApps(void) {
     return [AXNReadPreference(@"PinnedApps", @[]) mutableCopy];
 }
@@ -103,8 +118,7 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     self.nameLabel.text = item ? item.name : @"All";
     self.nameLabel.font = RailFont(selected ? UIFontTextStyleHeadline : UIFontTextStyleSubheadline, traits);
     self.nameLabel.hidden = item && !selected && [AXNReadPreference(@"Compact", @NO) boolValue];
-    self.badge.font = [[UIFontMetrics metricsForTextStyle:UIFontTextStyleCaption1]
-        scaledFontForFont:[UIFont monospacedDigitSystemFontOfSize:12 weight:UIFontWeightBold] compatibleWithTraitCollection:traits];
+    self.badge.font = BadgeFont(traits);
     self.badge.text = count > 999 ? @"999+" : [NSString stringWithFormat:@"%lu", (unsigned long)count];
     self.badge.textColor = selected ? UIColor.blackColor : UIColor.whiteColor;
     self.badge.backgroundColor = selected ? accent : [UIColor.whiteColor colorWithAlphaComponent:0.12];
@@ -137,6 +151,7 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
 @property(nonatomic, strong) NSArray<AXNRailItem *> *items;
 @property(nonatomic, copy) NSString *selected;
 @property(nonatomic, strong) NSLayoutConstraint *railHeight;
+@property(nonatomic, strong) NSLayoutConstraint *headerHeight;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, AXNCapsule *> *buttons;
 @end
 @implementation AXNRailView
@@ -159,7 +174,8 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     for (UIView *v in @[_header, _heading, _summary, _scroll, _stack]) v.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_header]; [self addSubview:_scroll]; [_scroll addSubview:_stack];
     _railHeight = [self.heightAnchor constraintEqualToConstant:106]; _railHeight.priority = 999;
-    [NSLayoutConstraint activateConstraints:@[_railHeight,
+    _headerHeight = [_header.heightAnchor constraintEqualToConstant:HeaderHeight(self.traitCollection)];
+    [NSLayoutConstraint activateConstraints:@[_railHeight, _headerHeight,
         [_header.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:16],
         [_header.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-16],
         [_header.topAnchor constraintEqualToAnchor:self.topAnchor constant:8],
@@ -177,13 +193,7 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     return self;
 }
 - (CGFloat)preferredRailHeight {
-    UITraitCollection *traits = self.traitCollection;
-    BOOL accessible = UIContentSizeCategoryIsAccessibilityCategory(traits.preferredContentSizeCategory);
-    CGFloat heading = ceil(RailFont(UIFontTextStyleSubheadline, traits).lineHeight);
-    CGFloat summary = ceil(RailFont(UIFontTextStyleCaption1, traits).lineHeight);
-    CGFloat header = accessible ? heading + summary + 4 : MAX(heading, summary);
-    CGFloat capsule = MAX(48, ceil(RailFont(UIFontTextStyleHeadline, traits).lineHeight) + 24);
-    return 28 + header + capsule + 12 * [AXNReadPreference(@"Density", @1) integerValue];
+    return 28 + HeaderHeight(self.traitCollection) + CapsuleHeight(self.traitCollection);
 }
 - (BOOL)interactionActive {
     if (self.scroll.tracking || self.scroll.dragging || self.scroll.decelerating) return YES;
@@ -310,6 +320,7 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
         : [NSString stringWithFormat:@"%lu total", (unsigned long)total];
     self.summary.textColor = selection ? Accent() : [UIColor.whiteColor colorWithAlphaComponent:0.75];
     self.hidden = total == 0;
+    self.headerHeight.constant = HeaderHeight(self.traitCollection);
     self.railHeight.constant = self.preferredRailHeight;
     CGPoint offset = self.scroll.contentOffset;
     NSMutableArray *desired = [NSMutableArray arrayWithObject:[self buttonForItem:nil total:total pins:pins]];
