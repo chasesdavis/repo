@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40052371674). The RootHide `0.1.0~alpha1` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40053352957). The RootHide `0.1.0~alpha2` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -49,6 +49,12 @@ Rootful is the usual term for what is sometimes called “rooted.” Package for
 ### Build using GitHub Actions
 
 The [build workflow](../../.github/workflows/build-axon-reborn.yml) runs on Axon source changes and can also be started manually. It uses pinned RootHide Theos and a patched iOS 16.5 SDK, runs portable checks, compiles the tweak and Settings bundle for arm64/arm64e, packages all three variants, inspects metadata, and uploads separate artifacts. Use `axon-alpha-roothide` for the first device target. All three variants built successfully on October 24, 2026; this does not establish on-device compatibility. Running the workflow does not install anything on your phone.
+
+### Alpha2 device troubleshooting
+
+Alpha2 removes the dependency between reporting adjunct content and an already visible rail, attaches the list earlier in its lifecycle, retries mounting during layout, and reconnects visible controllers when enabled. These changes address a possible blank-panel path; on-device confirmation is still required.
+
+After updating, respring, enable Axon, and open the Lock Screen with a notification present. If the selector is absent, return to **Settings → Axon Reborn → Check SpringBoard**. The diagnostic reply distinguishes a disabled preference, missing controllers, rejected signatures, unavailable snapshots, request parsing, mount failure, empty lists and successful attachment. A timeout means no reply was received; it does not by itself prove injection is disabled. Replies contain fixed status codes only, with no notification bodies or identifiers. Status describes the last observed Lock Screen presentation, not complete compatibility.
 
 ## Development safety and limitations
 

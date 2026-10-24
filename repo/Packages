@@ -1057,3 +1057,20 @@ MD5sum: f334d4831b12185b71ac512b301e44fa
 SHA1: f62f939b09b59635b4f26790cd3025e7a1d59cd3
 SHA256: 8cb4ae98474c1f44d1b3c4fa4366ea3cdfc95c969c8f2a0a1c1de65b3b5d2beb
 
+Package: com.chasesdavis.axonreborn
+Name: Axon Reborn (Development)
+Description: Experimental Axon redesign for iOS 15-17. Device validation required.
+Maintainer: Chase Davis
+Author: Chase Davis; original Axon by Nepeta & Baw Appie
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0), firmware (<< 18.0)
+Conflicts: me.nepeta.axon, io.ominousness.stackxi, com.thomasfinch.priorityhub, com.ioscreatix.intelixbeta, com.ioscreatix.intelix, com.spiritoflogic.ncunify, com.spiritoflogic.unifyx, com.hidan.nclink10, org.coolstar.ventana-modern, org.coolstar.ventana, org.s1ris.spinxi
+Architecture: iphoneos-arm64e
+Version: 0.1.0~alpha2
+Installed-Size: 456
+Filename: debs/com.chasesdavis.axonreborn_0.1.0~alpha2_iphoneos-arm64e.deb
+Size: 44514
+MD5sum: 66785722c683b2890c8078062c03e9ea
+SHA1: f5311542ddf76329b12ddbec4bbff5fc6decde0d
+SHA256: 6e794f8c8daa59ce75ea63466812ca8890922f9507a09aa31adc10376fefa7b0
+
