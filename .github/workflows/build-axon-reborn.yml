@@ -31,6 +31,12 @@ jobs:
           git -C "$THEOS" checkout cfba89a53a05b4a1b822121158acc3669c20602f
           git -C "$THEOS" submodule update --init --recursive
           xcrun --sdk iphoneos --show-sdk-path
+      - name: Install pinned SDK with private framework stubs
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/theos/sdks.git "$RUNNER_TEMP/axon-sdks"
+          git -C "$RUNNER_TEMP/axon-sdks" sparse-checkout set iPhoneOS16.5.sdk
+          git -C "$RUNNER_TEMP/axon-sdks" checkout 0222fd5413cf4b9af096f37b4621afa2688572f7
+          cp -R "$RUNNER_TEMP/axon-sdks/iPhoneOS16.5.sdk" "$THEOS/sdks/"
       - name: Test portable state and package configuration
         run: bash scripts/test.sh
       - name: Compile and package
