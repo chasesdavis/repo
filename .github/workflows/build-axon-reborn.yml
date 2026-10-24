@@ -1,5 +1,10 @@
 name: Build Axon Reborn (experimental)
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'tweaks/AxonReborn/**'
+      - '.github/workflows/build-axon-reborn.yml'
   workflow_dispatch:
 permissions:
   contents: read
