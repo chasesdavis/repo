@@ -11,7 +11,7 @@ typedef NS_ENUM(NSUInteger, AXNDiagnosticState) {
     AXNDiagnosticSignatures, AXNDiagnosticSnapshot, AXNDiagnosticRequest,
     AXNDiagnosticMount, AXNDiagnosticEmpty, AXNDiagnosticReady,
     AXNDiagnosticReplay, AXNDiagnosticOS, AXNDiagnosticCollection,
-    AXNDiagnosticGeometry, AXNDiagnosticFiltering, AXNDiagnosticReveal, AXNDiagnosticStateCount
+    AXNDiagnosticGeometry, AXNDiagnosticFiltering, AXNDiagnosticReveal, AXNDiagnosticZeroVisible, AXNDiagnosticStateCount
 };
 FOUNDATION_EXPORT NSString * const AXNDiagnosticQuery;
 FOUNDATION_EXPORT NSString *AXNDiagnosticReply(NSUInteger state);

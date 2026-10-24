@@ -35,6 +35,13 @@ static BOOL Matches(id owner, SEL selector, const char *first, const char *secon
     SEL selector = NSSelectorFromString(@"toggleFilteringForSectionIdentifier:shouldFilter:");
     BOOL success = YES;
     @try {
+        // Hide other apps first; restore the newly selected app last.
+        for (NSString *app in apps) {
+            if ([nativeApps containsObject:app] || [self.applied containsObject:app]) continue;
+            // Record before calling so partial native mutation can be restored.
+            [self.applied addObject:app];
+            ((void (*)(id, SEL, id, BOOL))objc_msgSend)(self.owner, selector, app, YES);
+        }
         for (NSString *app in self.applied.copy) {
             if ([nativeApps containsObject:app]) {
                 // A native rule now owns this exclusion; do not undo it.
@@ -43,12 +50,6 @@ static BOOL Matches(id owner, SEL selector, const char *first, const char *secon
                 ((void (*)(id, SEL, id, BOOL))objc_msgSend)(self.owner, selector, app, NO);
                 [self.applied removeObject:app];
             }
-        }
-        for (NSString *app in apps) {
-            if ([nativeApps containsObject:app] || [self.applied containsObject:app]) continue;
-            // Record before calling so partial native mutation can be restored.
-            [self.applied addObject:app];
-            ((void (*)(id, SEL, id, BOOL))objc_msgSend)(self.owner, selector, app, YES);
         }
     } @catch (NSException *exception) { (void)exception; success = NO; }
     @finally { self.applying = NO; }

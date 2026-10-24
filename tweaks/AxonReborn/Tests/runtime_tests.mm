@@ -15,6 +15,8 @@ static void Require(BOOL condition, const char *message) {
 @implementation TestRequest @end
 @interface TestSection : NSObject
 @property(nonatomic, strong) NSMutableArray *allNotificationRequests;
+@property(nonatomic, strong) NSDictionary *filteredNotificationRequests;
+@property(nonatomic, strong) NSSet *hiddenNotificationRequests;
 @end
 @implementation TestSection @end
 @interface TestMaster : NSObject
@@ -28,16 +30,19 @@ static void Require(BOOL condition, const char *message) {
 @property(nonatomic) NSUInteger insertCalls;
 @property(nonatomic) NSUInteger removeCalls;
 @property(nonatomic) NSUInteger toggleCalls;
+@property(nonatomic) NSUInteger revealCalls;
+@property(nonatomic, strong) NSMutableArray *operations;
 @property(nonatomic) BOOL historyRevealed;
 @property(nonatomic) BOOL failNextToggle;
 @end
 @implementation FilterOwner
 - (void)toggleFilteringForSectionIdentifier:(NSString *)app shouldFilter:(BOOL)filter {
     ++self.toggleCalls;
+    [self.operations addObject:[NSString stringWithFormat:@"%@:%d", app, filter]];
     if (filter) [self.filteredApps addObject:app]; else [self.filteredApps removeObject:app];
     if (self.failNextToggle) { self.failNextToggle = NO; [NSException raise:@"test" format:@"partial toggle failed"]; }
 }
-- (void)revealNotificationHistory:(BOOL)revealed animated:(BOOL)animated { (void)animated; self.historyRevealed = revealed; }
+- (void)revealNotificationHistory:(BOOL)revealed animated:(BOOL)animated { (void)animated; ++self.revealCalls; self.historyRevealed = revealed; }
 @end
 static BOOL OriginalPolicy(id owner, SEL command, id master, id request) {
     (void)command; (void)master;
@@ -56,7 +61,7 @@ static TestRequest *Request(NSString *app, NSString *identifier) {
     TestRequest *request = [TestRequest new]; request.sectionIdentifier = app;
     request.notificationIdentifier = identifier; request.timestamp = [NSDate date]; return request;
 }
-void AXNRunRuntimeTests(void) {
+void AXNRunRuntimeTests(void (^completion)(void)) {
     enabled = true; useListMount = true; nativeFilterHookInstalled = true;
     nativeShouldFilterOriginal = OriginalPolicy;
     states = [NSHashTable weakObjectsHashTable]; rails = [NSHashTable weakObjectsHashTable];
@@ -64,7 +69,7 @@ void AXNRunRuntimeTests(void) {
     hooks[Insert] = {@selector(insertNotificationRequest:), (IMP)OriginalInsert, 'v'};
     hooks[Remove] = {@selector(removeNotificationRequest:), (IMP)OriginalRemove, 'v'};
     listWillDisappearOriginal = OriginalDisappear;
-    FilterOwner *owner = [FilterOwner new]; owner.filteredApps = [NSMutableSet new]; owner.nativeExcludedApps = [NSMutableSet new];
+    FilterOwner *owner = [FilterOwner new]; owner.operations = [NSMutableArray new]; owner.filteredApps = [NSMutableSet new]; owner.nativeExcludedApps = [NSMutableSet new];
     TestSection *section = [TestSection new];
     TestRequest *a1 = Request(@"a", @"1"), *a2 = Request(@"a", @"2"), *b = Request(@"b", @"1");
     section.allNotificationRequests = [NSMutableArray arrayWithArray:@[a1, a2, b]];
@@ -88,8 +93,15 @@ void AXNRunRuntimeTests(void) {
     Require(AXNHandle(owner, Insert, c) && owner.insertCalls == 1 && state->index.size() == 4, "hidden arrival skipped native insertion");
     Require([owner.filteredApps containsObject:@"c"], "new app did not acquire filter rule");
     Require(AXNHandle(owner, Remove, c) && owner.removeCalls == 1 && state->index.size() == 3, "hidden dismissal skipped native removal");
+    [owner.operations removeAllObjects];
     state->index.select(std::string("b"));
     Require(AXNReconcile(state) && [owner.filteredApps isEqualToSet:[NSSet setWithObject:@"a"]], "switching app did not restore previous app");
+    Require([owner.operations isEqualToArray:@[@"a:1", @"b:0"]], "selected app was restored before hiding other apps");
+    section.filteredNotificationRequests = @{@"PRIVATE_APP_IDENTIFIER":@[b]};
+    section.hiddenNotificationRequests = [NSSet setWithObject:a1];
+    NSString *model = AXNModelReport(state);
+    Require([model containsString:@"filtered[total=1 selected=1"] && [model containsString:@"hidden[total=1 selected=0"], "native cache report lost selected counts");
+    Require(![model containsString:@"PRIVATE_APP_IDENTIFIER"], "native cache report leaked a dictionary key");
     Require(AXNRestore(state) && owner.filteredApps.count == 0 && section.allNotificationRequests.count == 3, "All failed to restore notifications");
     [owner.nativeExcludedApps addObject:@"b"]; [owner.filteredApps addObject:@"b"];
     state->index.select(std::string("a")); Require(AXNReconcile(state), "native-policy reconciliation failed");
@@ -103,6 +115,24 @@ void AXNRunRuntimeTests(void) {
     Require(!AXNReconcile(state) && !state.ready && owner.filteredApps.count == 0, "partial filter failure did not restore native list");
     AXNNativeFilter *unsupported = [[AXNNativeFilter alloc] initWithOwner:[NSObject new]];
     Require(!unsupported.available && ![unsupported revealHistory], "unsupported native signatures accepted");
-    enabled = false; activeState = nil;
-    puts("AXN_RUNTIME_TEST_PASS: app switching, All, native policy, incoming/dismissed requests, appearance, reveal and rollback");
+    // Exercise deferred reveal against rapid selection and leaving the list.
+    state.ready = YES; activeState = state; state.selectionTaps = 1;
+    NSUInteger priorReveals = owner.revealCalls;
+    AXNRequestSelectionReveal(state);
+    Require(owner.revealCalls == priorReveals, "history reveal ran inside the filter transaction");
+    state.selectionTaps = 2;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        Require(owner.revealCalls == priorReveals, "stale selection revealed history");
+        AXNRequestSelectionReveal(state);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 600 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
+            Require(owner.revealCalls == priorReveals + 1 && state.selectionSettled, "current selection failed to settle and reveal");
+            ++state.selectionTaps; AXNRequestSelectionReveal(state); activeState = nil;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                Require(owner.revealCalls == priorReveals + 1, "offscreen selection revealed history");
+                enabled = false;
+                puts("AXN_RUNTIME_TEST_PASS: filtering, hide-before-restore, deferred reveal, stale/offscreen cancellation, cache-count privacy and rollback");
+                completion();
+            });
+        });
+    });
 }

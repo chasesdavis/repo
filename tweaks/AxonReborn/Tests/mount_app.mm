@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-extern void AXNRunRuntimeTests(void);
+extern void AXNRunRuntimeTests(void (^completion)(void));
 
 static void Check(BOOL condition, const char *message) {
     if (!condition) { fprintf(stderr, "AXN_UI_TEST_FAIL: %s\n", message); fflush(stderr); exit(1); }
@@ -149,9 +149,10 @@ static void Check(BOOL condition, const char *message) {
         Check(!AXNReadDiagnosticResponse(request) && !AXNReadDiagnosticResponse(nextRequest), "stale diagnostic accepted");
         AXNPublishDiagnosticReport(AXNDiagnosticCollection, report);
         Check(AXNReadDiagnosticResponse(nextRequest) != nil && AXNReadDiagnosticResponse(request) == nil, "response correlation failed");
-        AXNRunRuntimeTests();
+        AXNRunRuntimeTests(^{
         puts("AXN_UI_TEST_PASS: collection and native-class scroll mounts; resolver guards; layout privacy; diagnostic correlation");
         fflush(stdout); exit(0);
+        });
     });
     return YES;
 }
