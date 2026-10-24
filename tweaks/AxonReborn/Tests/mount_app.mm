@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Public UIKit integration test. Does not emulate SpringBoard private APIs.
 #import <UIKit/UIKit.h>
+#import <objc/runtime.h>
 #import "../Tweak/AXNListMount.h"
 #import "../Tweak/AXNListResolver.h"
 #import "../Shared/AXNPreferences.h"
@@ -12,10 +13,25 @@ extern void AXNRunRuntimeTests(void (^completion)(void));
 static void Check(BOOL condition, const char *message) {
     if (!condition) { fprintf(stderr, "AXN_UI_TEST_FAIL: %s\n", message); fflush(stderr); exit(1); }
 }
-// Test doubles exercise getter selection and the UIScrollView mount only.
-// They do not emulate Apple's private list layout or notification model.
-@interface NCNotificationListView : UIScrollView @end
-@implementation NCNotificationListView @end
+// A geometry fixture reproduces the bottom-aligned short-list gap seen on
+// device. This is not an implementation of Apple's private list/model.
+@interface NCNotificationListView : UIScrollView
+@property(nonatomic) BOOL layoutFromBottom;
+@property(nonatomic, strong) UIView *fixtureCards;
+@property(nonatomic) CGFloat fixtureHeight;
+@property(nonatomic) BOOL simulateTracking;
+@end
+@implementation NCNotificationListView
+- (BOOL)isTracking { return self.simulateTracking || [super isTracking]; }
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    if (!self.fixtureCards) return;
+    CGFloat bottom = self.bounds.size.height - self.contentInset.top - self.contentInset.bottom - 53;
+    CGFloat start = self.layoutFromBottom ? MAX(0, bottom - self.fixtureHeight) : 0;
+    self.fixtureCards.frame = CGRectMake(10, start, self.bounds.size.width - 20, self.fixtureHeight);
+    self.contentSize = CGSizeMake(self.bounds.size.width, start + self.fixtureHeight);
+}
+@end
 @interface TestOwner : UIViewController
 @property(nonatomic, strong) id masterListView;
 @end
@@ -25,6 +41,7 @@ static void Check(BOOL condition, const char *message) {
 - (NSUInteger)masterListView { return 42; }
 - (id)scrollView { [NSException raise:@"test" format:@"unavailable getter"]; return nil; }
 @end
+static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command; return @"wrong type"; }
 @interface TestDelegate : UIResponder <UIApplicationDelegate, UICollectionViewDataSource>
 @property(nonatomic, strong) UIWindow *window;
 @end
@@ -94,16 +111,28 @@ static void Check(BOOL condition, const char *message) {
         nativeOwner.view.frame = controller.view.bounds;
         [controller.view addSubview:nativeOwner.view];
         [nativeOwner didMoveToParentViewController:controller];
-        NCNotificationListView *native = [[NCNotificationListView alloc] initWithFrame:nativeOwner.view.bounds];
+        NCNotificationListView *native = [[NCNotificationListView alloc] initWithFrame:CGRectMake(0, 0, 375, 812)];
         native.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-        native.contentInset = UIEdgeInsetsMake(12, 2, 9, 1);
-        native.contentSize = CGSizeMake(native.bounds.size.width, 1200);
-        native.contentOffset = CGPointMake(0, -12);
+        native.contentInset = UIEdgeInsetsMake(196, 2, 66, 1);
+        native.contentOffset = CGPointMake(0, -196);
+        native.layoutFromBottom = YES; native.fixtureHeight = 123;
         UILabel *card = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 280, 90)];
         card.text = @"SECRET_NOTIFICATION_TEXT";
         card.accessibilityIdentifier = @"SECRET_IDENTIFIER";
-        [native addSubview:card];
+        [native addSubview:card]; native.fixtureCards = card;
         [nativeOwner.view addSubview:native]; nativeOwner.masterListView = native;
+        [native layoutIfNeeded];
+        CGFloat beforeY = [native convertRect:card.frame toView:nativeOwner.view].origin.y;
+        Check(fabs(beforeY - 570) < 1, "fixture did not reproduce device bottom-aligned group");
+        // The old inset-only header leaves the card at the same screen Y.
+        native.contentInset = UIEdgeInsetsMake(196 + expected, 2, 66, 1);
+        native.contentOffset = CGPointMake(0, -196 - expected);
+        [native setNeedsLayout]; [native layoutIfNeeded];
+        Check(fabs([native convertRect:card.frame toView:nativeOwner.view].origin.y - beforeY) < 1,
+            "fixture did not reproduce inset-only failure");
+        Check(card.frame.origin.y > 250, "fixture lost the large gap beneath a header ending at content Y=0");
+        native.contentInset = UIEdgeInsetsMake(196, 2, 66, 1);
+        native.contentOffset = CGPointMake(0, -196);
         Check(AXNResolveList(nativeOwner) == native, "named native scroll getter not resolved");
         // Multiple unrelated collections must not obscure the named native list.
         [nativeOwner.view addSubview:list];
@@ -121,20 +150,58 @@ static void Check(BOOL condition, const char *message) {
         [nativeMount.rail updateWithItems:@[item] selected:nil];
         [nativeMount updateVisible:YES]; [native layoutIfNeeded];
         Check([nativeMount updateVisible:YES], "native scroll selector has no layout");
-        Check(CGRectGetMaxY(nativeMount.rail.frame) <= CGRectGetMinY(card.frame) + 0.5, "native scroll header overlaps card");
-        Check(fabs(native.contentOffset.y + 12 + expected) < 0.5, "resting scroll did not reveal header");
+        Check(!native.layoutFromBottom, "master list is still bottom aligned");
+        Check(fabs(CGRectGetMaxY(nativeMount.rail.frame) - CGRectGetMinY(card.frame)) < 0.5, "short selected group is not directly beneath selector");
+        Check(fabs(native.contentOffset.y + 196 + expected) < 0.5, "resting scroll did not reveal header");
+        Check(card.superview == native, "mount reparented a native card");
+        // Large and small app selections must start at the same place, and
+        // switching from a long, scrolled list must expose the new selection.
+        for (NSNumber *height in @[@123, @2100, @71, @600, @0, @123]) {
+            native.fixtureHeight = height.doubleValue;
+            native.contentOffset = CGPointMake(0, 700);
+            [native setNeedsLayout];
+            Check([nativeMount showSelection], "selection did not reset viewport");
+            Check(fabs(native.contentOffset.y + native.adjustedContentInset.top) < 0.5, "selected app inherited a stale scroll offset");
+            Check(fabs(card.frame.origin.y - CGRectGetMaxY(nativeMount.rail.frame)) < 0.5, "selection size reintroduced a gap");
+        }
+        native.simulateTracking = YES; native.contentOffset = CGPointMake(0, 120);
+        Check(![nativeMount showSelection] && native.contentOffset.y == 120, "selection interrupted a finger gesture");
+        native.simulateTracking = NO;
+        [nativeMount showSelection];
         NSString *report = AXNDescribeLayout(nativeOwner, native, nativeMount.rail);
         Check([report containsString:@"masterListView=NCNotificationListView"], "report lacks native getter class");
         Check(![report containsString:@"SECRET"], "report included notification text or identifiers");
         for (int i = 0; i < 100; ++i) { [native setNeedsLayout]; [native layoutIfNeeded]; [nativeMount updateVisible:YES]; }
-        Check(fabs(native.contentInset.top - 12 - expected) < 0.5, "native scroll accumulated padding");
+        Check(fabs(native.contentInset.top - 196 - expected) < 0.5, "native scroll accumulated padding");
         native.contentOffset = CGPointMake(0, 150);
         [nativeMount updateVisible:NO];
+        Check(native.layoutFromBottom, "hide did not restore native bottom alignment");
         Check(fabs(native.contentOffset.y - 150) < 0.5, "hide moved a scrolled list");
+        Check(![nativeMount showSelection], "hidden mount reset viewport");
         [nativeMount updateVisible:YES];
+        Check(!native.layoutFromBottom, "show did not reactivate top alignment");
         Check(fabs(native.contentOffset.y - 150) < 0.5, "show moved a scrolled list");
+        native.layoutFromBottom = YES; // Native master reconfiguration.
+        [nativeMount updateVisible:YES];
+        Check(!native.layoutFromBottom, "native reconfiguration disabled active mount alignment");
         [nativeMount detach];
-        Check(fabs(native.contentInset.top - 12) < 0.5 && native.contentInset.bottom == 9, "native scroll detach changed insets");
+        Check(native.layoutFromBottom && fabs(native.contentInset.top - 196) < 0.5 && native.contentInset.bottom == 66, "detach did not restore native alignment and insets");
+        native.layoutFromBottom = NO;
+        nativeMount = [[AXNListMount alloc] initWithScrollView:native];
+        [nativeMount.rail updateWithItems:@[item] selected:nil];
+        [nativeMount updateVisible:YES]; [nativeMount detach];
+        Check(!native.layoutFromBottom, "detach overwrote an initially top-aligned list");
+        native.layoutFromBottom = YES;
+        nativeMount = [[AXNListMount alloc] initWithScrollView:native];
+        [nativeMount.rail updateWithItems:@[item] selected:nil]; [nativeMount updateVisible:YES];
+        [nativeMount.rail removeFromSuperview]; [nativeMount detach];
+        Check(native.layoutFromBottom && fabs(native.contentInset.top - 196) < 0.5,
+            "externally removed rail leaked alignment or inset ownership");
+        Class invalidClass = objc_allocateClassPair(NCNotificationListView.class, "WrongAlignmentList", 0);
+        class_addMethod(invalidClass, NSSelectorFromString(@"layoutFromBottom"), (IMP)WrongAlignmentGetter, "@@:");
+        objc_registerClassPair(invalidClass);
+        NCNotificationListView *invalid = [[invalidClass alloc] initWithFrame:CGRectZero];
+        Check([[AXNListMount alloc] initWithScrollView:invalid] == nil, "unsafe alignment getter accepted");
         [native removeFromSuperview];
         Check(AXNResolveList(nativeOwner) == nil, "foreign native getter accepted");
         UIScrollView *unrelated = [[UIScrollView alloc] initWithFrame:nativeOwner.view.bounds];
@@ -150,7 +217,7 @@ static void Check(BOOL condition, const char *message) {
         AXNPublishDiagnosticReport(AXNDiagnosticCollection, report);
         Check(AXNReadDiagnosticResponse(nextRequest) != nil && AXNReadDiagnosticResponse(request) == nil, "response correlation failed");
         AXNRunRuntimeTests(^{
-        puts("AXN_UI_TEST_PASS: collection and native-class scroll mounts; resolver guards; layout privacy; diagnostic correlation");
+        puts("AXN_UI_TEST_PASS: bottom-aligned gap regression; short/long selection positioning; gesture preservation; alignment/inset restoration; resolver guards; layout privacy; diagnostic correlation");
         fflush(stdout); exit(0);
         });
     });

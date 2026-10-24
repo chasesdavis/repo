@@ -221,8 +221,8 @@ static NSString *AXNListPresentation(id value, UIView *root = nil) {
         CGRect rect = [view convertRect:view.bounds toView:root];
         placement = [NSString stringWithFormat:@"(%.0f,%.0f,%.0f,%.0f) intersectsViewport=%d", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, CGRectIntersectsRect(rect, root.bounds)];
     }
-    return [NSString stringWithFormat:@"%@ revealed=%@ sublistsRevealed=%@ currentlyVisible=%@ visibleRect=%@ cachedChildViews=%@ window=%d hidden=%d alpha=%.2f inMaster=%@",
-        NSStringFromClass(view.class), AXNScalar(view, @"isRevealed"), AXNScalar(view, @"areSublistsRevealed"),
+    return [NSString stringWithFormat:@"%@ bottomAligned=%@ revealed=%@ sublistsRevealed=%@ currentlyVisible=%@ visibleRect=%@ cachedChildViews=%@ window=%d hidden=%d alpha=%.2f inMaster=%@",
+        NSStringFromClass(view.class), AXNScalar(view, @"layoutFromBottom"), AXNScalar(view, @"isRevealed"), AXNScalar(view, @"areSublistsRevealed"),
         AXNScalar(view, @"isNotificationListViewCurrentlyVisible"), AXNVisibleRect(view), count, view.window != nil, view.hidden, view.alpha, placement];
 }
 // Traverse collection values only, never dictionary keys, text or descriptions.
@@ -310,6 +310,8 @@ static void AXNRequestSelectionReveal(AXNListState *state) {
         if (!enabled || !current.ready || current != activeState || current.selectionTaps != generation) return;
         [current.owner.viewIfLoaded layoutIfNeeded];
         current.revealedSelection = [current.nativeFilter revealHistory];
+        AXNListMount *mount = objc_getAssociatedObject(current.owner, listMountKey);
+        [mount showSelection];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 350 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
             AXNListState *settled = weakState;
             if (!enabled || !settled.ready || settled != activeState || settled.selectionTaps != generation) return;
@@ -559,6 +561,10 @@ static void AXNMountList(UIViewController *owner) {
     }
     if (mount) return;
     mount = [[AXNListMount alloc] initWithScrollView:list];
+    if (!mount) {
+        mountSucceeded = false; mountFailed = true; mountDiagnostic = AXNDiagnosticGeometry;
+        return;
+    }
     __weak UIViewController *weakOwner = owner;
     mount.rail.onSelect = ^(NSString *bundleID) {
         AXNListState *state = objc_getAssociatedObject(weakOwner, stateKey);

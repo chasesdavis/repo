@@ -45,7 +45,7 @@ void AXNPublishDiagnosticReport(NSUInteger state, NSString *report) {
     SyncDiagnostic();
     id request = ReadDiagnostic(CFSTR("request"));
     if (![request isKindOfClass:NSString.class] || [request length] > 64) return;
-    NSDictionary *response = @{@"request":request, @"version":@"alpha9", @"state":@(state),
+    NSDictionary *response = @{@"request":request, @"version":@"alpha10", @"state":@(state),
         @"report":[report substringToIndex:MIN(report.length, (NSUInteger)8192)]};
     CFPreferencesSetValue(CFSTR("response"), (__bridge CFDictionaryRef)response, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     SyncDiagnostic();
@@ -54,7 +54,7 @@ NSDictionary *AXNReadDiagnosticResponse(NSString *request) {
     SyncDiagnostic();
     id response = ReadDiagnostic(CFSTR("response"));
     if (![response isKindOfClass:NSDictionary.class]) return nil;
-    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"alpha9"] ||
+    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"alpha10"] ||
         ![response[@"report"] isKindOfClass:NSString.class] || [response[@"report"] length] > 8192 ||
         ![response[@"state"] isKindOfClass:NSNumber.class] || [response[@"state"] unsignedIntegerValue] >= AXNDiagnosticStateCount) return nil;
     return response;

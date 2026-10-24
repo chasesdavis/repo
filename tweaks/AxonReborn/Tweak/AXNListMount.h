@@ -5,5 +5,6 @@
 @property(nonatomic, weak, readonly) UIScrollView *scrollView;
 - (instancetype)initWithScrollView:(UIScrollView *)scrollView;
 - (BOOL)updateVisible:(BOOL)visible;
+- (BOOL)showSelection;
 - (void)detach;
 @end

@@ -1,6 +1,6 @@
 Package: com.chasesdavis.axonreborn
 Name: Axon Reborn (Development)
-Version: 0.1.0~alpha9
+Version: 0.1.0~alpha10
 Architecture: iphoneos-arm
 Description: Experimental Axon redesign for iOS 15-17. Device validation required.
 Maintainer: Chase Davis
