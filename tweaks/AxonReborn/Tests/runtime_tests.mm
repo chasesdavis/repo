@@ -15,11 +15,15 @@ static void Require(BOOL condition, const char *message) {
 @implementation TestRequest @end
 @interface TestSection : NSObject
 @property(nonatomic, strong) NSMutableArray *allNotificationRequests;
+@property(nonatomic, copy) NSMutableArray *(^snapshotProvider)(void);
 @property(nonatomic, strong) NSDictionary *filteredNotificationRequests;
 @property(nonatomic, strong) NSSet *hiddenNotificationRequests;
 @property(nonatomic, strong) NSArray *chronologicalSectionLists;
 @end
-@implementation TestSection @end
+@implementation TestSection
+@synthesize allNotificationRequests = _allNotificationRequests;
+- (NSMutableArray *)allNotificationRequests { return self.snapshotProvider ? self.snapshotProvider() : _allNotificationRequests; }
+@end
 @interface TestFocusView : NSObject
 @property(nonatomic, getter=isGrouped) BOOL grouped;
 @end
@@ -156,10 +160,17 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     AXNAttachList(firstOwner);
     AXNListState *firstState = objc_getAssociatedObject(firstOwner, stateKey);
     firstState->index.select(std::string("a")); Require(AXNReconcile(firstState), "handoff fixture failed");
+    TestSection *handoffSection = secondOwner.masterList.notificationSections.firstObject;
+    NSMutableArray *fullSnapshot = handoffSection.allNotificationRequests;
+    handoffSection.snapshotProvider = ^NSMutableArray *{
+        return firstOwner.filteredApps.count ? [NSMutableArray arrayWithObject:fullSnapshot.firstObject] : fullSnapshot;
+    };
     AXNAttachList(secondOwner);
+    handoffSection.snapshotProvider = nil;
     Require(!firstState->index.selection() && firstOwner.filteredApps.count == 0,
         "controller handoff left old app rules active");
     AXNListState *secondState = objc_getAssociatedObject(secondOwner, stateKey);
+    Require(secondState->index.size() == 2, "handoff snapshot inherited the previous app filter");
     secondState->index.select(std::string("b")); Require(AXNReconcile(secondState), "missing-mount fixture failed");
     UIViewController *root = UIApplication.sharedApplication.windows.firstObject.rootViewController;
     [root addChildViewController:secondOwner]; secondOwner.view.frame = root.view.bounds;

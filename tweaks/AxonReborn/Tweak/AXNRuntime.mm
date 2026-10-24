@@ -406,6 +406,16 @@ static void AXNAttachList(UIViewController *owner) {
         objc_setAssociatedObject(owner, stateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         if (activeState == state) activeState = nil;
     }
+    // Restore the old controller before reading the new snapshot: native
+    // controllers can observe shared section state during a handoff.
+    if (activeState && activeState != state) {
+        AXNListState *previous = activeState;
+        activeState = nil;
+        ++previous.selectionTaps; previous.selectionSettled = NO;
+        AXNRestore(previous);
+        AXNListMount *previousMount = objc_getAssociatedObject(previous.owner, listMountKey);
+        [previousMount updateVisible:NO]; AXNRefresh();
+    }
     NSArray *snapshot = AXNSnapshot(owner);
     if (!snapshot) { diagnostic = AXNDiagnosticSnapshot; NSLog(@"[Axon Reborn] Snapshot interface unavailable; using native notifications."); return; }
     state = [AXNListState new]; state.owner = owner;
@@ -416,14 +426,6 @@ static void AXNAttachList(UIViewController *owner) {
         state->index.upsert(record);
         state->visible.insert(record.key);
         state.requests[AXNKey(record.key)] = request;
-    }
-    if (activeState && activeState != state) {
-        AXNListState *previous = activeState;
-        activeState = nil;
-        ++previous.selectionTaps; previous.selectionSettled = NO;
-        AXNRestore(previous);
-        AXNListMount *previousMount = objc_getAssociatedObject(previous.owner, listMountKey);
-        [previousMount updateVisible:NO];
     }
     state.ready = YES;
     objc_setAssociatedObject(owner, stateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
