@@ -9,5 +9,6 @@
 
 @interface AXNRailView : UIView
 @property(nonatomic, copy) void (^onSelect)(NSString *bundleID);
+- (CGFloat)preferredRailHeight;
 - (void)updateWithItems:(NSArray<AXNRailItem *> *)items selected:(NSString *)selected;
 @end

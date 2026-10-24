@@ -21,6 +21,14 @@ for variant, scheme in (("rootful", ""), ("rootless", "rootless"), ("roothide", 
     makefile = "include config.mk\n.PHONY: report\nreport:\n\t@echo scheme=$(THEOS_PACKAGE_SCHEME) target=$(TARGET) archs=$(ARCHS)\n"
     output = subprocess.check_output(["make", "--no-print-directory", "-f", "-", "report", f"AXON_VARIANT={variant}"], input=makefile.encode(), cwd=root).decode().strip()
     assert output == f"scheme={scheme} target=iphone:clang:latest:15.0 archs=arm64 arm64e", output
-for script in ("build.sh", "test.sh"):
+for script in ("build.sh", "test.sh", "test-ui.sh"):
     subprocess.run(["bash", "-n", root / "scripts" / script], check=True)
 print("PASS: plist, package variants, deployment target, source hygiene and shell syntax")
+
+for path in (root / "scripts").glob("*.py"):
+    compile(path.read_text(), str(path), "exec")
+expected = {"Enabled":False, "Compact":False, "ShowCounts":True, "Haptics":True, "Motion":True,
+            "TapSelectedToAll":True, "RevealFocus":True, "Accent":0, "Sort":0, "Density":1}
+actual = {entry["key"]:entry["default"] for entry in settings["items"] if "key" in entry}
+assert actual == expected, (actual, expected)
+print("PASS: release script syntax and settings schema alignment")

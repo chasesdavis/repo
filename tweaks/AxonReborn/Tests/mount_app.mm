@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+extern void AXNRunPreferenceTests(void);
+extern void AXNRunRailFeatureTests(UIViewController *parent);
 extern void AXNRunRuntimeTests(void (^completion)(void));
 @interface AXNRailView (TestControls)
 - (void)togglePin:(NSString *)bundle;
@@ -56,6 +58,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
 }
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
     fputs("AXN_UI_STAGE: application launched\n", stderr); fflush(stderr);
+    AXNRunPreferenceTests();
     self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
     UIViewController *controller = [UIViewController new];
     self.window.rootViewController = controller;
@@ -128,7 +131,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         AXNWritePreference(@"PinnedApps", savedPins);
         [mount.rail updateWithItems:@[item] selected:nil];
         Check(mount.rail.superview == list, "selector is not in the notification collection");
-        CGFloat expected = MAX(106, [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline].pointSize * 2 + 68);
+        CGFloat expected = mount.rail.preferredRailHeight;
         Check(fabs(list.contentInset.top - 24 - expected) < 0.5, "missing reserved inset");
         UICollectionViewLayoutAttributes *first = [list layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
         Check(CGRectGetMaxY(mount.rail.frame) <= CGRectGetMinY(first.frame) + 0.5, "selector overlaps the first card");
@@ -258,6 +261,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(!AXNReadDiagnosticResponse(request) && !AXNReadDiagnosticResponse(nextRequest), "stale diagnostic accepted");
         AXNPublishDiagnosticReport(AXNDiagnosticCollection, report);
         Check(AXNReadDiagnosticResponse(nextRequest) != nil && AXNReadDiagnosticResponse(request) == nil, "response correlation failed");
+        AXNRunRailFeatureTests(controller);
         fputs("AXN_UI_STAGE: runtime tests\n", stderr); fflush(stderr);
         AXNRunRuntimeTests(^{
         puts("AXN_UI_TEST_PASS: bottom-aligned gap regression; short/long selection positioning; gesture preservation; alignment/inset restoration; resolver guards; layout privacy; diagnostic correlation");

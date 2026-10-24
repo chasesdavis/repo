@@ -80,7 +80,7 @@ static void SetBottomAligned(UIScrollView *view, BOOL value) {
             (void)exception; visible = NO;
         }
     }
-    CGFloat height = visible ? MAX(106, [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline].pointSize * 2 + 68) : 0;
+    CGFloat height = visible ? self.rail.preferredRailHeight : 0;
     UIEdgeInsets inset = scrollView.contentInset;
     CGFloat next = _reservation.update(inset.top, height);
     CGPoint offset = scrollView.contentOffset;

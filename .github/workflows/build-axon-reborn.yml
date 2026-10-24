@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   build:
-    name: ${{ matrix.variant }} (unverified alpha)
+    name: ${{ matrix.variant }} (device validation required)
     runs-on: macos-latest
     defaults:
       run:
@@ -45,11 +45,12 @@ jobs:
         run: bash scripts/build.sh "${{ matrix.variant }}"
       - name: Test selector mounting with public UIKit in Simulator
         if: matrix.variant == 'roothide'
-        timeout-minutes: 6
+        timeout-minutes: 8
         run: bash scripts/test-ui.sh
       - name: Inspect package metadata
         run: |
           for package in packages/*.deb; do
+            python3 scripts/verify-package.py "$package" "${{ matrix.variant }}"
             dpkg-deb -I "$package"
             dpkg-deb -c "$package"
           done
@@ -59,3 +60,22 @@ jobs:
           path: tweaks/AxonReborn/packages/*.deb
           if-no-files-found: error
           retention-days: 14
+
+  stage-candidate:
+    name: Verify and stage RootHide candidate
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: axon-alpha-roothide
+          path: candidate
+      - name: Prepare verified package and repository indexes
+        run: python3 tweaks/AxonReborn/scripts/prepare-release.py candidate staged
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: axon-verified-release
+          path: staged/
+          if-no-files-found: error
+          retention-days: 30

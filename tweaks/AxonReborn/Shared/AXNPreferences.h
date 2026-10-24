@@ -5,6 +5,7 @@ FOUNDATION_EXPORT NSString * const AXNPreferencesChanged;
 FOUNDATION_EXPORT id AXNReadPreference(NSString *key, id fallback);
 FOUNDATION_EXPORT void AXNWritePreference(NSString *key, id value);
 FOUNDATION_EXPORT void AXNSynchronizePreferences(void);
+FOUNDATION_EXPORT void AXNResetAppearance(void);
 // Diagnostic states and bounded layout metadata. No notification content or identifiers.
 typedef NS_ENUM(NSUInteger, AXNDiagnosticState) {
     AXNDiagnosticWaiting, AXNDiagnosticDisabled, AXNDiagnosticClasses,

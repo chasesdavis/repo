@@ -42,3 +42,6 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify published Axon package and all indexes
+        run: python3 tweaks/AxonReborn/scripts/verify-public-release.py

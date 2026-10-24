@@ -2,11 +2,26 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha11; RootHide package published to the [Sileo repository](https://chasesdavis.github.io/repo/).** The [validated build](https://github.com/chasesdavis/repo/actions/runs/40131980274) passed all three package variants, portable checks, native runtime contract tests and UIKit regressions. The synthetic native capsule preview was visually inspected. The tester reports that alpha10 looks better; alpha11's Focus behavior and capsule controls still need confirmation on the iOS 17.0 device. This project starts disabled; native notification previews and authentication remain handled by iOS.
+**Status: 0.2.0~beta1 implementation; automated validation in progress.** This is the premium-polish milestone, with stable 1.0 gated on actual device acceptance. Read the [detailed release plan](docs/PREMIUM_RELEASE_PLAN.md) and [current validation record](docs/VALIDATION.md). The tester reports that alpha10 looks better; full Focus, interaction, privacy and performance checks remain necessary on the iOS 17.0 RootHide device. Native cards and authentication stay under iOS control.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
 Open `Design/preview.html` in a browser for the interactive visual concept. It works offline with sample notifications. Its controls manipulate demo data only.
+
+## Beta1 premium polish
+
+- Slim, Balanced and Roomy capsule sizes share geometry with the native list inset.
+- Dynamic Type, stacked accessibility headings, scalable count badges and 48-point minimum targets.
+- Favorites support Move favorite first and VoiceOver actions for pin/unpin and Show All.
+- Touch/scroll updates coalesce until interaction ends; surviving controls are moved in place.
+- Capsule animations have a switch and automatically quiet in Low Power Mode or Reduce Motion. Contrast/transparency changes update live.
+- Settings use a validated, bounded cache. Reset appearance preserves enable and Focus settings.
+- Use native notifications provides direct recovery through the existing disable/restore path.
+- Missing selectors and controller handoffs restore Axon's app rules; snapshots are bounded.
+- Icon collection uses one pass, and app names are cached per controller.
+- Package inspection and staged publication include binary slices, install paths, metadata, checksums and public-byte verification.
+
+Long-press a pinned capsule for **Move favorite first**. In Settings, choose **Capsule size**, **Accent color**, **Compact app capsules** and **Capsule animations**. Notification counts represent indexed requests, not read/unread status.
 
 ## What changed
 
@@ -110,7 +125,7 @@ After updating, respring, enable Axon, and open the Lock Screen with notificatio
 
 The status describes the last observed Lock Screen presentation, not complete compatibility. The report contains runtime view class names, geometry, getter result types and whether the rail intersects the list viewport. It does not include notification text, application or notification identifiers, accessibility labels, object descriptions or screenshots. Reports stay in memory until a diagnostic request; the latest requested report is shared locally through a separate preferences domain and is copied only when you tap the copy action. There is no network upload. A request token prevents an older report from being shown as the current reply.
 
-A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching alpha11 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
+A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching beta1 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
 
 ## Development safety and limitations
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #import "AXNPreferences.h"
+#include <math.h>
 NSString * const AXNPreferencesDomain = @"com.chasesdavis.axonreborn";
 NSString * const AXNPreferencesChanged = @"com.chasesdavis.axonreborn/changed";
 NSString * const AXNDiagnosticQuery = @"com.chasesdavis.axonreborn/diagnostics/query";
@@ -45,7 +46,7 @@ void AXNPublishDiagnosticReport(NSUInteger state, NSString *report) {
     SyncDiagnostic();
     id request = ReadDiagnostic(CFSTR("request"));
     if (![request isKindOfClass:NSString.class] || [request length] > 64) return;
-    NSDictionary *response = @{@"request":request, @"version":@"alpha11", @"state":@(state),
+    NSDictionary *response = @{@"request":request, @"version":@"beta1", @"state":@(state),
         @"report":[report substringToIndex:MIN(report.length, (NSUInteger)8192)]};
     CFPreferencesSetValue(CFSTR("response"), (__bridge CFDictionaryRef)response, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     SyncDiagnostic();
@@ -54,24 +55,89 @@ NSDictionary *AXNReadDiagnosticResponse(NSString *request) {
     SyncDiagnostic();
     id response = ReadDiagnostic(CFSTR("response"));
     if (![response isKindOfClass:NSDictionary.class]) return nil;
-    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"alpha11"] ||
+    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"beta1"] ||
         ![response[@"report"] isKindOfClass:NSString.class] || [response[@"report"] length] > 8192 ||
         ![response[@"state"] isKindOfClass:NSNumber.class] || [response[@"state"] unsignedIntegerValue] >= AXNDiagnosticStateCount) return nil;
     return response;
 }
+// A single schema protects SpringBoard from malformed settings and bounds work.
+static NSDictionary<NSString *, id> *Defaults(void) {
+    static NSDictionary *values; static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        values = @{@"Enabled":@NO, @"Compact":@NO, @"ShowCounts":@YES,
+            @"Haptics":@YES, @"Motion":@YES, @"TapSelectedToAll":@YES,
+            @"RevealFocus":@YES, @"Accent":@0, @"Sort":@0, @"Density":@1, @"PinnedApps":@[]};
+    });
+    return values;
+}
+static id Validated(NSString *key, id value) {
+    id fallback = Defaults()[key];
+    if (!fallback) return nil;
+    if ([key isEqualToString:@"PinnedApps"]) {
+        if (![value isKindOfClass:NSArray.class]) return fallback;
+        NSMutableArray *pins = [NSMutableArray new];
+        NSCharacterSet *invalid = [[NSCharacterSet characterSetWithCharactersInString:
+            @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"] invertedSet];
+        NSUInteger examined = 0;
+        for (id app in value) {
+            if (++examined > 128 || pins.count == 32) break;
+            if ([app isKindOfClass:NSString.class] && [app length] > 0 && [app length] <= 255 &&
+                [app rangeOfCharacterFromSet:invalid].location == NSNotFound && ![pins containsObject:app])
+                [pins addObject:[app copy]];
+        }
+        return [pins copy];
+    }
+    if (![value isKindOfClass:NSNumber.class]) return fallback;
+    double number = [value doubleValue];
+    NSInteger maximum = [key isEqualToString:@"Accent"] ? 3 : ([key isEqualToString:@"Density"] ? 2 : 1);
+    if (!isfinite(number) || number < 0 || number > maximum || floor(number) != number) return fallback;
+    return @((NSInteger)number);
+}
+static NSDictionary<NSString *, id> *cachedPreferences;
+static void ReloadPreferences(void) {
+    NSMutableDictionary *values = [NSMutableDictionary new];
+    for (NSString *key in Defaults()) {
+        id value = CFBridgingRelease(CFPreferencesCopyValue((__bridge CFStringRef)key,
+            (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+        values[key] = Validated(key, value);
+    }
+    cachedPreferences = [values copy];
+}
 id AXNReadPreference(NSString *key, id fallback) {
-    id value = CFBridgingRelease(CFPreferencesCopyValue((__bridge CFStringRef)key,
-        (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
-    return value ?: fallback;
+    @synchronized (AXNPreferencesDomain) {
+        if (!cachedPreferences) ReloadPreferences();
+        return cachedPreferences[key] ?: fallback;
+    }
 }
 void AXNSynchronizePreferences(void) {
-    CFPreferencesSynchronize((__bridge CFStringRef)AXNPreferencesDomain,
-        kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    @synchronized (AXNPreferencesDomain) {
+        CFPreferencesSynchronize((__bridge CFStringRef)AXNPreferencesDomain,
+            kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        ReloadPreferences();
+    }
 }
-void AXNWritePreference(NSString *key, id value) {
-    CFPreferencesSetValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)value,
-        (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    AXNSynchronizePreferences();
+static void NotifyPreferences(void) {
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),
         (__bridge CFStringRef)AXNPreferencesChanged, NULL, NULL, YES);
+}
+void AXNWritePreference(NSString *key, id value) {
+    id validated = Validated(key, value);
+    if (!validated) return;
+    @synchronized (AXNPreferencesDomain) {
+        CFPreferencesSetValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)validated,
+            (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        AXNSynchronizePreferences();
+    }
+    NotifyPreferences();
+}
+void AXNResetAppearance(void) {
+    @synchronized (AXNPreferencesDomain) {
+        for (NSString *key in @[@"Compact", @"ShowCounts", @"Haptics", @"Motion", @"TapSelectedToAll",
+                               @"Accent", @"Sort", @"Density", @"PinnedApps"]) {
+            CFPreferencesSetValue((__bridge CFStringRef)key, NULL,
+                (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        }
+        AXNSynchronizePreferences();
+    }
+    NotifyPreferences();
 }

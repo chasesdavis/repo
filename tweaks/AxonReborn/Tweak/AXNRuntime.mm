@@ -42,6 +42,7 @@ static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &l
 }
 @property(nonatomic, weak) UIViewController *owner;
 @property(nonatomic, strong) NSMutableDictionary<NSArray<NSString *> *, id> *requests;
+@property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *appNames;
 @property(nonatomic) BOOL ready;
 @property(nonatomic) BOOL replaying;
 @property(nonatomic, strong) AXNNativeFilter *nativeFilter;
@@ -53,7 +54,7 @@ static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &l
 @end
 @implementation AXNListState
 - (instancetype)init {
-    if ((self = [super init])) _requests = [NSMutableDictionary new];
+    if ((self = [super init])) { _requests = [NSMutableDictionary new]; _appNames = [NSMutableDictionary new]; }
     return self;
 }
 @end
@@ -102,7 +103,7 @@ static bool AXNRecord(id request, axon::Record &record) {
     NSString *app = AXNString(AXNObject(request, @"sectionIdentifier"));
     if (!app) app = AXNString(AXNObject(AXNObject(request, @"bulletin"), @"sectionID"));
     NSString *identifier = AXNString(AXNObject(request, @"notificationIdentifier"));
-    if (!app || !identifier) return false;
+    if (!app || !identifier || app.length > 1024 || identifier.length > 1024 || !app.UTF8String || !identifier.UTF8String) return false;
     record.key = {app.UTF8String, identifier.UTF8String};
     id date = AXNObject(request, @"timestamp");
     record.timestamp = [date isKindOfClass:NSDate.class] ? [date timeIntervalSince1970] : 0;
@@ -379,15 +380,17 @@ static bool AXNReconcile(AXNListState *state) {
 static NSArray *AXNSnapshot(UIViewController *owner) {
     NSArray *sections = AXNArray(AXNObject(AXNObject(owner, @"masterList"), @"notificationSections"));
     if (sections) {
+        if (sections.count > 128) return nil;
         NSMutableArray *requests = [NSMutableArray new];
         for (id section in sections) {
             NSArray *items = AXNArray(AXNObject(section, @"allNotificationRequests"));
-            if (!items) return nil;
+            if (!items || items.count > 8192 - requests.count) return nil;
             [requests addObjectsFromArray:items];
         }
         return requests;
     }
-    return AXNArray(AXNObject(owner, @"allNotificationRequests"));
+    NSArray *requests = AXNArray(AXNObject(owner, @"allNotificationRequests"));
+    return requests.count <= 8192 ? requests : nil;
 }
 static void AXNAttachList(UIViewController *owner) {
     [listOwners addObject:owner];
@@ -413,6 +416,14 @@ static void AXNAttachList(UIViewController *owner) {
         state->index.upsert(record);
         state->visible.insert(record.key);
         state.requests[AXNKey(record.key)] = request;
+    }
+    if (activeState && activeState != state) {
+        AXNListState *previous = activeState;
+        activeState = nil;
+        ++previous.selectionTaps; previous.selectionSettled = NO;
+        AXNRestore(previous);
+        AXNListMount *previousMount = objc_getAssociatedObject(previous.owner, listMountKey);
+        [previousMount updateVisible:NO];
     }
     state.ready = YES;
     objc_setAssociatedObject(owner, stateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -462,6 +473,10 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
         state->index.upsert(record); state.requests[AXNKey(record.key)] = request;
         if (shouldCall) state->visible.insert(record.key);
     }
+    if (state->index.size() > 8192) {
+        AXNRestore(state); state.ready = NO; diagnostic = AXNDiagnosticSnapshot; AXNRefresh();
+        return success;
+    }
     AXNReconcile(state); AXNCaptureFilterReport(state); AXNRefresh();
     return success;
 }
@@ -473,6 +488,7 @@ AXN_EVENT_CALLBACKS(AXNRemove, Remove)
 AXN_EVENT_CALLBACKS(AXNModify, Modify)
 
 static NSString *AXNAppName(NSString *bundleID) {
+    @try {
     id controller = AXNObject(NSClassFromString(@"SBApplicationController"), @"sharedInstance");
     SEL selector = NSSelectorFromString(@"applicationWithBundleIdentifier:");
     if (controller && AXNMethodMatches(object_getClass(controller), selector, "@", 3)) {
@@ -480,6 +496,7 @@ static NSString *AXNAppName(NSString *bundleID) {
         NSString *name = AXNString(AXNObject(application, @"displayName"));
         if (name) return name;
     }
+    } @catch (NSException *exception) { (void)exception; }
     // Do not use notification headers: these can contain a private sender name.
     return bundleID;
 }
@@ -492,21 +509,24 @@ static void AXNRender(void) {
         NSInteger sorting = [AXNReadPreference(@"Sort", @0) integerValue];
         auto groups = state->index.groups(sorting == 1 ? axon::Sort::Count : axon::Sort::Recent);
         if (state->index.selection()) selection = [NSString stringWithUTF8String:state->index.selection()->c_str()];
+        // One bounded pass replaces a full request scan for every app.
+        NSMutableDictionary<NSString *, UIImage *> *icons = [NSMutableDictionary new];
+        for (NSArray<NSString *> *key in state.requests) {
+            NSString *app = key.firstObject;
+            if (icons[app]) continue;
+            id icon = AXNObject(AXNObject(state.requests[key], @"content"), @"icon");
+            if ([icon isKindOfClass:UIImage.class]) icons[app] = icon;
+        }
         for (const auto &group : groups) {
             AXNRailItem *item = [AXNRailItem new];
             item.bundleID = [NSString stringWithUTF8String:group.app.c_str()];
-            item.name = AXNAppName(item.bundleID); item.count = group.count;
-            for (const auto &key : state->index.visibleKeys()) {
-                if (key.first != group.app) continue;
-                id icon = AXNObject(AXNObject(state.requests[AXNKey(key)], @"content"), @"icon");
-                if ([icon isKindOfClass:UIImage.class]) { item.icon = icon; break; }
+            NSString *name = state.appNames[item.bundleID];
+            if (!name) {
+                name = AXNAppName(item.bundleID);
+                if (state.appNames.count >= 256) [state.appNames removeAllObjects];
+                state.appNames[item.bundleID] = name;
             }
-            // Hidden apps still retain their icon without reading message text.
-            if (!item.icon) for (NSArray<NSString *> *key in state.requests) {
-                if (![key.firstObject isEqualToString:item.bundleID]) continue;
-                id icon = AXNObject(AXNObject(state.requests[key], @"content"), @"icon");
-                if ([icon isKindOfClass:UIImage.class]) { item.icon = icon; break; }
-            }
+            item.name = name; item.count = group.count; item.icon = icons[item.bundleID];
             [items addObject:item];
         }
     }
@@ -555,6 +575,13 @@ static void AXNSelectApp(AXNListState *state, NSString *bundleID) {
     if (bundleID) state->index.select(std::string(bundleID.UTF8String));
     else state->index.select(std::nullopt);
 }
+static void AXNRestoreForMissingMount(UIViewController *owner) {
+    AXNListState *state = objc_getAssociatedObject(owner, stateKey);
+    if (state.ready && (state->index.selection() || state.nativeFilter.appliedCount)) {
+        ++state.selectionTaps; state.selectionSettled = NO;
+        AXNRestore(state); AXNRefresh();
+    }
+}
 static void AXNMountList(UIViewController *owner) {
     if (!useListMount || !enabled || !owner.viewIfLoaded.window) return;
     UIScrollView *list = AXNResolveList(owner);
@@ -566,12 +593,14 @@ static void AXNMountList(UIViewController *owner) {
     }
     lastLayoutReport = AXNDescribeLayout(owner, list, mount.rail);
     if (!list) {
+        AXNRestoreForMissingMount(owner);
         mountSucceeded = false; mountFailed = true; mountDiagnostic = AXNDiagnosticCollection;
         return;
     }
     if (mount) return;
     mount = [[AXNListMount alloc] initWithScrollView:list];
     if (!mount) {
+        AXNRestoreForMissingMount(owner);
         mountSucceeded = false; mountFailed = true; mountDiagnostic = AXNDiagnosticGeometry;
         return;
     }

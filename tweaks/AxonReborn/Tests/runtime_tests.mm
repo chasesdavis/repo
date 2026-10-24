@@ -143,6 +143,39 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     hooks[Insert] = {@selector(insertNotificationRequest:), (IMP)OriginalInsert, 'v'};
     hooks[Remove] = {@selector(removeNotificationRequest:), (IMP)OriginalRemove, 'v'};
     listWillDisappearOriginal = OriginalDisappear;
+    // Handoff and mount-loss must not strand the previous selection's rules.
+    FilterOwner *firstOwner = [FilterOwner new], *secondOwner = [FilterOwner new];
+    for (FilterOwner *candidate in @[firstOwner, secondOwner]) {
+        candidate.operations = [NSMutableArray new]; candidate.filteredApps = [NSMutableSet new];
+        candidate.nativeExcludedApps = [NSMutableSet new]; candidate.masterList = [TestMaster new];
+        candidate.masterList.revealCoordinator = Coordinator();
+        TestSection *fixture = [TestSection new];
+        fixture.allNotificationRequests = [NSMutableArray arrayWithArray:@[Request(@"a", @"1"), Request(@"b", @"1")]];
+        candidate.masterList.notificationSections = @[fixture];
+    }
+    AXNAttachList(firstOwner);
+    AXNListState *firstState = objc_getAssociatedObject(firstOwner, stateKey);
+    firstState->index.select(std::string("a")); Require(AXNReconcile(firstState), "handoff fixture failed");
+    AXNAttachList(secondOwner);
+    Require(!firstState->index.selection() && firstOwner.filteredApps.count == 0,
+        "controller handoff left old app rules active");
+    AXNListState *secondState = objc_getAssociatedObject(secondOwner, stateKey);
+    secondState->index.select(std::string("b")); Require(AXNReconcile(secondState), "missing-mount fixture failed");
+    UIViewController *root = UIApplication.sharedApplication.windows.firstObject.rootViewController;
+    [root addChildViewController:secondOwner]; secondOwner.view.frame = root.view.bounds;
+    [root.view addSubview:secondOwner.view]; [secondOwner didMoveToParentViewController:root];
+    AXNMountList(secondOwner);
+    Require(secondState->index.selection() == std::nullopt && secondOwner.filteredApps.count == 0,
+        "unresolvable selector left notifications filtered");
+    [secondOwner willMoveToParentViewController:nil]; [secondOwner.view removeFromSuperview];
+    [secondOwner removeFromParentViewController];
+    FilterOwner *oversized = [FilterOwner new]; oversized.masterList = [TestMaster new];
+    TestSection *oversizedSection = [TestSection new]; oversizedSection.allNotificationRequests = [NSMutableArray new];
+    TestRequest *same = Request(@"a", @"large");
+    for (NSUInteger i = 0; i < 8193; ++i) [oversizedSection.allNotificationRequests addObject:same];
+    oversized.masterList.notificationSections = @[oversizedSection];
+    Require(AXNSnapshot(oversized) == nil, "oversized snapshot accepted");
+    activeState = nil;
     FilterOwner *owner = [FilterOwner new]; owner.operations = [NSMutableArray new]; owner.filteredApps = [NSMutableSet new]; owner.nativeExcludedApps = [NSMutableSet new];
     TestSection *section = [TestSection new];
     TestRequest *a1 = Request(@"a", @"1"), *a2 = Request(@"a", @"2"), *b = Request(@"b", @"1");
@@ -296,7 +329,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 Require(owner.revealCalls == priorReveals + 1, "offscreen selection revealed history");
                 enabled = false;
-                puts("AXN_RUNTIME_TEST_PASS: Focus expansion with native authentication preserved; tap-again reset; filtering, native programmatic reveal independent of gesture flags, incoming-only selection, native policy and identity checks, accurate reveal diagnostics, report privacy, restore and rollback");
+                puts("AXN_RUNTIME_TEST_PASS: controller handoff, missing mount restoration, snapshot bound; Focus expansion with native authentication preserved; tap-again reset; filtering, native programmatic reveal independent of gesture flags, incoming-only selection, native policy and identity checks, accurate reveal diagnostics, report privacy, restore and rollback");
                 completion();
             });
         });
