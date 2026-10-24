@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40082489721). The RootHide `0.1.0~alpha3` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40083892821). The RootHide `0.1.0~alpha4` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -50,17 +50,21 @@ Rootful is the usual term for what is sometimes called “rooted.” Package for
 
 The [build workflow](../../.github/workflows/build-axon-reborn.yml) runs on Axon source changes and can also be started manually. It uses pinned RootHide Theos and a patched iOS 16.5 SDK, runs portable checks, compiles the tweak and Settings bundle for arm64/arm64e, packages all three variants, inspects metadata, and uploads separate artifacts. Use `axon-alpha-roothide` for the first device target. All three variants built successfully on October 24, 2026; this does not establish on-device compatibility. Running the workflow does not install anything on your phone.
 
-### Alpha3 iOS 17 mount
+### Alpha4 iOS 17 mount
 
-The alpha2 device report confirmed list attachment but no selector mount. Alpha3 uses the notification collection itself on iOS 17, so it does not require the old adjunct controller or `_stackView`. The selector scrolls with the list; scroll to the top to find it. Disabling, leaving the list or detaching removes its reserved space. An unknown collection layout and an incomplete visible layout now have separate diagnostic replies.
+The alpha3 device report confirmed notification reading but rejected its collection-view resolver. The iOS 17 runtime headers declare `masterListView` as `NCNotificationListView : UIScrollView`. Alpha4 checks that getter first, then `scrollView`, and verifies the native class and ownership. Its bounded fallback accepts exactly one outer native list; it skips arbitrary scroll views and their card descendants. A checked `collectionView` getter remains available for alternate layouts.
 
-Portable inset tests cover 10,000 repeated layouts, text-size changes, absolute native inset rewrites, disable and re-enable. The CI UIKit simulator test covers actual mounting, separation from the first cell, repeated layout, resizing, disabling and detaching. This tests public UIKit behavior in the runner's available simulator; it does not emulate iOS 17 SpringBoard or prove physical-device compatibility.
+The selector mounts as a scrolling header with a reversible top inset. Scroll to the top of the notification list to find it. Disabling, leaving the list or detaching removes its reserved space. The native card views, data source and delegate are not replaced.
+
+The CI simulator test covers both a real UICollectionView and a UIScrollView test double named NCNotificationListView. It checks mounting, card separation, repeated layouts, disabling, detaching, resolver ambiguity and foreign-view rejection, unsafe getters, report privacy and request correlation. The test double does not emulate Apple's private list layout; a passing test does not establish iOS 17 device compatibility.
 
 ### Device troubleshooting
 
-Alpha2 removes the dependency between reporting adjunct content and an already visible rail, attaches the list earlier in its lifecycle, retries mounting during layout, and reconnects visible controllers when enabled. These changes address a possible blank-panel path; on-device confirmation is still required.
+After updating, respring, enable Axon, and open the Lock Screen with notifications present. Scroll to the top of the notification list. If the selector is absent, return to **Settings → Axon Reborn → Check SpringBoard → Copy Layout Report**, then paste the report with your test result.
 
-After updating, respring, enable Axon, and open the Lock Screen with a notification present. If the selector is absent, return to **Settings → Axon Reborn → Check SpringBoard**. The diagnostic reply distinguishes a disabled preference, missing controllers, rejected signatures, unavailable snapshots, request parsing, mount failure, empty lists and successful attachment. A timeout means no reply was received; it does not by itself prove injection is disabled. Replies contain fixed status codes only, with no notification bodies or identifiers. Status describes the last observed Lock Screen presentation, not complete compatibility.
+The status describes the last observed Lock Screen presentation, not complete compatibility. The report contains runtime view class names, geometry, getter result types and whether the rail intersects the list viewport. It does not include notification text, application or notification identifiers, accessibility labels, object descriptions or screenshots. Reports stay in memory until a diagnostic request; the latest requested report is shared locally through a separate preferences domain and is copied only when you tap the copy action. There is no network upload. A request token prevents an older report from being shown as the current reply.
+
+A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching alpha4 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
 
 ## Development safety and limitations
 
@@ -69,9 +73,9 @@ After updating, respring, enable Axon, and open the Lock Screen with a notificat
 3. The adapter only supports the structured list's one-request methods returning `void` or `BOOL`. Unknown signatures, missing classes or incomplete initial snapshots disable filtering.
 4. On a replay failure the adapter attempts to restore All and disables itself for that controller. Restoration is best-effort. If it fails, disable the tweak and respring through the jailbreak's existing controls.
 5. Grouped/coalesced notification counts, bulk clears, Focus, Scheduled Summary, notification list modes, media controls, native quick actions, rotation, concurrent list controllers and authentication need physical-device tests. Counts represent distinct requests observed by this adapter and are not yet guaranteed to equal every visually nested notification.
-6. No custom notification body export, debug dump, analytics or network endpoint is implemented. Native request objects are retained temporarily in process memory for filtering; these objects may themselves contain message content.
-7. The adapter and Settings preference domain must be verified specifically under RootHide. A working package build does not prove successful injection or shared preference behavior.
-8. iOS 17 mounts a scrolling selector header in the notification controller's collection view, with reserved top content inset. It uses a checked `collectionView` getter or a bounded search for exactly one collection, and does not reparent native cards or replace their data source/delegate. iOS 15–16 retain the guarded adjunct-stack adapter. Unsupported or ambiguous layouts leave the native presentation active.
+6. No notification body export, analytics or network endpoint is implemented. The optional layout report is limited to structural UI metadata. Native request objects are retained temporarily in process memory for filtering; these objects may themselves contain message content.
+7. The user's alpha3 diagnostic confirmed injection, the enabled preference and notification reading on iOS 17 RootHide Bootstrap. The new mount and diagnostic-report preferences still require device verification.
+8. iOS 17 mounts in the checked native notification scroll view with reserved top content inset. iOS 15–16 retain the guarded adjunct-stack adapter. Unsupported or ambiguous layouts leave the native presentation active.
 
 ## Validation completed here
 
@@ -91,6 +95,7 @@ Primary references:
 
 - https://github.com/Baw-Appie/Axon
 - https://github.com/dakotadawolfe/axon-ios16-compatibility
+- https://github.com/MTACS/iOS-17-Runtime-Headers/tree/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UserNotificationsUIKit.framework (native list class and getter declarations)
 - https://theos.dev/docs/rootless
 - https://github.com/roothide/Developer
 - https://github.com/roothide/Bootstrap/releases
