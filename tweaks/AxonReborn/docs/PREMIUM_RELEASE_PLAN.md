@@ -119,12 +119,15 @@ Repeat the core selection/privacy/restore checks on at least one actual iOS 15 a
 Implement the scoped work, run automated checks, fix failures, inspect artifacts, publish a beta candidate and update the validation record with exact evidence. Stable 1.0 is blocked by missing physical-device results, not by a checkbox in this document. Do not label those checks passed without observation. Any P0 failure blocks stable promotion; preserve the previous downloadable alpha as rollback.
 
 ## Release checklist
-- [ ] Implementation committed
-- [ ] Portable checks passed
-- [ ] Native runtime and UIKit tests passed
-- [ ] All three packages compiled and inspected
-- [ ] RootHide beta candidate published and deployment verified
+- [x] Implementation committed
+- [x] Portable checks passed
+- [x] Native runtime and UIKit tests passed
+- [x] All three packages compiled and inspected
+- [x] RootHide beta candidate published and deployment verified
 - [ ] Primary phone acceptance completed
 - [ ] Additional advertised OS/package combinations tested
 - [ ] Performance and overnight soak completed
 - [ ] Stable release approved from actual evidence
+
+## Executed milestone
+Beta1 source: `a8f195011fcb45038073ac2f627d96a83c51533f`. [Build 40138163664](https://github.com/chasesdavis/repo/actions/runs/40138163664) passed all five jobs. RootHide publication: `8a7dadaf8db71255ea1830f38bfe88111526db1b`. [Pages deployment 40138903642](https://github.com/chasesdavis/repo/actions/runs/40138903642) verifies all 34 public package/index files against the staged manifest. See [VALIDATION.md](VALIDATION.md) for exact evidence and [DEVICE_ACCEPTANCE.md](DEVICE_ACCEPTANCE.md) for the uncompleted physical checks.

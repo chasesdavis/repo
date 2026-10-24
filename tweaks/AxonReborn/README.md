@@ -2,11 +2,17 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: 0.2.0~beta1 implementation; automated validation in progress.** This is the premium-polish milestone, with stable 1.0 gated on actual device acceptance. Read the [detailed release plan](docs/PREMIUM_RELEASE_PLAN.md) and [current validation record](docs/VALIDATION.md). The tester reports that alpha10 looks better; full Focus, interaction, privacy and performance checks remain necessary on the iOS 17.0 RootHide device. Native cards and authentication stay under iOS control.
+**Status: 0.2.0~beta1 published for RootHide; automated build, runtime and UIKit gates passed.** This is a beta candidate, with stable 1.0 gated on actual device acceptance. Read the [detailed release plan](docs/PREMIUM_RELEASE_PLAN.md) and [current validation record](docs/VALIDATION.md). The tester reports that alpha10 looks better; full Focus, interaction, privacy and performance checks remain necessary on the iOS 17.0 RootHide device. Native cards and authentication stay under iOS control.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
 Open `Design/preview.html` in a browser for the interactive visual concept. It works offline with sample notifications. Its controls manipulate demo data only.
+
+## Install the RootHide beta
+
+Refresh [the Sileo repository](https://chasesdavis.github.io/repo/), install **Axon Reborn (Beta) 0.2.0~beta1**, and respring through your jailbreak controls. Existing preferences are retained; on a new installation enable Axon in Settings. Test with notifications present. Use **Expand While in Focus** for the native authenticated Focus expansion action. Rootful/rootless packages are build artifacts in [the successful candidate run](https://github.com/chasesdavis/repo/actions/runs/40138163664), not packages published to this RootHide feed.
+
+Record actual results in [the device acceptance checklist](docs/DEVICE_ACCEPTANCE.md). Build success does not certify SpringBoard behavior on the phone.
 
 ## Beta1 premium polish
 
