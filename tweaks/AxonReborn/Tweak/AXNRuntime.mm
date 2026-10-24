@@ -4,6 +4,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 #import <substrate.h>
+#import <notify.h>
 #import "AXNRailView.h"
 #import "../Shared/AXNPreferences.h"
 #include "../Core/NotificationIndex.hpp"
@@ -13,6 +14,9 @@ enum AXNEvent { Insert, Remove, Modify };
 struct AXNHook { SEL selector; IMP original; char result; };
 static AXNHook hooks[3];
 static bool enabled = false;
+static AXNDiagnosticState diagnostic = AXNDiagnosticWaiting;
+static bool hooksInstalled = false, mountSucceeded = false, mountFailed = false;
+static bool presentedContent = false;
 static const void *stateKey = &stateKey, *railKey = &railKey;
 
 @interface AXNListState : NSObject {
@@ -34,6 +38,7 @@ static const void *stateKey = &stateKey, *railKey = &railKey;
 
 static NSHashTable<AXNListState *> *states;
 static NSHashTable<AXNRailView *> *rails;
+static NSHashTable<UIViewController *> *listOwners, *hostOwners;
 static __weak AXNListState *activeState;
 static void AXNRefresh(void);
 
@@ -114,6 +119,7 @@ static bool AXNRestore(AXNListState *state) {
     }
     if (!success) {
         state.ready = NO;
+        diagnostic = AXNDiagnosticReplay;
         NSLog(@"[Axon Reborn] Native restoration incomplete. Disable the tweak and respring.");
     }
     return success;
@@ -125,14 +131,14 @@ static bool AXNReconcile(AXNListState *state) {
     for (const auto &key : current) {
         if (desired.count(key)) continue;
         if (!AXNReplay(state, Remove, state.requests[AXNKey(key)])) {
-            AXNRestore(state); state.ready = NO; return false;
+            AXNRestore(state); state.ready = NO; diagnostic = AXNDiagnosticReplay; return false;
         }
         state->visible.erase(key);
     }
     for (const auto &key : desired) {
         if (state->visible.count(key)) continue;
         if (!AXNReplay(state, Insert, state.requests[AXNKey(key)])) {
-            AXNRestore(state); state.ready = NO; return false;
+            AXNRestore(state); state.ready = NO; diagnostic = AXNDiagnosticReplay; return false;
         }
         state->visible.insert(key);
     }
@@ -155,6 +161,7 @@ static NSArray *AXNSnapshot(UIViewController *owner) {
     return AXNArray(AXNObject(owner, @"allNotificationRequests"));
 }
 static void AXNAttachList(UIViewController *owner) {
+    [listOwners addObject:owner];
     if (!enabled) return;
     AXNListState *state = objc_getAssociatedObject(owner, stateKey);
     // Re-read the native snapshot on every presentation; offscreen changes can
@@ -165,11 +172,11 @@ static void AXNAttachList(UIViewController *owner) {
         if (activeState == state) activeState = nil;
     }
     NSArray *snapshot = AXNSnapshot(owner);
-    if (!snapshot) { NSLog(@"[Axon Reborn] Snapshot interface unavailable; using native notifications."); return; }
+    if (!snapshot) { diagnostic = AXNDiagnosticSnapshot; NSLog(@"[Axon Reborn] Snapshot interface unavailable; using native notifications."); return; }
     state = [AXNListState new]; state.owner = owner;
     for (id request in snapshot) {
         axon::Record record;
-        if (!AXNRecord(request, record)) return;
+        if (!AXNRecord(request, record)) { diagnostic = AXNDiagnosticRequest; return; }
         state->index.upsert(record);
         state->visible.insert(record.key);
         state.requests[AXNKey(record.key)] = request;
@@ -177,6 +184,7 @@ static void AXNAttachList(UIViewController *owner) {
     state.ready = YES;
     objc_setAssociatedObject(owner, stateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [states addObject:state]; activeState = state;
+    diagnostic = state->index.size() ? AXNDiagnosticReady : AXNDiagnosticEmpty;
     AXNRefresh();
 }
 static bool AXNHandle(id owner, AXNEvent event, id request) {
@@ -196,7 +204,7 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
                         state.requests[AXNKey(record.key)] = request;
                     }
                 }
-                AXNRestore(state); state.ready = NO; AXNRefresh();
+                AXNRestore(state); state.ready = NO; diagnostic = AXNDiagnosticReplay; AXNRefresh();
             }
         });
         return result;
@@ -206,6 +214,7 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
     axon::Record record;
     if (!AXNRecord(request, record)) {
         AXNRestore(state); state.ready = NO; AXNRefresh();
+        diagnostic = AXNDiagnosticRequest;
         return AXNCallOriginal(owner, event, request);
     }
     bool shouldCall = event == Remove
@@ -268,6 +277,19 @@ static void AXNRender(void) {
         }
     }
     for (AXNRailView *rail in rails) [rail updateWithItems:items selected:selection];
+    if (enabled && state.ready) diagnostic = items.count ? AXNDiagnosticReady : AXNDiagnosticEmpty;
+    // Content must not depend on an already visible rail: UIKit may not load or
+    // present the adjunct controller until isPresentingContent returns YES.
+    bool hasContent = enabled && state.ready && items.count > 0;
+    if (hasContent != presentedContent) {
+        presentedContent = hasContent;
+        for (UIViewController *host in hostOwners.allObjects) {
+            SEL update = NSSelectorFromString(@"_updatePresentingContent");
+            if (AXNMethodMatches(host.class, update, "v", 2))
+                ((void (*)(id, SEL))objc_msgSend)(host, update);
+            [host.viewIfLoaded setNeedsLayout];
+        }
+    }
 }
 static void AXNRefresh(void) {
     // Notification bursts produce one rail render per main-queue turn.
@@ -277,13 +299,14 @@ static void AXNRefresh(void) {
     dispatch_async(dispatch_get_main_queue(), ^{ pending = false; AXNRender(); });
 }
 static void AXNMount(UIViewController *owner) {
+    [hostOwners addObject:owner];
     if (!enabled) return;
     AXNRailView *rail = objc_getAssociatedObject(owner, railKey);
     if (rail) { AXNRefresh(); return; }
     Ivar ivar = class_getInstanceVariable(owner.class, "_stackView");
-    if (!ivar || *AXNUnqualified(ivar_getTypeEncoding(ivar)) != '@') return;
+    if (!ivar || *AXNUnqualified(ivar_getTypeEncoding(ivar)) != '@') { mountFailed = true; return; }
     id container = object_getIvar(owner, ivar);
-    if (![container isKindOfClass:UIStackView.class]) return;
+    if (![container isKindOfClass:UIStackView.class]) { mountFailed = true; return; }
     UIStackView *stack = container;
     rail = [[AXNRailView alloc] initWithFrame:CGRectZero];
     rail.hidden = YES;
@@ -298,14 +321,24 @@ static void AXNMount(UIViewController *owner) {
     [rail.widthAnchor constraintEqualToAnchor:stack.widthAnchor].active = YES;
     objc_setAssociatedObject(owner, railKey, rail, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [rails addObject:rail]; AXNRefresh();
+    mountSucceeded = true; mountFailed = false;
 }
 
 static void (*listDidAppearOriginal)(id, SEL, BOOL);
+static void (*listWillAppearOriginal)(id, SEL, BOOL);
+static void (*listDidLoadOriginal)(id, SEL);
 static void (*listWillDisappearOriginal)(id, SEL, BOOL);
 static void (*hostDidLoadOriginal)(id, SEL);
 static void (*hostDidAppearOriginal)(id, SEL, BOOL);
+static void (*hostDidLayoutOriginal)(id, SEL);
 static void (*hostWillDisappearOriginal)(id, SEL, BOOL);
 static BOOL (*hostHasContentOriginal)(id, SEL);
+static void AXNListDidLoad(id self, SEL command) {
+    listDidLoadOriginal(self, command); AXNAttachList(self);
+}
+static void AXNListWillAppear(id self, SEL command, BOOL animated) {
+    listWillAppearOriginal(self, command, animated); AXNAttachList(self);
+}
 static void AXNListDidAppear(id self, SEL command, BOOL animated) {
     listDidAppearOriginal(self, command, animated); AXNAttachList(self);
 }
@@ -317,13 +350,18 @@ static void AXNListWillDisappear(id self, SEL command, BOOL animated) {
 }
 static void AXNHostDidLoad(id self, SEL command) { hostDidLoadOriginal(self, command); AXNMount(self); }
 static void AXNHostDidAppear(id self, SEL command, BOOL animated) { hostDidAppearOriginal(self, command, animated); AXNMount(self); }
+static void AXNHostDidLayout(id self, SEL command) {
+    hostDidLayoutOriginal(self, command);
+    if (!objc_getAssociatedObject(self, railKey)) AXNMount(self);
+}
 static void AXNHostWillDisappear(id self, SEL command, BOOL animated) {
     if (activeState) AXNRestore(activeState);
     AXNRefresh(); hostWillDisappearOriginal(self, command, animated);
 }
 static BOOL AXNHostHasContent(id self, SEL command) {
-    AXNRailView *rail = objc_getAssociatedObject(self, railKey);
-    return hostHasContentOriginal(self, command) || (enabled && rail && !rail.hidden);
+    [hostOwners addObject:self];
+    AXNListState *state = activeState;
+    return hostHasContentOriginal(self, command) || (enabled && state.ready && state->index.size() > 0);
 }
 static void AXNPreferenceCallback(CFNotificationCenterRef center, void *observer, CFStringRef name,
                                   const void *object, CFDictionaryRef userInfo) {
@@ -339,24 +377,42 @@ static void AXNPreferenceCallback(CFNotificationCenterRef center, void *observer
             }
             activeState = nil;
         }
+        bool justEnabled = !enabled && nextEnabled;
         enabled = nextEnabled;
+        if (justEnabled) {
+            for (UIViewController *owner in listOwners.allObjects)
+                if (owner.viewIfLoaded.window) AXNAttachList(owner);
+            for (UIViewController *owner in hostOwners.allObjects)
+                if (owner.isViewLoaded) AXNMount(owner);
+        }
         AXNRefresh();
     });
 }
 __attribute__((constructor)) static void AXNInitialize(void) {
     @autoreleasepool {
         if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]) return;
+        // Register before compatibility checks so a rejected adapter can explain
+        // itself. Replies are fixed states, never notification data.
+        static int diagnosticToken;
+        notify_register_dispatch(AXNDiagnosticQuery.UTF8String, &diagnosticToken, dispatch_get_main_queue(), ^(int token) {
+            (void)token;
+            AXNDiagnosticState result = diagnostic;
+            if (hooksInstalled && !enabled) result = AXNDiagnosticDisabled;
+            else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = AXNDiagnosticMount;
+            notify_post(AXNDiagnosticReply(result).UTF8String);
+        });
         NSInteger major = NSProcessInfo.processInfo.operatingSystemVersion.majorVersion;
-        if (major < 15 || major > 17) return;
+        if (major < 15 || major > 17) { diagnostic = AXNDiagnosticOS; return; }
         Class list = NSClassFromString(@"NCNotificationStructuredListViewController");
         Class host = NSClassFromString(@"CSNotificationAdjunctListViewController");
-        if (!list || !host || ![list isSubclassOfClass:UIViewController.class] || ![host isSubclassOfClass:UIViewController.class]) return;
+        if (!list || !host || ![list isSubclassOfClass:UIViewController.class] || ![host isSubclassOfClass:UIViewController.class]) { diagnostic = AXNDiagnosticClasses; return; }
         const char *names[3] = {"insertNotificationRequest:", "removeNotificationRequest:", "modifyNotificationRequest:"};
         IMP voidCallbacks[3] = {(IMP)AXNInsertVoid, (IMP)AXNRemoveVoid, (IMP)AXNModifyVoid};
         IMP boolCallbacks[3] = {(IMP)AXNInsertBool, (IMP)AXNRemoveBool, (IMP)AXNModifyBool};
         for (int i = 0; i < 3; ++i) {
             hooks[i].selector = sel_registerName(names[i]);
             if (!AXNMethodMatches(list, hooks[i].selector, "vB", 3)) {
+                diagnostic = AXNDiagnosticSignatures;
                 NSLog(@"[Axon Reborn] Unknown notification method signature; leaving native notifications active."); return;
             }
             char type[16] = {};
@@ -364,17 +420,22 @@ __attribute__((constructor)) static void AXNInitialize(void) {
             hooks[i].result = *AXNUnqualified(type);
         }
         states = [NSHashTable weakObjectsHashTable]; rails = [NSHashTable weakObjectsHashTable];
+        listOwners = [NSHashTable weakObjectsHashTable]; hostOwners = [NSHashTable weakObjectsHashTable];
         AXNSynchronizePreferences(); enabled = [AXNReadPreference(@"Enabled", @NO) boolValue];
         for (int i = 0; i < 3; ++i) MSHookMessageEx(list, hooks[i].selector,
             hooks[i].result == 'v' ? voidCallbacks[i] : boolCallbacks[i], &hooks[i].original);
         MSHookMessageEx(list, @selector(viewDidAppear:), (IMP)AXNListDidAppear, (IMP *)&listDidAppearOriginal);
+        MSHookMessageEx(list, @selector(viewDidLoad), (IMP)AXNListDidLoad, (IMP *)&listDidLoadOriginal);
+        MSHookMessageEx(list, @selector(viewWillAppear:), (IMP)AXNListWillAppear, (IMP *)&listWillAppearOriginal);
         MSHookMessageEx(list, @selector(viewWillDisappear:), (IMP)AXNListWillDisappear, (IMP *)&listWillDisappearOriginal);
         MSHookMessageEx(host, @selector(viewDidLoad), (IMP)AXNHostDidLoad, (IMP *)&hostDidLoadOriginal);
         MSHookMessageEx(host, @selector(viewDidAppear:), (IMP)AXNHostDidAppear, (IMP *)&hostDidAppearOriginal);
+        MSHookMessageEx(host, @selector(viewDidLayoutSubviews), (IMP)AXNHostDidLayout, (IMP *)&hostDidLayoutOriginal);
         MSHookMessageEx(host, @selector(viewWillDisappear:), (IMP)AXNHostWillDisappear, (IMP *)&hostWillDisappearOriginal);
         if (AXNMethodMatches(host, @selector(isPresentingContent), "B", 2))
             MSHookMessageEx(host, @selector(isPresentingContent), (IMP)AXNHostHasContent, (IMP *)&hostHasContentOriginal);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, AXNPreferenceCallback,
             (__bridge CFStringRef)AXNPreferencesChanged, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+        hooksInstalled = true;
     }
 }
