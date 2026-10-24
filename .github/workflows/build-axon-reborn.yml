@@ -37,6 +37,8 @@ jobs:
           git -C "$RUNNER_TEMP/axon-sdks" sparse-checkout set iPhoneOS16.5.sdk
           git -C "$RUNNER_TEMP/axon-sdks" checkout 0222fd5413cf4b9af096f37b4621afa2688572f7
           cp -R "$RUNNER_TEMP/axon-sdks/iPhoneOS16.5.sdk" "$THEOS/sdks/"
+          echo "SYSROOT=$THEOS/sdks/iPhoneOS16.5.sdk" >> "$GITHUB_ENV"
+          echo "ISYSROOT=$THEOS/sdks/iPhoneOS16.5.sdk" >> "$GITHUB_ENV"
       - name: Test portable state and package configuration
         run: bash scripts/test.sh
       - name: Compile and package
