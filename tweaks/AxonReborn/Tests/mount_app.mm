@@ -9,6 +9,9 @@
 #include <cstdlib>
 
 extern void AXNRunRuntimeTests(void (^completion)(void));
+@interface AXNRailView (TestControls)
+- (void)togglePin:(NSString *)bundle;
+@end
 
 static void Check(BOOL condition, const char *message) {
     if (!condition) { fprintf(stderr, "AXN_UI_TEST_FAIL: %s\n", message); fflush(stderr); exit(1); }
@@ -89,6 +92,34 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(taps == 1 && [tapped isEqual:@"example.test"], "app capsule did not dispatch selection");
         [allButton sendActionsForControlEvents:UIControlEventTouchUpInside];
         Check(taps == 2 && tapped == nil, "All capsule did not dispatch reset");
+        NSArray *savedPins = AXNReadPreference(@"PinnedApps", @[]);
+        AXNWritePreference(@"PinnedApps", @[]);
+        AXNRailItem *secondItem = [AXNRailItem new]; secondItem.bundleID = @"example.second";
+        secondItem.name = @"Messages"; secondItem.count = 12;
+        secondItem.icon = [UIImage systemImageNamed:@"bubble.left.and.bubble.right.fill"];
+        [mount.rail updateWithItems:@[item, secondItem] selected:secondItem.bundleID];
+        UIStackView *capsules = (UIStackView *)appButton.superview;
+        Check([capsules.arrangedSubviews containsObject:appButton], "count updates replaced an existing control");
+        UIButton *secondButton = (UIButton *)capsules.arrangedSubviews.lastObject;
+        Check((secondButton.accessibilityTraits & UIAccessibilityTraitSelected) != 0 && secondButton.menu.children.count == 2,
+            "selected capsule or long-press controls missing");
+        [mount.rail togglePin:secondItem.bundleID];
+        Check(capsules.arrangedSubviews[1] == secondButton && [secondButton.accessibilityValue containsString:@"pinned"],
+            "pin did not move favorite first");
+        [mount.rail updateWithItems:@[secondItem, item] selected:secondItem.bundleID];
+        Check(capsules.arrangedSubviews[1] == secondButton, "favorite ordering did not survive refresh");
+        [mount.rail layoutIfNeeded];
+        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:mount.rail.bounds.size];
+        UIImage *preview = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+            [UIColor.blackColor setFill]; UIRectFill(mount.rail.bounds);
+            [mount.rail drawViewHierarchyInRect:mount.rail.bounds afterScreenUpdates:YES];
+            (void)context;
+        }];
+        printf("AXN_RAIL_PREVIEW:%s\n", [UIImagePNGRepresentation(preview) base64EncodedStringWithOptions:0].UTF8String);
+        [mount.rail togglePin:secondItem.bundleID];
+        Check(![AXNReadPreference(@"PinnedApps", @[]) containsObject:secondItem.bundleID], "unpin did not persist");
+        AXNWritePreference(@"PinnedApps", savedPins);
+        [mount.rail updateWithItems:@[item] selected:nil];
         Check(mount.rail.superview == list, "selector is not in the notification collection");
         CGFloat expected = MAX(106, [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline].pointSize * 2 + 68);
         Check(fabs(list.contentInset.top - 24 - expected) < 0.5, "missing reserved inset");

@@ -20,6 +20,21 @@ static void Require(BOOL condition, const char *message) {
 @property(nonatomic, strong) NSArray *chronologicalSectionLists;
 @end
 @implementation TestSection @end
+@interface TestFocusView : NSObject
+@property(nonatomic, getter=isGrouped) BOOL grouped;
+@end
+@implementation TestFocusView @end
+@interface TestFocusSection : TestSection
+@property(nonatomic, strong) TestFocusView *sectionListView;
+@property(nonatomic) BOOL authenticationAllowed;
+@property(nonatomic) NSUInteger expandCalls;
+@end
+@implementation TestFocusSection
+- (void)_expandSection {
+    ++self.expandCalls;
+    if (self.authenticationAllowed) self.sectionListView.grouped = NO;
+}
+@end
 @interface TestRevealCoordinator : NSObject
 @property(nonatomic) BOOL allowed;
 @property(nonatomic) BOOL transitionAllowed;
@@ -51,6 +66,8 @@ static TestRevealCoordinator *Coordinator(void) {
 @property(nonatomic, strong) NSArray *notificationSections;
 @property(nonatomic, strong) TestRevealCoordinator *revealCoordinator;
 @property(nonatomic) BOOL historyRevealed;
+@property(nonatomic, getter=isMissedSectionActive) BOOL missedSectionActive;
+@property(nonatomic, strong) TestFocusSection *upcomingMissedSectionList;
 @end
 @implementation TestMaster
 // Model the observed distinction: programmatic reveal sets state/percentage
@@ -135,10 +152,33 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     AXNAttachList(owner);
     AXNListState *state = objc_getAssociatedObject(owner, stateKey);
     Require(state.ready && state->index.size() == 3, "initial runtime snapshot failed");
+    AXNSelectApp(state, @"a");
+    Require(state->index.selection() == std::optional<std::string>("a"), "capsule selection failed");
+    AXNSelectApp(state, @"a");
+    Require(!state->index.selection(), "repeat capsule tap did not return to All");
     state->index.select(std::string("a"));
     Require(AXNReconcile(state) && [owner.filteredApps isEqualToSet:[NSSet setWithObject:@"b"]], "select A did not filter B");
     Require(owner.removeCalls == 0 && owner.insertCalls == 0, "selection mutated request lifecycle");
     Require([state.nativeFilter revealHistory] && owner.historyRevealed, "selection history reveal failed");
+    TestFocusSection *focus = [TestFocusSection new]; focus.sectionListView = [TestFocusView new];
+    focus.sectionListView.grouped = YES; focus.allNotificationRequests = [NSMutableArray arrayWithObject:a1];
+    owner.masterList.upcomingMissedSectionList = focus;
+    [state.nativeFilter revealFocusForApp:@"a"];
+    Require(focus.expandCalls == 0, "inactive Focus was expanded");
+    owner.masterList.missedSectionActive = YES;
+    [state.nativeFilter revealFocusForApp:@"b"];
+    [state.nativeFilter revealFocusForApp:nil];
+    Require(focus.expandCalls == 0, "Focus expanded without an explicit matching app");
+    [state.nativeFilter revealFocusForApp:@"a"];
+    Require(focus.expandCalls == 1 && focus.sectionListView.grouped && owner.masterList.missedSectionActive,
+        "Focus reveal bypassed native authentication or disabled Focus");
+    focus.authenticationAllowed = YES;
+    [state.nativeFilter revealFocusForApp:@"a"];
+    Require(focus.expandCalls == 2 && !focus.sectionListView.grouped && owner.masterList.missedSectionActive,
+        "authorized Focus section did not expand through native action");
+    [state.nativeFilter revealFocusForApp:@"a"];
+    Require(focus.expandCalls == 2, "already expanded Focus section was expanded again");
+    owner.masterList.missedSectionActive = NO;
     Require(owner.masterList.revealCoordinator.childRevealed && owner.masterList.revealCoordinator.refetchCalls == 1, "child sections stayed collapsed after root history reveal");
     AXNAttachList(owner);
     Require(objc_getAssociatedObject(owner, stateKey) == state && state->index.selection() == std::optional<std::string>("a"), "repeated appearance reset selection");
@@ -256,7 +296,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 Require(owner.revealCalls == priorReveals + 1, "offscreen selection revealed history");
                 enabled = false;
-                puts("AXN_RUNTIME_TEST_PASS: filtering, native programmatic reveal independent of gesture flags, incoming-only selection, native policy and identity checks, accurate reveal diagnostics, report privacy, restore and rollback");
+                puts("AXN_RUNTIME_TEST_PASS: Focus expansion with native authentication preserved; tap-again reset; filtering, native programmatic reveal independent of gesture flags, incoming-only selection, native policy and identity checks, accurate reveal diagnostics, report privacy, restore and rollback");
                 completion();
             });
         });

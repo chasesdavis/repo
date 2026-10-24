@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha10, compiled; phone behavior still needs verification.** All three package variants and the UIKit/runtime regression tests passed in [build 40123791616](https://github.com/chasesdavis/repo/actions/runs/40123791616). The RootHide `0.1.0~alpha10` package is published at https://chasesdavis.github.io/repo/. Alpha9 filtering/reveal reports improved, but the tester still reported incorrect Lock Screen behavior; alpha10 changes the list alignment and selection positioning. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha11; build and device validation pending.** The tester reports that alpha10 looks better. Alpha11 adds native Focus-section expansion and redesigned capsule controls. This project starts disabled; native notification previews and authentication remain handled by iOS.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -49,6 +49,18 @@ Rootful is the usual term for what is sometimes called “rooted.” Package for
 ### Build using GitHub Actions
 
 The [build workflow](../../.github/workflows/build-axon-reborn.yml) runs on Axon source changes and can also be started manually. It uses pinned RootHide Theos and a patched iOS 16.5 SDK, runs portable checks, compiles the tweak and Settings bundle for arm64/arm64e, packages all three variants, inspects metadata, and uploads separate artifacts. Use `axon-alpha-roothide` for the first device target. All three variants built successfully on October 24, 2026; this does not establish on-device compatibility. Running the workflow does not install anything on your phone.
+
+### Alpha11 Focus and capsule controls
+
+On iOS 17, choosing an app with matching requests in `upcomingMissedSectionList` invokes the summarized section's checked `_expandSection` action after native history reveal. This is the normal Focus platter action: it calls `notificationListComponent:requestsAuthenticationAndPerformBlock:` before revealing content. Axon does not modify Focus mode, sounds, banners, preview policy, authentication or hidden caches. The action is requested only for an explicit matching app selection and can be disabled with **Expand While in Focus**. iOS owns the resulting expansion lifecycle, just as when the user opens the platter manually. A report status of `native-expand-requested` records the request, not proof that authentication completed.
+
+The behavior is based on the [iOS 17.6.1 summarized-section implementation](https://github.com/SuperChaoM/iPhone15-3_17.6.1_21G101_Restore/blob/95df6b804bee0e01538eb2ddad0413609938d063/System/Library/PrivateFrameworks/UserNotificationsUIKit.framework/NCNotificationSummarizedSectionList.m). The phone runs iOS 17.0, so device verification remains necessary. The contract test covers inactive Focus, nonmatching/all selection, authentication denial, authorized expansion and an already expanded section.
+
+Capsules now have four accent palettes (Mint, Violet, Ocean, Rose), a distinct selected border and count badge, spring press feedback, and count pulses for arrivals. Reduce Motion suppresses these animations and Reduce Transparency uses solid material. The heading shows the selected app and its count out of all indexed requests. Compact mode keeps other apps small while displaying the selected app's name.
+
+Touch and hold an app for **Pin favorite / Unpin favorite** or **Show all notifications**. Up to 32 favorites persist as app identifiers in local settings and appear first, keeping their pin order. Apps with no notifications remain absent until they have requests again. Regular apps keep the user's recent/count ordering. Tapping the selected app again returns to All; this can be disabled in Settings. Existing buttons survive count-only updates so those refreshes do not discard an in-flight touch.
+
+The UIKit regression checks control identity, selection accessibility, menu availability, persistent pin/unpin ordering and the existing mount geometry. A synthetic capsule preview is captured in the CI log for visual inspection; it contains only test data. Native filtering, restore, and history tests remain in place. No notification content is exported by the tweak.
 
 ### Alpha10 selection layout
 
@@ -98,7 +110,7 @@ After updating, respring, enable Axon, and open the Lock Screen with notificatio
 
 The status describes the last observed Lock Screen presentation, not complete compatibility. The report contains runtime view class names, geometry, getter result types and whether the rail intersects the list viewport. It does not include notification text, application or notification identifiers, accessibility labels, object descriptions or screenshots. Reports stay in memory until a diagnostic request; the latest requested report is shared locally through a separate preferences domain and is copied only when you tap the copy action. There is no network upload. A request token prevents an older report from being shown as the current reply.
 
-A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching alpha10 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
+A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching alpha11 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
 
 ## Development safety and limitations
 
@@ -135,4 +147,3 @@ Primary references:
 - https://github.com/roothide/Bootstrap/releases
 - https://github.com/opa334/Dopamine
 - https://github.com/palera1n/palera1n
-

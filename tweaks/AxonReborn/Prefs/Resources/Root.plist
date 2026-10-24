@@ -2,10 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict><key>items</key><array>
   <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>YOUR NOTIFICATIONS, IN FOCUS</string>
-    <key>footerText</key><string>Experimental alpha10. After installing, respring. Enable Axon, then open the Lock Screen with notifications present. If nothing appears, use Check SpringBoard below.</string></dict>
+    <key>footerText</key><string>Experimental alpha11. After installing, respring. Enable Axon, then open the Lock Screen with notifications present. If nothing appears, use Check SpringBoard below.</string></dict>
   <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Enable Axon Reborn</string><key>key</key><string>Enabled</string><key>default</key><false/></dict>
   <dict><key>cell</key><string>PSButtonCell</string><key>label</key><string>Check SpringBoard</string><key>action</key><string>checkSpringBoard</string></dict>
+  <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>CAPSULE CONTROLS</string><key>footerText</key><string>Touch and hold an app capsule to pin it as a favorite or show all notifications. Favorites stay first. Tap the selected capsule again to return to All.</string></dict>
+  <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Tap selected app to show All</string><key>key</key><string>TapSelectedToAll</string><key>default</key><true/></dict>
+  <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>FOCUS</string><key>footerText</key><string>Selecting an app also opens its While in Focus section on iOS 17. Focus still silences sounds and banners. iOS may request Face ID before showing protected content.</string></dict>
+  <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Expand While in Focus</string><key>key</key><string>RevealFocus</string><key>default</key><true/></dict>
   <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>APPEARANCE</string></dict>
+  <dict><key>cell</key><string>PSLinkListCell</string><key>label</key><string>Accent color</string><key>key</key><string>Accent</string><key>default</key><integer>0</integer><key>detail</key><string>PSListItemsController</string><key>validValues</key><array><integer>0</integer><integer>1</integer><integer>2</integer><integer>3</integer></array><key>validTitles</key><array><string>Mint</string><string>Violet</string><string>Ocean</string><string>Rose</string></array></dict>
   <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Compact app capsules</string><key>key</key><string>Compact</string><key>default</key><false/></dict>
   <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Notification counts</string><key>key</key><string>ShowCounts</string><key>default</key><true/></dict>
   <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Selection haptics</string><key>key</key><string>Haptics</string><key>default</key><true/></dict>

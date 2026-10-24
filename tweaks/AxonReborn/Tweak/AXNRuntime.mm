@@ -176,11 +176,11 @@ static void AXNCaptureFilterReport(AXNListState *state) {
         @catch (NSException *exception) { (void)exception; hasCount = NO; }
     }
     state.nativeCountAvailable = hasCount; state.nativeAboveHistoryCount = nativeCount;
-    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d indexedMatchingRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyUpdateCompleted=%d nativeAboveHistoryCountAvailable=%d nativeAboveHistoryCount=%lu coordinator=%@",
+    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d indexedMatchingRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyUpdateCompleted=%d nativeAboveHistoryCountAvailable=%d nativeAboveHistoryCount=%lu coordinator=%@ focus=%@",
         (unsigned long)state.selectionTaps, state->index.selection().has_value(),
         (unsigned long)state->index.visibleKeys().size(), (unsigned long)state.nativeFilter.appliedCount,
         (unsigned long)predicateCalls, (unsigned long)predicateExclusions, state.revealedSelection,
-        hasCount, (unsigned long)nativeCount, state.nativeFilter.revealStatus ?: @"not-requested"];
+        hasCount, (unsigned long)nativeCount, state.nativeFilter.revealStatus ?: @"not-requested", state.nativeFilter.focusStatus ?: @"not-requested"];
 }
 // Read only checked scalar getters; report raw values without guessing enum meanings.
 static NSString *AXNScalar(id object, NSString *name) {
@@ -310,6 +310,10 @@ static void AXNRequestSelectionReveal(AXNListState *state) {
         if (!enabled || !current.ready || current != activeState || current.selectionTaps != generation) return;
         [current.owner.viewIfLoaded layoutIfNeeded];
         current.revealedSelection = [current.nativeFilter revealHistory];
+        if (current.revealedSelection && [AXNReadPreference(@"RevealFocus", @YES) boolValue]) {
+            NSString *app = current->index.selection() ? [NSString stringWithUTF8String:current->index.selection()->c_str()] : nil;
+            [current.nativeFilter revealFocusForApp:app];
+        }
         AXNListMount *mount = objc_getAssociatedObject(current.owner, listMountKey);
         [mount showSelection];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 350 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
@@ -545,6 +549,12 @@ static void AXNRefresh(void) {
     pending = true;
     dispatch_async(dispatch_get_main_queue(), ^{ pending = false; AXNRender(); });
 }
+static void AXNSelectApp(AXNListState *state, NSString *bundleID) {
+    if (bundleID && [AXNReadPreference(@"TapSelectedToAll", @YES) boolValue] &&
+        state->index.selection() == std::optional<std::string>(bundleID.UTF8String)) bundleID = nil;
+    if (bundleID) state->index.select(std::string(bundleID.UTF8String));
+    else state->index.select(std::nullopt);
+}
 static void AXNMountList(UIViewController *owner) {
     if (!useListMount || !enabled || !owner.viewIfLoaded.window) return;
     UIScrollView *list = AXNResolveList(owner);
@@ -573,8 +583,7 @@ static void AXNMountList(UIViewController *owner) {
         if (!nativeFilterHookInstalled || !state.nativeFilter.available) {
             diagnostic = AXNDiagnosticFiltering; AXNCaptureFilterReport(state); return;
         }
-        if (bundleID) state->index.select(std::string(bundleID.UTF8String));
-        else state->index.select(std::nullopt);
+        AXNSelectApp(state, bundleID);
         if (AXNReconcile(state)) {
             AXNRequestSelectionReveal(state);
         }
@@ -599,8 +608,7 @@ static void AXNMount(UIViewController *owner) {
     rail.onSelect = ^(NSString *bundleID) {
         AXNListState *state = activeState;
         if (!enabled || !state.ready) return;
-        if (bundleID) state->index.select(std::string(bundleID.UTF8String));
-        else state->index.select(std::nullopt);
+        AXNSelectApp(state, bundleID);
         AXNReconcile(state); AXNRefresh();
     };
     [stack addArrangedSubview:rail];

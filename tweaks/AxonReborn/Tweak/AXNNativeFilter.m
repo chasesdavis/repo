@@ -38,6 +38,7 @@ static void VoidCall(id object, NSString *name) {
 @property(nonatomic, strong) NSMutableSet<NSString *> *applied;
 @property(nonatomic) BOOL applying;
 @property(nonatomic, readwrite, copy) NSString *revealStatus;
+@property(nonatomic, readwrite, copy) NSString *focusStatus;
 @end
 @implementation AXNNativeFilter
 - (instancetype)initWithOwner:(id)owner {
@@ -78,6 +79,35 @@ static void VoidCall(id object, NSString *name) {
 // The coordinator's sectionRevealed flag is gesture bookkeeping. Its native
 // programmatic reveal path instead updates revealState and revealPercentage.
 // Let the controller own that path and its normal dismissal/reset lifecycle.
+- (void)revealFocusForApp:(NSString *)app {
+    self.focusStatus = @"not-requested";
+    if (!app.length) return;
+    @try {
+        id master = ObjectGetter(self.owner, @"masterList");
+        if (!Signature(master, @"isMissedSectionActive", "Bc", NULL)) { self.focusStatus = @"unavailable"; return; }
+        if (!BoolGetter(master, @"isMissedSectionActive")) { self.focusStatus = @"inactive"; return; }
+        id section = ObjectGetter(master, @"upcomingMissedSectionList");
+        id items = ObjectGetter(section, @"allNotificationRequests");
+        if ([items isKindOfClass:NSSet.class]) items = [items allObjects];
+        if (![items isKindOfClass:NSArray.class] || [items count] > 4096) { self.focusStatus = @"unavailable"; return; }
+        BOOL matched = NO;
+        for (id request in items) {
+            id identifier = ObjectGetter(request, @"sectionIdentifier");
+            if ([identifier isKindOfClass:NSString.class] && [identifier isEqualToString:app]) { matched = YES; break; }
+        }
+        if (!matched) { self.focusStatus = @"no-matching-requests"; return; }
+        id view = ObjectGetter(section, @"sectionListView");
+        if (!Signature(view, @"isGrouped", "Bc", NULL) || !Signature(section, @"_expandSection", "v", NULL)) {
+            self.focusStatus = @"unavailable"; return;
+        }
+        if (!BoolGetter(view, @"isGrouped")) { self.focusStatus = @"already-expanded"; return; }
+        // Use the same section action as tapping the native Focus platter.
+        // It requests authentication itself before exposing its content.
+        // Never change DND configuration, device authentication or caches.
+        VoidCall(section, @"_expandSection");
+        self.focusStatus = @"native-expand-requested";
+    } @catch (NSException *exception) { (void)exception; self.focusStatus = @"exception"; }
+}
 - (BOOL)revealHistory {
     self.revealStatus = @"unavailable";
     SEL selector = NSSelectorFromString(@"revealNotificationHistory:animated:");

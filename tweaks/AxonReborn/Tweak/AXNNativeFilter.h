@@ -8,4 +8,6 @@
 - (BOOL)applyHiddenApps:(NSSet<NSString *> *)apps preservingNativeApps:(NSSet<NSString *> *)nativeApps;
 @property(nonatomic, readonly, copy) NSString *revealStatus;
 - (BOOL)revealHistory;
+@property(nonatomic, readonly, copy) NSString *focusStatus;
+- (void)revealFocusForApp:(NSString *)app;
 @end
