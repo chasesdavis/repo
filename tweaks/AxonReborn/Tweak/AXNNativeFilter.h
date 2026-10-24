@@ -8,5 +8,4 @@
 - (BOOL)applyHiddenApps:(NSSet<NSString *> *)apps preservingNativeApps:(NSSet<NSString *> *)nativeApps;
 @property(nonatomic, readonly, copy) NSString *revealStatus;
 - (BOOL)revealHistory;
-- (BOOL)restoreReveal;
 @end

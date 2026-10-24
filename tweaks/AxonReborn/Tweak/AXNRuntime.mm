@@ -27,7 +27,7 @@ static bool enabled = false;
 static AXNDiagnosticState diagnostic = AXNDiagnosticWaiting;
 static bool hooksInstalled = false, mountSucceeded = false, mountFailed = false;
 static bool useListMount = false;
-static NSString *lastLayoutReport, *lastFilterReport, *lastModelReport;
+static NSString *lastLayoutReport, *lastFilterReport, *lastModelReport, *lastSelectionReport;
 static BOOL (*nativeShouldFilterOriginal)(id, SEL, id, id);
 static NSUInteger predicateCalls = 0, predicateExclusions = 0;
 static bool nativeFilterHookInstalled = false;
@@ -49,7 +49,7 @@ static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &l
 @property(nonatomic) BOOL revealedSelection;
 @property(nonatomic) BOOL selectionSettled;
 @property(nonatomic) BOOL nativeCountAvailable;
-@property(nonatomic) NSUInteger nativeVisibleCount;
+@property(nonatomic) NSUInteger nativeAboveHistoryCount;
 @end
 @implementation AXNListState
 - (instancetype)init {
@@ -175,8 +175,8 @@ static void AXNCaptureFilterReport(AXNListState *state) {
         @try { nativeCount = ((NSUInteger (*)(id, SEL))objc_msgSend)(state.owner, count); }
         @catch (NSException *exception) { (void)exception; hasCount = NO; }
     }
-    state.nativeCountAvailable = hasCount; state.nativeVisibleCount = nativeCount;
-    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d expectedRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyRevealRequested=%d nativeCountAvailable=%d nativeVisibleCount=%lu coordinator=%@",
+    state.nativeCountAvailable = hasCount; state.nativeAboveHistoryCount = nativeCount;
+    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d indexedMatchingRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyUpdateCompleted=%d nativeAboveHistoryCountAvailable=%d nativeAboveHistoryCount=%lu coordinator=%@",
         (unsigned long)state.selectionTaps, state->index.selection().has_value(),
         (unsigned long)state->index.visibleKeys().size(), (unsigned long)state.nativeFilter.appliedCount,
         (unsigned long)predicateCalls, (unsigned long)predicateExclusions, state.revealedSelection,
@@ -190,6 +190,10 @@ static NSString *AXNScalar(id object, NSString *name) {
             return ((BOOL (*)(id, SEL))objc_msgSend)(object, selector) ? @"1" : @"0";
         if (AXNMethodMatches(object_getClass(object), selector, "Q", 2))
             return [NSString stringWithFormat:@"%lu", (unsigned long)((NSUInteger (*)(id, SEL))objc_msgSend)(object, selector)];
+        if (AXNMethodMatches(object_getClass(object), selector, "i", 2))
+            return [NSString stringWithFormat:@"%d", ((int (*)(id, SEL))objc_msgSend)(object, selector)];
+        if (AXNMethodMatches(object_getClass(object), selector, "d", 2))
+            return [NSString stringWithFormat:@"%.2f", ((double (*)(id, SEL))objc_msgSend)(object, selector)];
     } @catch (NSException *exception) { (void)exception; }
     return @"unavailable";
 }
@@ -207,14 +211,19 @@ static NSString *AXNVisibleRect(id view) {
     } @catch (NSException *exception) { (void)exception; return @"unavailable"; }
 }
 // Only structural properties of known list views; never enumerate card content.
-static NSString *AXNListPresentation(id value) {
+static NSString *AXNListPresentation(id value, UIView *root = nil) {
     if (![value isKindOfClass:UIScrollView.class]) return value ? NSStringFromClass([value class]) : @"nil";
     UIScrollView *view = value;
     id visible = AXNObject(view, @"visibleViews");
     NSString *count = [visible isKindOfClass:NSDictionary.class] ? [NSString stringWithFormat:@"%lu", (unsigned long)[visible count]] : @"unavailable";
-    return [NSString stringWithFormat:@"%@ revealed=%@ sublistsRevealed=%@ currentlyVisible=%@ visibleRect=%@ renderedViews=%@ window=%d hidden=%d alpha=%.2f",
+    NSString *placement = @"unavailable";
+    if (root && (view == root || [view isDescendantOfView:root])) {
+        CGRect rect = [view convertRect:view.bounds toView:root];
+        placement = [NSString stringWithFormat:@"(%.0f,%.0f,%.0f,%.0f) intersectsViewport=%d", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, CGRectIntersectsRect(rect, root.bounds)];
+    }
+    return [NSString stringWithFormat:@"%@ revealed=%@ sublistsRevealed=%@ currentlyVisible=%@ visibleRect=%@ cachedChildViews=%@ window=%d hidden=%d alpha=%.2f inMaster=%@",
         NSStringFromClass(view.class), AXNScalar(view, @"isRevealed"), AXNScalar(view, @"areSublistsRevealed"),
-        AXNScalar(view, @"isNotificationListViewCurrentlyVisible"), AXNVisibleRect(view), count, view.window != nil, view.hidden, view.alpha];
+        AXNScalar(view, @"isNotificationListViewCurrentlyVisible"), AXNVisibleRect(view), count, view.window != nil, view.hidden, view.alpha, placement];
 }
 // Traverse collection values only, never dictionary keys, text or descriptions.
 static NSString *AXNRequestCounts(id container, AXNListState *state) {
@@ -242,32 +251,35 @@ static NSString *AXNRequestCounts(id container, AXNListState *state) {
 }
 static NSString *AXNModelReport(AXNListState *state) {
     id master = AXNObject(state.owner, @"masterList");
-    NSMutableString *report = [NSMutableString stringWithFormat:@"Native model: historyRevealed=%@ contentToReveal=%@ displayStyle=%@ totalCount=%@ visibleCount=%@\n",
+    NSMutableString *report = [NSMutableString stringWithFormat:@"Native model: historyRevealed=%@ contentToReveal=%@ displayStyle=%@ totalCount=%@ aboveHistoryCount=%@\n",
         AXNScalar(master, @"isNotificationHistoryRevealed"), AXNScalar(master, @"hasVisibleContentToReveal"),
         AXNScalar(master, @"currentListDisplayStyleSetting"), AXNScalar(master, @"totalNotificationCount"), AXNScalar(master, @"visibleNotificationCount")];
     id coordinator = AXNObject(master, @"revealCoordinator");
-    [report appendFormat:@"Coordinator: class=%@ sectionRevealed=%@ stateLocked=%@ forceRevealed=%@ allowsReveal=%@ allowsTransition=%@ sublists=%lu\n",
-        coordinator ? NSStringFromClass([coordinator class]) : @"nil", AXNScalar(coordinator, @"isSectionRevealed"),
-        AXNScalar(coordinator, @"isSectionRevealedStateLocked"), AXNScalar(coordinator, @"isForceRevealed"),
+    [report appendFormat:@"Coordinator: class=%@ actualRevealed=%@ revealState=%@ revealPercentage=%@ gestureSectionRevealed=%@ stateLocked=%@ allowsReveal=%@ allowsTransition=%@ sublists=%lu\n",
+        coordinator ? NSStringFromClass([coordinator class]) : @"nil", AXNScalar(coordinator, @"_isRevealed"),
+        AXNScalar(coordinator, @"revealState"), AXNScalar(coordinator, @"revealPercentage"),
+        AXNScalar(coordinator, @"isSectionRevealed"), AXNScalar(coordinator, @"isSectionRevealedStateLocked"),
         AXNScalar(coordinator, @"_shouldAllowNotificationListReveal"), AXNScalar(coordinator, @"_shouldAllowNotificationListRevealTransition"),
         (unsigned long)AXNArray(AXNObject(coordinator, @"subLists")).count];
-    [report appendFormat:@"Master view: %@\n", AXNListPresentation(AXNObject(master, @"masterListView"))];
+    id masterView = AXNObject(master, @"masterListView");
+    UIView *root = [masterView isKindOfClass:UIView.class] ? masterView : nil;
+    [report appendFormat:@"Master view: %@\n", AXNListPresentation(masterView, root)];
     NSArray *sublists = AXNArray(AXNObject(coordinator, @"subLists"));
     for (NSUInteger i = 0; i < MIN((NSUInteger)8, sublists.count); ++i)
-        [report appendFormat:@"coordinator view %lu: %@\n", (unsigned long)i + 1, AXNListPresentation(sublists[i])];
+        [report appendFormat:@"coordinator view %lu: %@\n", (unsigned long)i + 1, AXNListPresentation(sublists[i], root)];
     NSMutableArray *pending = [NSMutableArray arrayWithArray:AXNArray(AXNObject(master, @"notificationSections")) ?: @[]];
     NSHashTable *seen = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
     NSUInteger visited = 0;
     while (pending.count && visited++ < 16 && report.length < 4000) {
         id section = pending.firstObject; [pending removeObjectAtIndex:0];
         if ([seen containsObject:section]) continue; [seen addObject:section];
-        [report appendFormat:@"section %lu %@: revealed=%@ visible=%@ groups=%@ notificationCount=%@\n all[%@] filtered[%@] hidden[%@]\n",
+        [report appendFormat:@"section %lu %@: configuredViewRevealed=%@ visible=%@ groups=%@ notificationCount=%@\n all[%@] filtered[%@] hidden[%@]\n",
             (unsigned long)visited, NSStringFromClass([section class]), AXNScalar(section, @"isNotificationListViewRevealed"),
             AXNScalar(section, @"isSectionVisible"), AXNScalar(section, @"count"), AXNScalar(section, @"notificationCount"),
             AXNRequestCounts(AXNObject(section, @"allNotificationRequests"), state),
             AXNRequestCounts(AXNObject(section, @"filteredNotificationRequests"), state),
             AXNRequestCounts(AXNObject(section, @"hiddenNotificationRequests"), state)];
-        [report appendFormat:@" section view: %@\n", AXNListPresentation(AXNObject(section, @"sectionListView"))];
+        [report appendFormat:@" section view: %@\n", AXNListPresentation(AXNObject(section, @"sectionListView"), root)];
         for (NSString *getter in @[@"sectionLists", @"chronologicalSectionLists"]) {
             NSArray *children = AXNArray(AXNObject(section, getter));
             NSUInteger room = 16 - MIN((NSUInteger)16, visited + pending.count);
@@ -281,9 +293,7 @@ static void AXNCapturePresentation(AXNListState *state, NSString *phase) {
     if (!useListMount || !state.ready || !state.selectionTaps) return;
     AXNCaptureFilterReport(state);
     if (state.selectionSettled) {
-        if (state.nativeCountAvailable && state.nativeVisibleCount > 0) diagnostic = AXNDiagnosticReady;
-        else if (!state.revealedSelection) diagnostic = AXNDiagnosticReveal;
-        else if (state.nativeCountAvailable && !state->index.visibleKeys().empty()) diagnostic = AXNDiagnosticZeroVisible;
+        diagnostic = !state.revealedSelection ? AXNDiagnosticReveal : (state->index.size() ? AXNDiagnosticReady : AXNDiagnosticEmpty);
     }
     lastModelReport = [NSString stringWithFormat:@"Sample: %@\n%@", phase, AXNModelReport(state)];
     AXNListMount *mount = objc_getAssociatedObject(state.owner, listMountKey);
@@ -305,6 +315,10 @@ static void AXNRequestSelectionReveal(AXNListState *state) {
             if (!enabled || !settled.ready || settled != activeState || settled.selectionTaps != generation) return;
             settled.selectionSettled = YES;
             AXNCapturePresentation(settled, @"selection-settled");
+            id coordinator = AXNObject(AXNObject(settled.owner, @"masterList"), @"revealCoordinator");
+            lastSelectionReport = [NSString stringWithFormat:@"At selection settle: %@\nactualRevealed=%@ revealState=%@ revealPercentage=%@ gestureSectionRevealed=%@ stateLocked=%@",
+                lastFilterReport, AXNScalar(coordinator, @"_isRevealed"), AXNScalar(coordinator, @"revealState"),
+                AXNScalar(coordinator, @"revealPercentage"), AXNScalar(coordinator, @"isSectionRevealed"), AXNScalar(coordinator, @"isSectionRevealedStateLocked")];
             AXNRefresh();
         });
     });
@@ -314,8 +328,6 @@ static bool AXNRestore(AXNListState *state) {
     bool success = true;
     if (useListMount) {
         success = AXNApplyNativeFilter(state);
-        BOOL revealRestored = [state.nativeFilter restoreReveal];
-        success = success && revealRestored;
         if (!success) { state.ready = NO; diagnostic = AXNDiagnosticReplay; }
         return success;
     }
@@ -509,7 +521,6 @@ static void AXNRender(void) {
         diagnostic = items.count ? AXNDiagnosticReady : AXNDiagnosticEmpty;
         if (useListMount && (!nativeFilterHookInstalled || !state.nativeFilter.available)) diagnostic = AXNDiagnosticFiltering;
         else if (useListMount && state.selectionSettled && !state.revealedSelection) diagnostic = AXNDiagnosticReveal;
-        else if (useListMount && state.selectionSettled && state.nativeCountAvailable && state.nativeVisibleCount == 0 && !state->index.visibleKeys().empty()) diagnostic = AXNDiagnosticZeroVisible;
         AXNCaptureFilterReport(state);
     }
     // Content must not depend on an already visible rail: UIKit may not load or
@@ -552,7 +563,7 @@ static void AXNMountList(UIViewController *owner) {
     mount.rail.onSelect = ^(NSString *bundleID) {
         AXNListState *state = objc_getAssociatedObject(weakOwner, stateKey);
         if (!enabled || !state.ready || state != activeState) return;
-        ++state.selectionTaps;
+        ++state.selectionTaps; lastSelectionReport = nil;
         if (!nativeFilterHookInstalled || !state.nativeFilter.available) {
             diagnostic = AXNDiagnosticFiltering; AXNCaptureFilterReport(state); return;
         }
@@ -692,7 +703,7 @@ __attribute__((constructor)) static void AXNInitialize(void) {
             AXNDiagnosticState result = diagnostic;
             if (hooksInstalled && !enabled) result = AXNDiagnosticDisabled;
             else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = mountDiagnostic;
-            AXNPublishDiagnosticReport(result, [NSString stringWithFormat:@"%@\n%@\n%@", lastFilterReport ?: @"No capsule selection captured yet.", lastModelReport ?: @"No settled selection model captured yet.", lastLayoutReport ?: @"No visible list layout captured yet."]);
+            AXNPublishDiagnosticReport(result, [NSString stringWithFormat:@"%@\n%@\n%@\n%@", lastFilterReport ?: @"No capsule selection captured yet.", lastSelectionReport ?: @"No settled selection sample captured yet.", lastModelReport ?: @"No settled selection model captured yet.", lastLayoutReport ?: @"No visible list layout captured yet."]);
             notify_post(AXNDiagnosticReply(result).UTF8String);
         });
         NSInteger major = NSProcessInfo.processInfo.operatingSystemVersion.majorVersion;

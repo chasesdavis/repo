@@ -28,6 +28,9 @@ static void Require(BOOL condition, const char *message) {
 @property(nonatomic) BOOL childRevealed;
 @property(nonatomic) NSUInteger refetchCalls;
 @property(nonatomic) NSUInteger revealWrites;
+@property(nonatomic) int revealState;
+@property(nonatomic) double revealPercentage;
+@property(nonatomic) BOOL emptySublists;
 @end
 @implementation TestRevealCoordinator
 @synthesize sectionRevealed = _sectionRevealed;
@@ -35,9 +38,10 @@ static void Require(BOOL condition, const char *message) {
 - (BOOL)_shouldAllowNotificationListReveal { return self.allowed; }
 - (BOOL)_shouldAllowNotificationListRevealTransition { return self.transitionAllowed; }
 - (void)_refetchSubListViews { ++self.refetchCalls; }
-- (void)_performRevealForSubviewsIfNecessary { self.childRevealed = self.sectionRevealed; }
+- (void)_performRevealForSubviewsIfNecessary { self.childRevealed = self.revealState != 0 && self.revealPercentage >= 1.0; }
+- (BOOL)_isRevealed { return self.revealState == 2; }
 - (BOOL)isForceRevealed { return NO; }
-- (NSArray *)subLists { return @[]; }
+- (NSArray *)subLists { return self.emptySublists ? @[] : @[[NSObject new]]; }
 @end
 static TestRevealCoordinator *Coordinator(void) {
     TestRevealCoordinator *coordinator = [TestRevealCoordinator new];
@@ -46,10 +50,19 @@ static TestRevealCoordinator *Coordinator(void) {
 @interface TestMaster : NSObject
 @property(nonatomic, strong) NSArray *notificationSections;
 @property(nonatomic, strong) TestRevealCoordinator *revealCoordinator;
-@property(nonatomic) NSUInteger visibilityRefreshCalls;
+@property(nonatomic) BOOL historyRevealed;
 @end
 @implementation TestMaster
-- (void)_updateVisibilityOfHistorySection { ++self.visibilityRefreshCalls; }
+// Model the observed distinction: programmatic reveal sets state/percentage
+// and the interaction lock, but does not set the gesture's sectionRevealed bit.
+- (void)requestHistory:(BOOL)revealed {
+    if (self.historyRevealed == revealed && revealed) return;
+    self.historyRevealed = revealed;
+    self.revealCoordinator.revealState = revealed ? 2 : 0;
+    self.revealCoordinator.revealPercentage = revealed ? 1.0 : 0.0;
+    self.revealCoordinator.sectionRevealedStateLocked = revealed;
+    [self.revealCoordinator _performRevealForSubviewsIfNecessary];
+}
 @end
 @interface ReportList : UIScrollView
 @property(nonatomic) CGRect visibleRect;
@@ -68,12 +81,14 @@ static TestRevealCoordinator *Coordinator(void) {
 @property(nonatomic) NSUInteger removeCalls;
 @property(nonatomic) NSUInteger toggleCalls;
 @property(nonatomic) NSUInteger revealCalls;
+@property(nonatomic) NSUInteger aboveHistoryCount;
 @property(nonatomic, strong) NSMutableArray *operations;
 @property(nonatomic) BOOL historyRevealed;
 @property(nonatomic) BOOL failNextToggle;
 @property(nonatomic, copy) void (^revealEffect)(void);
 @end
 @implementation FilterOwner
+- (NSUInteger)visibleNotificationCount { return self.aboveHistoryCount; }
 - (void)toggleFilteringForSectionIdentifier:(NSString *)app shouldFilter:(BOOL)filter {
     ++self.toggleCalls;
     [self.operations addObject:[NSString stringWithFormat:@"%@:%d", app, filter]];
@@ -82,6 +97,7 @@ static TestRevealCoordinator *Coordinator(void) {
 }
 - (void)revealNotificationHistory:(BOOL)revealed animated:(BOOL)animated {
     (void)animated; ++self.revealCalls; self.historyRevealed = revealed;
+    [self.masterList requestHistory:revealed];
     if (self.revealEffect) self.revealEffect();
 }
 @end
@@ -151,8 +167,14 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     ReportList *reportList = [ReportList new]; reportList.visibleRect = CGRectMake(1, 2, 300, 400);
     reportList.visibleViews = @{@"PRIVATE_VIEW_KEY":@"PRIVATE_CARD_TEXT"};
     NSString *viewReport = AXNListPresentation(reportList);
-    Require([viewReport containsString:@"visibleRect=(1,2,300,400)"] && [viewReport containsString:@"renderedViews=1"] && ![viewReport containsString:@"PRIVATE"], "view report lost geometry or leaked content");
+    Require([viewReport containsString:@"visibleRect=(1,2,300,400)"] && [viewReport containsString:@"cachedChildViews=1"] && ![viewReport containsString:@"PRIVATE"], "view report lost geometry or leaked content");
     Require([AXNVisibleRect([WrongRectList new]) isEqual:@"unavailable"], "wrong rectangle getter signature accepted");
+    UIScrollView *viewport = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 375, 812)];
+    viewport.bounds = CGRectMake(0, -302, 375, 812);
+    reportList.frame = CGRectMake(10, 700, 300, 80); [viewport addSubview:reportList];
+    Require([AXNListPresentation(reportList, viewport) containsString:@"intersectsViewport=0"], "offscreen native list reported in viewport");
+    reportList.frame = CGRectMake(10, 0, 300, 80);
+    Require([AXNListPresentation(reportList, viewport) containsString:@"intersectsViewport=1"], "onscreen native list reported outside viewport");
     Require(AXNRestore(state) && owner.filteredApps.count == 0 && section.allNotificationRequests.count == 3, "All failed to restore notifications");
     [owner.nativeExcludedApps addObject:@"b"]; [owner.filteredApps addObject:@"b"];
     state->index.select(std::string("a")); Require(AXNReconcile(state), "native-policy reconciliation failed");
@@ -163,7 +185,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     AXNListWillDisappear(owner, @selector(viewWillDisappear:), NO);
     Require([lastModelReport containsString:@"Sample: before-disappearance"] && [lastFilterReport containsString:@"appSelected=1"], "final presentation was not sampled before filter cleanup");
     Require(!activeState && owner.filteredApps.count == 0, "leaving list left Axon filters applied");
-    Require(!owner.masterList.revealCoordinator.sectionRevealed && !owner.masterList.revealCoordinator.childRevealed, "leaving list did not restore section reveal state");
+    Require(owner.masterList.revealCoordinator.revealWrites == 0 && owner.masterList.revealCoordinator.childRevealed, "filter cleanup changed native presentation state");
     AXNAttachList(owner); state = objc_getAssociatedObject(owner, stateKey);
     state->index.select(std::string("a")); owner.failNextToggle = YES;
     Require(!AXNReconcile(state) && !state.ready && owner.filteredApps.count == 0, "partial filter failure did not restore native list");
@@ -175,37 +197,43 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     coordinator.allowed = NO;
     Require(![policyFilter revealHistory] && policyOwner.revealCalls == 0 && coordinator.refetchCalls == 0, "native reveal policy bypassed");
     coordinator.allowed = YES; coordinator.transitionAllowed = NO;
-    Require(![policyFilter revealHistory] && policyOwner.revealCalls == 0, "native transition policy bypassed");
-    coordinator.transitionAllowed = YES; coordinator.sectionRevealedStateLocked = YES;
-    Require(![policyFilter revealHistory] && policyOwner.revealCalls == 0 && policyOwner.masterList.visibilityRefreshCalls == 0, "locked hidden state bypassed");
-    coordinator.sectionRevealed = YES;
-    NSUInteger writes = coordinator.revealWrites;
-    Require([policyFilter revealHistory] && [policyFilter.revealStatus isEqual:@"refreshed-locked-reveal"] && coordinator.childRevealed, "locked revealed state was rejected instead of refreshed");
-    Require(policyOwner.revealCalls == 0 && coordinator.revealWrites == writes && coordinator.sectionRevealedStateLocked && policyOwner.masterList.visibilityRefreshCalls == 1, "refresh changed native locked state or omitted model update");
-    Require([policyFilter restoreReveal] && coordinator.sectionRevealed && coordinator.revealWrites == writes, "cleanup changed pre-existing locked reveal");
-    coordinator.sectionRevealedStateLocked = NO; coordinator.sectionRevealed = YES;
-    Require([policyFilter revealHistory] && coordinator.childRevealed && [policyFilter restoreReveal] && coordinator.sectionRevealed, "pre-existing native reveal state was changed");
-    coordinator.sectionRevealed = NO; coordinator.childRevealed = NO;
-    Require([policyFilter revealHistory] && coordinator.childRevealed, "collapsed sections did not reveal");
+    Require([policyFilter revealHistory] && [policyFilter.revealStatus isEqual:@"native-no-history"] && policyOwner.revealCalls == 0, "incoming-only selection treated as reveal failure");
+    coordinator.transitionAllowed = YES;
+    Require([policyFilter revealHistory] && coordinator.childRevealed, "native programmatic reveal failed");
+    Require(coordinator.sectionRevealedStateLocked && !coordinator.sectionRevealed && coordinator.revealWrites == 0, "programmatic state was confused with gesture bookkeeping");
+    coordinator.childRevealed = NO;
+    Require([policyFilter revealHistory] && coordinator.childRevealed && [policyFilter.revealStatus isEqual:@"native-reveal-refreshed"], "locked programmatic state incorrectly rejected or new child views not refreshed");
+    NSString *coordinatorReport = AXNModelReport(state);
+    Require([coordinatorReport containsString:@"actualRevealed=1 revealState=2 revealPercentage=1.00 gestureSectionRevealed=0"], "report did not distinguish actual state from gesture flag");
+    state.ready = YES; state.selectionTaps = 1;
+    state.selectionSettled = YES; state.revealedSelection = YES;
+    state.nativeCountAvailable = YES; state.nativeAboveHistoryCount = 0;
+    AXNCapturePresentation(state, @"test");
+    Require(diagnostic == AXNDiagnosticReady, "zero incoming count was treated as missing history cards");
+    state.revealedSelection = NO; owner.aboveHistoryCount = 1;
+    AXNCapturePresentation(state, @"test");
+    Require(diagnostic == AXNDiagnosticReveal, "failed history request reported ready");
+    state.selectionSettled = NO; owner.aboveHistoryCount = 0;
     coordinator.allowed = NO;
-    Require(![policyFilter revealHistory] && coordinator.childRevealed, "temporary reveal denial collapsed existing sections");
+    NSUInteger calls = policyOwner.revealCalls;
+    Require(![policyFilter revealHistory] && policyOwner.revealCalls == calls && coordinator.childRevealed, "temporary native denial mutated existing presentation");
     coordinator.allowed = YES;
-    TestRevealCoordinator *replacement = Coordinator(); policyOwner.masterList.revealCoordinator = replacement;
-    Require([policyFilter revealHistory] && !coordinator.sectionRevealed && replacement.childRevealed, "coordinator replacement leaked old reveal state");
-    Require([policyFilter restoreReveal] && !replacement.sectionRevealed, "reveal cleanup failed");
-    Require([policyFilter revealHistory], "reveal before native state ownership failed");
-    replacement.sectionRevealedStateLocked = YES; writes = replacement.revealWrites;
-    Require([policyFilter restoreReveal] && replacement.sectionRevealed && replacement.revealWrites == writes, "cleanup changed a state subsequently locked by iOS");
-    replacement.sectionRevealedStateLocked = NO; replacement.sectionRevealed = NO;
-    policyOwner.revealEffect = ^{ replacement.sectionRevealedStateLocked = YES; };
-    Require(![policyFilter revealHistory] && !replacement.sectionRevealed, "state lock acquired during native request was bypassed");
-    policyOwner.revealEffect = nil; replacement.sectionRevealedStateLocked = NO;
-    policyOwner.revealEffect = ^{ replacement.allowed = NO; };
-    Require(![policyFilter revealHistory] && !replacement.sectionRevealed, "policy changed during native request was bypassed");
-    policyOwner.revealEffect = nil; replacement.allowed = YES;
+    // A stale root history flag can make the normal request a no-op. Report
+    // that condition; never manufacture a state or change authentication.
+    coordinator.revealState = 0; coordinator.revealPercentage = 0; coordinator.childRevealed = NO;
+    Require(![policyFilter revealHistory] && [policyFilter.revealStatus isEqual:@"native-request-pending"] && !coordinator.childRevealed, "uncompleted native request was reported as revealed");
+    policyOwner.masterList.historyRevealed = NO;
+    Require([policyFilter revealHistory], "native history reset did not recover");
+    coordinator.emptySublists = YES;
+    Require(![policyFilter revealHistory] && [policyFilter.revealStatus isEqual:@"native-no-sublists"], "empty native sublists were accepted");
+    coordinator.emptySublists = NO;
+    policyOwner.revealEffect = ^{ coordinator.allowed = NO; };
+    calls = coordinator.refetchCalls;
+    Require(![policyFilter revealHistory] && coordinator.refetchCalls == calls, "changed native policy was ignored after request");
+    policyOwner.revealEffect = nil; coordinator.allowed = YES;
     TestMaster *policyMaster = policyOwner.masterList;
     policyOwner.revealEffect = ^{ policyMaster.revealCoordinator = Coordinator(); };
-    Require(![policyFilter revealHistory] && !replacement.sectionRevealed && [policyFilter.revealStatus isEqual:@"native-coordinator-changed"], "request used a replaced coordinator");
+    Require(![policyFilter revealHistory] && [policyFilter.revealStatus isEqual:@"native-coordinator-changed"], "request used a replaced coordinator");
     policyOwner.revealEffect = nil;
     policyOwner.masterList.revealCoordinator = nil;
     Require(![policyFilter revealHistory], "missing coordinator was accepted");
@@ -220,11 +248,15 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
         AXNRequestSelectionReveal(state);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 600 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
             Require(owner.revealCalls == priorReveals + 1 && state.selectionSettled, "current selection failed to settle and reveal");
+            NSString *selectionSample = lastSelectionReport;
+            Require([selectionSample containsString:@"actualRevealed=1"], "settled reveal sample missing");
+            AXNCapturePresentation(state, @"before-disappearance");
+            Require([lastSelectionReport isEqual:selectionSample], "final sample overwrote selection sample");
             ++state.selectionTaps; AXNRequestSelectionReveal(state); activeState = nil;
             dispatch_async(dispatch_get_main_queue(), ^{
                 Require(owner.revealCalls == priorReveals + 1, "offscreen selection revealed history");
                 enabled = false;
-                puts("AXN_RUNTIME_TEST_PASS: filtering, deferred reveal, locked-open refresh, locked-hidden guard, native state ownership, policy/identity rechecks, final presentation sampling, view-report privacy, restore and rollback");
+                puts("AXN_RUNTIME_TEST_PASS: filtering, native programmatic reveal independent of gesture flags, incoming-only selection, native policy and identity checks, accurate reveal diagnostics, report privacy, restore and rollback");
                 completion();
             });
         });

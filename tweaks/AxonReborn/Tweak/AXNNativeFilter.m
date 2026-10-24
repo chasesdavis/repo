@@ -37,9 +37,6 @@ static void VoidCall(id object, NSString *name) {
 @property(nonatomic, weak) id owner;
 @property(nonatomic, strong) NSMutableSet<NSString *> *applied;
 @property(nonatomic) BOOL applying;
-@property(nonatomic, weak) id revealCoordinator;
-@property(nonatomic) BOOL ownsReveal;
-@property(nonatomic) BOOL previousReveal;
 @property(nonatomic, readwrite, copy) NSString *revealStatus;
 @end
 @implementation AXNNativeFilter
@@ -78,28 +75,9 @@ static void VoidCall(id object, NSString *name) {
     @finally { self.applying = NO; }
     return success;
 }
-- (BOOL)restoreReveal {
-    id coordinator = self.revealCoordinator;
-    if (!self.ownsReveal || !coordinator) { self.ownsReveal = NO; return YES; }
-    @try {
-        if (!Signature(coordinator, @"isSectionRevealed", "Bc", NULL) ||
-            !Signature(coordinator, @"isSectionRevealedStateLocked", "Bc", NULL) ||
-            !Signature(coordinator, @"setSectionRevealed:", "v", "Bc") ||
-            !Signature(coordinator, @"_performRevealForSubviewsIfNecessary", "v", NULL)) return NO;
-        // iOS may take ownership by locking a state after our request. Never
-        // change that state during cleanup, including when it is locked open.
-        if (BoolGetter(coordinator, @"isSectionRevealedStateLocked")) {
-            self.ownsReveal = NO; self.revealCoordinator = nil; return YES;
-        }
-        // Restore only the state we set. A later native collapse already wins.
-        if (BoolGetter(coordinator, @"isSectionRevealed")) {
-            ((void (*)(id, SEL, BOOL))objc_msgSend)(coordinator, NSSelectorFromString(@"setSectionRevealed:"), self.previousReveal);
-            VoidCall(coordinator, @"_performRevealForSubviewsIfNecessary");
-        }
-        self.ownsReveal = NO; self.revealCoordinator = nil;
-        return YES;
-    } @catch (NSException *exception) { (void)exception; return NO; }
-}
+// The coordinator's sectionRevealed flag is gesture bookkeeping. Its native
+// programmatic reveal path instead updates revealState and revealPercentage.
+// Let the controller own that path and its normal dismissal/reset lifecycle.
 - (BOOL)revealHistory {
     self.revealStatus = @"unavailable";
     SEL selector = NSSelectorFromString(@"revealNotificationHistory:animated:");
@@ -107,52 +85,43 @@ static void VoidCall(id object, NSString *name) {
     @try {
         id master = ObjectGetter(self.owner, @"masterList");
         id coordinator = ObjectGetter(master, @"revealCoordinator");
-        if (self.revealCoordinator != coordinator && ![self restoreReveal]) { self.revealStatus = @"restore-failed"; return NO; }
-        for (NSString *name in @[@"_shouldAllowNotificationListReveal", @"_shouldAllowNotificationListRevealTransition", @"isSectionRevealed", @"isSectionRevealedStateLocked"])
+        for (NSString *name in @[@"_shouldAllowNotificationListReveal", @"_shouldAllowNotificationListRevealTransition", @"_isRevealed"])
             if (!Signature(coordinator, name, "Bc", NULL)) return NO;
         for (NSString *name in @[@"_refetchSubListViews", @"_performRevealForSubviewsIfNecessary"])
             if (!Signature(coordinator, name, "v", NULL)) return NO;
-        if (!Signature(coordinator, @"setSectionRevealed:", "v", "Bc")) return NO;
-        if (!Signature(master, @"_updateVisibilityOfHistorySection", "v", NULL)) return NO;
-        // Native policy and interaction locks take precedence. Never set forceRevealed,
-        // authentication, preview permissions or an inferred display-style enum.
-        if (!BoolGetter(coordinator, @"_shouldAllowNotificationListReveal") ||
-            !BoolGetter(coordinator, @"_shouldAllowNotificationListRevealTransition")) {
+        if (!BoolGetter(coordinator, @"_shouldAllowNotificationListReveal")) {
             self.revealStatus = @"native-policy-denied"; return NO;
         }
-        BOOL locked = BoolGetter(coordinator, @"isSectionRevealedStateLocked");
-        if (locked && !BoolGetter(coordinator, @"isSectionRevealed")) {
-            self.revealStatus = @"native-locked-hidden"; return NO;
+        // The native transition gate checks whether history has any requests.
+        // An app with only incoming notifications needs no history transition.
+        if (!BoolGetter(coordinator, @"_shouldAllowNotificationListRevealTransition")) {
+            self.revealStatus = @"native-no-history"; return YES;
         }
-        // A lock can hold an already revealed state (observed on iOS 17).
-        // Refresh that presentation without changing the lock or reveal flag.
-        if (!locked) ((void (*)(id, SEL, BOOL, BOOL))objc_msgSend)(self.owner, selector, YES, YES);
-        // The normal request can replace the coordinator, change policy or lock
-        // the state. Recheck before changing anything; do not act on a stale one.
-        if (ObjectGetter(master, @"revealCoordinator") != coordinator) { self.revealStatus = @"native-coordinator-changed"; return NO; }
-        if (!BoolGetter(coordinator, @"_shouldAllowNotificationListReveal") ||
-            !BoolGetter(coordinator, @"_shouldAllowNotificationListRevealTransition")) {
+        ((void (*)(id, SEL, BOOL, BOOL))objc_msgSend)(self.owner, selector, YES, NO);
+        if (ObjectGetter(self.owner, @"masterList") != master || ObjectGetter(master, @"revealCoordinator") != coordinator) {
+            self.revealStatus = @"native-coordinator-changed"; return NO;
+        }
+        if (!BoolGetter(coordinator, @"_shouldAllowNotificationListReveal")) {
             self.revealStatus = @"native-policy-denied"; return NO;
         }
-        locked = BoolGetter(coordinator, @"isSectionRevealedStateLocked");
-        if (!BoolGetter(coordinator, @"isSectionRevealed")) {
-            if (locked) { self.revealStatus = @"native-locked-hidden"; return NO; }
-            if (!self.ownsReveal) {
-                self.previousReveal = NO;
-                self.revealCoordinator = coordinator;
-                self.ownsReveal = YES;
-            }
-            ((void (*)(id, SEL, BOOL))objc_msgSend)(coordinator, NSSelectorFromString(@"setSectionRevealed:"), YES);
+        if (!BoolGetter(coordinator, @"_shouldAllowNotificationListRevealTransition")) {
+            self.revealStatus = @"native-no-history"; return YES;
         }
-        // Reconcile model visibility using iOS's history-specific update, then
-        // let its coordinator propagate the existing reveal to native subviews.
-        VoidCall(master, @"_updateVisibilityOfHistorySection");
+        if (!BoolGetter(coordinator, @"_isRevealed")) {
+            self.revealStatus = @"native-request-pending"; return NO;
+        }
+        // Filtering can create new sublist views after the native reveal state
+        // was entered. Refresh those views using the existing native state.
         VoidCall(coordinator, @"_refetchSubListViews");
+        NSArray *sublists = ObjectGetter(coordinator, @"subLists");
+        if (![sublists isKindOfClass:NSArray.class] || !sublists.count) {
+            self.revealStatus = @"native-no-sublists"; return NO;
+        }
         VoidCall(coordinator, @"_performRevealForSubviewsIfNecessary");
-        self.revealStatus = locked ? @"refreshed-locked-reveal" : @"section-update-sent";
+        self.revealStatus = @"native-reveal-refreshed";
         return YES;
     } @catch (NSException *exception) {
-        (void)exception; self.revealStatus = @"exception"; [self restoreReveal]; return NO;
+        (void)exception; self.revealStatus = @"exception"; return NO;
     }
 }
 @end
