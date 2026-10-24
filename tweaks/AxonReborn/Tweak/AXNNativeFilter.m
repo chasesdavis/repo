@@ -111,7 +111,7 @@ static void VoidCall(id object, NSString *name) {
         // authentication, preview permissions or an inferred display-style enum.
         if (!BoolGetter(coordinator, @"_shouldAllowNotificationListReveal") ||
             !BoolGetter(coordinator, @"_shouldAllowNotificationListRevealTransition")) {
-            self.revealStatus = @"native-policy-denied"; [self restoreReveal]; return NO;
+            self.revealStatus = @"native-policy-denied"; return NO;
         }
         if (BoolGetter(coordinator, @"isSectionRevealedStateLocked")) { self.revealStatus = @"native-state-locked"; return NO; }
         ((void (*)(id, SEL, BOOL, BOOL))objc_msgSend)(self.owner, selector, YES, YES);

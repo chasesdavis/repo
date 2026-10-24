@@ -152,6 +152,9 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     Require([policyFilter revealHistory] && coordinator.childRevealed && [policyFilter restoreReveal] && coordinator.sectionRevealed, "pre-existing native reveal state was changed");
     coordinator.sectionRevealed = NO; coordinator.childRevealed = NO;
     Require([policyFilter revealHistory] && coordinator.childRevealed, "collapsed sections did not reveal");
+    coordinator.allowed = NO;
+    Require(![policyFilter revealHistory] && coordinator.childRevealed, "temporary reveal denial collapsed existing sections");
+    coordinator.allowed = YES;
     TestRevealCoordinator *replacement = Coordinator(); policyOwner.masterList.revealCoordinator = replacement;
     Require([policyFilter revealHistory] && !coordinator.sectionRevealed && replacement.childRevealed, "coordinator replacement leaked old reveal state");
     Require([policyFilter restoreReveal] && !replacement.sectionRevealed, "reveal cleanup failed");
