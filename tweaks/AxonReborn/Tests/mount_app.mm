@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+extern void AXNRunRuntimeTests(void);
+
 static void Check(BOOL condition, const char *message) {
     if (!condition) { fprintf(stderr, "AXN_UI_TEST_FAIL: %s\n", message); fflush(stderr); exit(1); }
 }
@@ -54,6 +56,22 @@ static void Check(BOOL condition, const char *message) {
         [mount updateVisible:YES];
         [list layoutIfNeeded];
         Check([mount updateVisible:YES], "mounted selector has no visible layout");
+        __block NSString *tapped = nil;
+        __block NSUInteger taps = 0;
+        mount.rail.onSelect = ^(NSString *app) { tapped = app; ++taps; };
+        NSMutableArray<UIView *> *buttonSearch = [NSMutableArray arrayWithObject:mount.rail];
+        UIButton *appButton = nil, *allButton = nil;
+        while (buttonSearch.count) {
+            UIView *view = buttonSearch.lastObject; [buttonSearch removeLastObject];
+            if ([view isKindOfClass:UIButton.class]) {
+                if ([view.accessibilityLabel isEqual:@"Test"]) appButton = (UIButton *)view;
+                if ([view.accessibilityLabel isEqual:@"All"]) allButton = (UIButton *)view;
+            } else [buttonSearch addObjectsFromArray:view.subviews];
+        }
+        [appButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+        Check(taps == 1 && [tapped isEqual:@"example.test"], "app capsule did not dispatch selection");
+        [allButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+        Check(taps == 2 && tapped == nil, "All capsule did not dispatch reset");
         Check(mount.rail.superview == list, "selector is not in the notification collection");
         CGFloat expected = MAX(106, [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline].pointSize * 2 + 68);
         Check(fabs(list.contentInset.top - 24 - expected) < 0.5, "missing reserved inset");
@@ -131,6 +149,7 @@ static void Check(BOOL condition, const char *message) {
         Check(!AXNReadDiagnosticResponse(request) && !AXNReadDiagnosticResponse(nextRequest), "stale diagnostic accepted");
         AXNPublishDiagnosticReport(AXNDiagnosticCollection, report);
         Check(AXNReadDiagnosticResponse(nextRequest) != nil && AXNReadDiagnosticResponse(request) == nil, "response correlation failed");
+        AXNRunRuntimeTests();
         puts("AXN_UI_TEST_PASS: collection and native-class scroll mounts; resolver guards; layout privacy; diagnostic correlation");
         fflush(stdout); exit(0);
     });

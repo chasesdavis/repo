@@ -9,7 +9,7 @@ sdk="$(xcrun --sdk iphonesimulator --show-sdk-path)"
 arch="$(uname -m)"
 device="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(v["udid"] for k,a in d["devices"].items() if "iOS" in k for v in a if v.get("isAvailable") and "iPhone" in v["name"]))')"
 xcrun clang++ -arch "$arch" -target "$arch-apple-ios15.0-simulator" -isysroot "$sdk" -fobjc-arc -std=gnu++17 -x objective-c++ \
-  Tests/mount_app.mm Tweak/AXNListMount.mm Tweak/AXNListResolver.m Tweak/AXNRailView.m Shared/AXNPreferences.m \
+  Tests/mount_app.mm Tests/runtime_tests.mm Tweak/AXNListMount.mm Tweak/AXNListResolver.m Tweak/AXNNativeFilter.m Tweak/AXNRailView.m Shared/AXNPreferences.m \
   -framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics -framework CoreFoundation -o "$app/AxonMountTest"
 python3 - "$app/Info.plist" <<'PY'
 import plistlib,sys

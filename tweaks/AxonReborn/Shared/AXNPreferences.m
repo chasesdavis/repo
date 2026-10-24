@@ -20,7 +20,9 @@ NSString *AXNDiagnosticMessage(NSUInteger state) {
         @"Axon stopped filtering after a native update failed. Disable Axon and respring before testing again.",
         @"This build supports testing on iOS 15 through 17 only.",
         @"Axon read the notifications, but could not identify the native notification scroll view. Tap Copy Layout Report and send it with your test result.",
-        @"Axon found the notification scroll view, but its selector has not completed layout. Open Notification Center with a notification present, then check again. If it persists, tap Copy Layout Report."
+        @"Axon found the notification scroll view, but its selector has not completed layout. Open Notification Center with a notification present, then check again. If it persists, tap Copy Layout Report.",
+        @"The native app-filtering interface is unavailable. No selection filter was applied. Copy the layout report for diagnosis.",
+        @"Axon applied its app filter, but could not request notification-history reveal. Swipe up to reveal history, then copy the layout report if cards are still missing."
     ];
     return state < messages.count ? messages[state] : @"Unknown diagnostic state.";
 }
@@ -43,7 +45,7 @@ void AXNPublishDiagnosticReport(NSUInteger state, NSString *report) {
     SyncDiagnostic();
     id request = ReadDiagnostic(CFSTR("request"));
     if (![request isKindOfClass:NSString.class] || [request length] > 64) return;
-    NSDictionary *response = @{@"request":request, @"version":@"alpha4", @"state":@(state),
+    NSDictionary *response = @{@"request":request, @"version":@"alpha5", @"state":@(state),
         @"report":[report substringToIndex:MIN(report.length, (NSUInteger)8192)]};
     CFPreferencesSetValue(CFSTR("response"), (__bridge CFDictionaryRef)response, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     SyncDiagnostic();
@@ -52,7 +54,7 @@ NSDictionary *AXNReadDiagnosticResponse(NSString *request) {
     SyncDiagnostic();
     id response = ReadDiagnostic(CFSTR("response"));
     if (![response isKindOfClass:NSDictionary.class]) return nil;
-    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"alpha4"] ||
+    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"alpha5"] ||
         ![response[@"report"] isKindOfClass:NSString.class] || [response[@"report"] length] > 8192 ||
         ![response[@"state"] isKindOfClass:NSNumber.class] || [response[@"state"] unsignedIntegerValue] >= AXNDiagnosticStateCount) return nil;
     return response;

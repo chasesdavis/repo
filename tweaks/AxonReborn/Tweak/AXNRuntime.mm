@@ -3,11 +3,19 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
+#ifndef AXN_RUNTIME_TEST
 #import <substrate.h>
+#else
+// The test harness supplies original methods directly; it does not inject hooks.
+static void MSHookMessageEx(Class cls, SEL sel, IMP replacement, IMP *original) {
+    (void)cls; (void)sel; (void)replacement; (void)original;
+}
+#endif
 #import <notify.h>
 #import "AXNRailView.h"
 #import "AXNListMount.h"
 #import "AXNListResolver.h"
+#import "AXNNativeFilter.h"
 #import "../Shared/AXNPreferences.h"
 #include "../Core/NotificationIndex.hpp"
 #include <cstring>
@@ -19,7 +27,10 @@ static bool enabled = false;
 static AXNDiagnosticState diagnostic = AXNDiagnosticWaiting;
 static bool hooksInstalled = false, mountSucceeded = false, mountFailed = false;
 static bool useListMount = false;
-static NSString *lastLayoutReport;
+static NSString *lastLayoutReport, *lastFilterReport;
+static BOOL (*nativeShouldFilterOriginal)(id, SEL, id, id);
+static NSUInteger predicateCalls = 0, predicateExclusions = 0;
+static bool nativeFilterHookInstalled = false;
 static AXNDiagnosticState mountDiagnostic = AXNDiagnosticMount;
 static bool presentedContent = false;
 static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &listMountKey;
@@ -33,6 +44,9 @@ static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &l
 @property(nonatomic, strong) NSMutableDictionary<NSArray<NSString *> *, id> *requests;
 @property(nonatomic) BOOL ready;
 @property(nonatomic) BOOL replaying;
+@property(nonatomic, strong) AXNNativeFilter *nativeFilter;
+@property(nonatomic) NSUInteger selectionTaps;
+@property(nonatomic) BOOL revealedSelection;
 @end
 @implementation AXNListState
 - (instancetype)init {
@@ -115,9 +129,63 @@ static bool AXNReplay(AXNListState *state, AXNEvent event, id request) {
     @finally { state.replaying = previous; }
     return success;
 }
+// Read the original native policy directly, so Axon never takes ownership of
+// exclusions already imposed by iOS. These identifiers remain in memory only.
+static NSSet<NSString *> *AXNNativeExclusions(AXNListState *state) {
+    NSMutableSet *excluded = [NSMutableSet new];
+    if (!nativeShouldFilterOriginal) return excluded;
+    id master = AXNObject(state.owner, @"masterList");
+    for (NSArray<NSString *> *key in state.requests) {
+        if (nativeShouldFilterOriginal(state.owner, NSSelectorFromString(@"notificationMasterList:shouldFilterNotificationRequest:"), master, state.requests[key]))
+            [excluded addObject:key.firstObject];
+    }
+    return excluded;
+}
+static BOOL AXNShouldFilter(id owner, SEL command, id master, id request) {
+    BOOL native = nativeShouldFilterOriginal(owner, command, master, request);
+    if (native || !NSThread.isMainThread) return native;
+    AXNListState *state = objc_getAssociatedObject(owner, stateKey);
+    if (!enabled || !state.ready || state != activeState || !state->index.selection()) return native;
+    ++predicateCalls;
+    axon::Record record;
+    BOOL excluded = AXNRecord(request, record) && !state->index.includes(record.key);
+    if (excluded) ++predicateExclusions;
+    return excluded;
+}
+static BOOL AXNApplyNativeFilter(AXNListState *state) {
+    NSMutableSet<NSString *> *hidden = [NSMutableSet new];
+    if (state->index.selection()) for (const auto &group : state->index.groups(axon::Sort::Identifier))
+        if (group.app != *state->index.selection()) [hidden addObject:[NSString stringWithUTF8String:group.app.c_str()]];
+    BOOL previous = state.replaying; state.replaying = YES;
+    BOOL success = NO;
+    @try { success = [state.nativeFilter applyHiddenApps:hidden preservingNativeApps:AXNNativeExclusions(state)]; }
+    @catch (NSException *exception) { (void)exception; }
+    @finally { state.replaying = previous; }
+    return success;
+}
+static void AXNCaptureFilterReport(AXNListState *state) {
+    if (!state.selectionTaps) return;
+    NSUInteger nativeCount = 0;
+    SEL count = NSSelectorFromString(@"visibleNotificationCount");
+    BOOL hasCount = AXNMethodMatches(state.owner.class, count, "Q", 2);
+    if (hasCount) {
+        @try { nativeCount = ((NSUInteger (*)(id, SEL))objc_msgSend)(state.owner, count); }
+        @catch (NSException *exception) { (void)exception; hasCount = NO; }
+    }
+    lastFilterReport = [NSString stringWithFormat:@"Selection: taps=%lu appSelected=%d expectedRequests=%lu appliedAppRules=%lu predicateCalls=%lu predicateExclusions=%lu historyRevealRequested=%d nativeCountAvailable=%d nativeVisibleCount=%lu",
+        (unsigned long)state.selectionTaps, state->index.selection().has_value(),
+        (unsigned long)state->index.visibleKeys().size(), (unsigned long)state.nativeFilter.appliedCount,
+        (unsigned long)predicateCalls, (unsigned long)predicateExclusions, state.revealedSelection,
+        hasCount, (unsigned long)nativeCount];
+}
 static bool AXNRestore(AXNListState *state) {
     state->index.select(std::nullopt);
     bool success = true;
+    if (useListMount) {
+        success = AXNApplyNativeFilter(state);
+        if (!success) { state.ready = NO; diagnostic = AXNDiagnosticReplay; }
+        return success;
+    }
     for (const auto &key : state->index.visibleKeys()) {
         if (state->visible.count(key)) continue;
         if (AXNReplay(state, Insert, state.requests[AXNKey(key)])) state->visible.insert(key);
@@ -132,6 +200,10 @@ static bool AXNRestore(AXNListState *state) {
 }
 static bool AXNReconcile(AXNListState *state) {
     if (!state.ready) return false;
+    if (useListMount) {
+        if (AXNApplyNativeFilter(state)) return true;
+        AXNRestore(state); state.ready = NO; diagnostic = AXNDiagnosticReplay; return false;
+    }
     std::set<axon::Key> desired = state->index.visibleKeys();
     auto current = state->visible;
     for (const auto &key : current) {
@@ -170,6 +242,9 @@ static void AXNAttachList(UIViewController *owner) {
     [listOwners addObject:owner];
     if (!enabled) return;
     AXNListState *state = objc_getAssociatedObject(owner, stateKey);
+    // viewDidLoad, viewWillAppear and viewDidAppear can refer to the same
+    // presentation. Do not reset a live selection when an appearance repeats.
+    if (state && state == activeState) { AXNRefresh(); return; }
     // Re-read the native snapshot on every presentation; offscreen changes can
     // bypass this controller. Never revive a failed adapter without a respring.
     if (state) {
@@ -180,6 +255,7 @@ static void AXNAttachList(UIViewController *owner) {
     NSArray *snapshot = AXNSnapshot(owner);
     if (!snapshot) { diagnostic = AXNDiagnosticSnapshot; NSLog(@"[Axon Reborn] Snapshot interface unavailable; using native notifications."); return; }
     state = [AXNListState new]; state.owner = owner;
+    if (useListMount) state.nativeFilter = [[AXNNativeFilter alloc] initWithOwner:owner];
     for (id request in snapshot) {
         axon::Record record;
         if (!AXNRecord(request, record)) { diagnostic = AXNDiagnosticRequest; return; }
@@ -223,9 +299,9 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
         diagnostic = AXNDiagnosticRequest;
         return AXNCallOriginal(owner, event, request);
     }
-    bool shouldCall = event == Remove
+    bool shouldCall = useListMount || (event == Remove
         ? state->visible.count(record.key) || !state->index.contains(record.key)
-        : state->index.includes(record.key);
+        : state->index.includes(record.key));
     bool success = !shouldCall || AXNCallOriginal(owner, event, request);
     if (!success) return false;
     if (event == Remove) {
@@ -235,7 +311,7 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
         state->index.upsert(record); state.requests[AXNKey(record.key)] = request;
         if (shouldCall) state->visible.insert(record.key);
     }
-    AXNReconcile(state); AXNRefresh();
+    AXNReconcile(state); AXNCaptureFilterReport(state); AXNRefresh();
     return success;
 }
 #define AXN_EVENT_CALLBACKS(Name, Event) \
@@ -296,7 +372,12 @@ static void AXNRender(void) {
             } else [mount updateVisible:NO];
         }
     }
-    if (enabled && state.ready) diagnostic = items.count ? AXNDiagnosticReady : AXNDiagnosticEmpty;
+    if (enabled && state.ready) {
+        diagnostic = items.count ? AXNDiagnosticReady : AXNDiagnosticEmpty;
+        if (useListMount && (!nativeFilterHookInstalled || !state.nativeFilter.available)) diagnostic = AXNDiagnosticFiltering;
+        else if (useListMount && state.selectionTaps && !state.revealedSelection) diagnostic = AXNDiagnosticReveal;
+        AXNCaptureFilterReport(state);
+    }
     // Content must not depend on an already visible rail: UIKit may not load or
     // present the adjunct controller until isPresentingContent returns YES.
     bool hasContent = enabled && state.ready && items.count > 0;
@@ -337,9 +418,17 @@ static void AXNMountList(UIViewController *owner) {
     mount.rail.onSelect = ^(NSString *bundleID) {
         AXNListState *state = objc_getAssociatedObject(weakOwner, stateKey);
         if (!enabled || !state.ready || state != activeState) return;
+        ++state.selectionTaps;
+        if (!nativeFilterHookInstalled || !state.nativeFilter.available) {
+            diagnostic = AXNDiagnosticFiltering; AXNCaptureFilterReport(state); return;
+        }
         if (bundleID) state->index.select(std::string(bundleID.UTF8String));
         else state->index.select(std::nullopt);
-        AXNReconcile(state); AXNRefresh();
+        if (AXNReconcile(state)) {
+            state.revealedSelection = [state.nativeFilter revealHistory];
+            if (!state.revealedSelection) diagnostic = AXNDiagnosticReveal;
+        }
+        AXNCaptureFilterReport(state); AXNRefresh();
     };
     objc_setAssociatedObject(owner, listMountKey, mount, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [rails addObject:mount.rail];
@@ -466,7 +555,7 @@ __attribute__((constructor)) static void AXNInitialize(void) {
             AXNDiagnosticState result = diagnostic;
             if (hooksInstalled && !enabled) result = AXNDiagnosticDisabled;
             else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = mountDiagnostic;
-            AXNPublishDiagnosticReport(result, lastLayoutReport ?: @"No visible list layout captured yet.");
+            AXNPublishDiagnosticReport(result, [NSString stringWithFormat:@"%@\n%@", lastLayoutReport ?: @"No visible list layout captured yet.", lastFilterReport ?: @"No capsule selection captured yet."]);
             notify_post(AXNDiagnosticReply(result).UTF8String);
         });
         NSInteger major = NSProcessInfo.processInfo.operatingSystemVersion.majorVersion;
@@ -488,6 +577,11 @@ __attribute__((constructor)) static void AXNInitialize(void) {
             char type[16] = {};
             method_getReturnType(class_getInstanceMethod(list, hooks[i].selector), type, sizeof(type));
             hooks[i].result = *AXNUnqualified(type);
+        }
+        SEL predicate = NSSelectorFromString(@"notificationMasterList:shouldFilterNotificationRequest:");
+        if (useListMount && AXNMethodMatches(list, predicate, "B", 4)) {
+            MSHookMessageEx(list, predicate, (IMP)AXNShouldFilter, (IMP *)&nativeShouldFilterOriginal);
+            nativeFilterHookInstalled = true;
         }
         states = [NSHashTable weakObjectsHashTable]; rails = [NSHashTable weakObjectsHashTable];
         listOwners = [NSHashTable weakObjectsHashTable]; hostOwners = [NSHashTable weakObjectsHashTable];
