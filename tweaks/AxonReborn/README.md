@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental source, not an installable or device-verified release.** No `.deb` is included. The native code has not been compiled with an iOS SDK in this workspace. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40052371674). The RootHide `0.1.0~alpha1` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -48,7 +48,7 @@ Rootful is the usual term for what is sometimes called “rooted.” Package for
 
 ### Build using GitHub Actions
 
-An **unrun** manual workflow is included in [`.github/workflows/build-axon-reborn.yml`](../../.github/workflows/build-axon-reborn.yml). From this repository, run **Actions → Build Axon Reborn (experimental) → Run workflow**. It configures pinned RootHide Theos on macOS, runs the portable checks, attempts all three package builds, and uploads separate artifacts. Use the `axon-alpha-roothide` artifact for the first device target, only after reviewing its successful build log and package metadata. This workflow has not been executed here and may need SDK/toolchain adjustments before its first successful native compile. Running it does not install anything on your phone.
+The [build workflow](../../.github/workflows/build-axon-reborn.yml) runs on Axon source changes and can also be started manually. It uses pinned RootHide Theos and a patched iOS 16.5 SDK, runs portable checks, compiles the tweak and Settings bundle for arm64/arm64e, packages all three variants, inspects metadata, and uploads separate artifacts. Use `axon-alpha-roothide` for the first device target. All three variants built successfully on October 24, 2026; this does not establish on-device compatibility. Running the workflow does not install anything on your phone.
 
 ## Development safety and limitations
 
@@ -65,7 +65,7 @@ An **unrun** manual workflow is included in [`.github/workflows/build-axon-rebor
 
 `bash scripts/test.sh` compiles the portable index with C++17 and warnings-as-errors. It tests identifier collisions across apps, duplicate updates, selected-app removal, recency recalculation, deterministic ordering, and **20,000 seeded randomized notification events** against a reference model. It also parses the XML plists, evaluates all three Makefile configurations, checks package bounds and validates shell syntax.
 
-These checks do **not** compile UIKit/Objective-C++ code, exercise Theos packaging, verify injection, or prove notification safety on an iPhone. See `docs/DEVICE_TESTING.md` for those release gates and `docs/SOURCE_AUDIT.md` for reference findings.
+The portable checks do **not** verify injection or notification safety on an iPhone. Separately, CI successfully compiled the native UIKit/Objective-C++ sources and packaged rootful, rootless and RootHide builds. The published RootHide artifact was inspected for architecture, package contents and Mach-O dependencies. See `docs/DEVICE_TESTING.md` for those release gates and `docs/SOURCE_AUDIT.md` for reference findings.
 
 The standalone HTML preview was also exercised in headless Chromium: filtering, simulated arrivals, privacy demo, last-app removal fallback, compact/count controls, ordering, empty state and reset. It produced no page errors or horizontal page overflow at 1440, 1024, 768, 390 and 320 pixels. Desktop and mobile renders were visually inspected. `Tests/preview.spec.cjs` reproduces these checks with Playwright installed; this is browser validation, not native iOS validation.
 

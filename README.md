@@ -4,7 +4,7 @@ This repo contains a first tranche of Bootstrap-compatible, roothide Theos tweak
 
 ## Tweaks
 
-- [Axon Reborn](tweaks/AxonReborn): experimental iOS 15–17 notification-grouping redesign, with RootHide Bootstrap on iOS 17 as the first test target. Source, interactive preview and a manual macOS build workflow are included; native compilation and device compatibility remain unverified.
+- [Axon Reborn](tweaks/AxonReborn): experimental iOS 15–17 notification-grouping redesign, with RootHide Bootstrap on iOS 17 as the first test target. Source, interactive preview and a macOS build workflow are included. All three package variants compile in CI; the experimental RootHide package is published for device testing and starts disabled. Device compatibility remains unverified.
 - AuraDock: dock glow and ambient dock styling.
 - KineticBadges: animated notification badge changes.
 - VelvetAlerts: softer notification/banner presentation.
@@ -76,22 +76,10 @@ Then add the printed `http://<mac-lan-ip>:8088/` URL to Sileo.
 
 ## Publishing to Sileo (important)
 
-GitHub Pages serves the **`gh-pages` branch**, not `main`.
+GitHub Pages deploys the `repo/` directory from `main` through [Deploy Sileo repo to Pages](.github/workflows/deploy-pages.yml).
 
-After building packages into `repo/`:
+After adding packages, regenerate the indexes with `scripts/package-repo.sh`, commit the package and metadata changes under `repo/`, and push to `main`. Wait for the Pages deployment to succeed before refreshing Sileo.
 
-```bash
-./scripts/package-repo.sh
-git add -A && git commit -m "..." && git push origin main
-./scripts/publish-pages.sh   # syncs repo/ → gh-pages
-```
+Sileo source URL: https://chasesdavis.github.io/repo/
 
-Sileo source URL:
-
-```text
-https://chasesdavis.github.io/repo/
-```
-
-If a package is on `main` but missing in Sileo, you forgot `publish-pages.sh`.
-
-
+The older `scripts/publish-pages.sh` flow is not required by the current Actions deployment.
