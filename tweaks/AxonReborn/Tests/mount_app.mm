@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Public UIKit integration test. Does not emulate SpringBoard private APIs.
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #import "../Tweak/AXNListMount.h"
 #import "../Tweak/AXNListResolver.h"
@@ -117,7 +118,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:mount.rail.bounds.size format:format];
         UIImage *preview = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
             [UIColor.blackColor setFill]; UIRectFill(mount.rail.bounds);
-            [mount.rail drawViewHierarchyInRect:mount.rail.bounds afterScreenUpdates:NO];
+            [mount.rail.layer renderInContext:context.CGContext];
             (void)context;
         }];
         printf("AXN_RAIL_PREVIEW:%s\n", [UIImagePNGRepresentation(preview) base64EncodedStringWithOptions:0].UTF8String);
