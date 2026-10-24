@@ -7,6 +7,7 @@
 #import <notify.h>
 #import "AXNRailView.h"
 #import "AXNListMount.h"
+#import "AXNListResolver.h"
 #import "../Shared/AXNPreferences.h"
 #include "../Core/NotificationIndex.hpp"
 #include <cstring>
@@ -18,6 +19,7 @@ static bool enabled = false;
 static AXNDiagnosticState diagnostic = AXNDiagnosticWaiting;
 static bool hooksInstalled = false, mountSucceeded = false, mountFailed = false;
 static bool useListMount = false;
+static NSString *lastLayoutReport;
 static AXNDiagnosticState mountDiagnostic = AXNDiagnosticMount;
 static bool presentedContent = false;
 static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &listMountKey;
@@ -290,6 +292,7 @@ static void AXNRender(void) {
                 mountSucceeded = [mount updateVisible:YES];
                 mountFailed = !mountSucceeded;
                 mountDiagnostic = AXNDiagnosticGeometry;
+                lastLayoutReport = AXNDescribeLayout(owner, mount.scrollView, mount.rail);
             } else [mount updateVisible:NO];
         }
     }
@@ -314,43 +317,22 @@ static void AXNRefresh(void) {
     pending = true;
     dispatch_async(dispatch_get_main_queue(), ^{ pending = false; AXNRender(); });
 }
-// Resolve the collection through a checked getter first, then through a bounded
-// UIKit hierarchy walk. Never choose between multiple possible lists or inspect
-// notification card contents. Stop descending at each collection view.
-static UICollectionView *AXNCollection(UIViewController *owner) {
-    UIView *root = owner.viewIfLoaded;
-    if (!root) return nil;
-    id candidate = AXNObject(owner, @"collectionView");
-    if ([candidate isKindOfClass:UICollectionView.class] &&
-        (candidate == root || [candidate isDescendantOfView:root])) return candidate;
-    NSMutableArray<UIView *> *pending = [NSMutableArray arrayWithObject:root];
-    UICollectionView *found = nil;
-    NSUInteger visited = 0;
-    while (pending.count && visited++ < 256) {
-        UIView *view = pending.lastObject; [pending removeLastObject];
-        if ([view isKindOfClass:AXNRailView.class]) continue;
-        if ([view isKindOfClass:UICollectionView.class]) {
-            if (found) return nil;
-            found = (UICollectionView *)view;
-        } else [pending addObjectsFromArray:view.subviews];
-    }
-    return pending.count ? nil : found;
-}
 static void AXNMountList(UIViewController *owner) {
     if (!useListMount || !enabled || !owner.viewIfLoaded.window) return;
-    UICollectionView *collection = AXNCollection(owner);
+    UIScrollView *list = AXNResolveList(owner);
     AXNListMount *mount = objc_getAssociatedObject(owner, listMountKey);
-    if (mount && (mount.collection != collection || mount.rail.superview != collection)) {
+    if (mount && (mount.scrollView != list || mount.rail.superview != list)) {
         [rails removeObject:mount.rail]; [mount detach];
         objc_setAssociatedObject(owner, listMountKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         mount = nil;
     }
-    if (!collection) {
+    lastLayoutReport = AXNDescribeLayout(owner, list, mount.rail);
+    if (!list) {
         mountSucceeded = false; mountFailed = true; mountDiagnostic = AXNDiagnosticCollection;
         return;
     }
     if (mount) return;
-    mount = [[AXNListMount alloc] initWithCollection:collection];
+    mount = [[AXNListMount alloc] initWithScrollView:list];
     __weak UIViewController *weakOwner = owner;
     mount.rail.onSelect = ^(NSString *bundleID) {
         AXNListState *state = objc_getAssociatedObject(weakOwner, stateKey);
@@ -420,6 +402,7 @@ static void AXNListDidLayout(id self, SEL command) {
     else if (mount && ((UIViewController *)self).viewIfLoaded.window && state->index.size()) {
         mountSucceeded = [mount updateVisible:YES]; mountFailed = !mountSucceeded;
         mountDiagnostic = AXNDiagnosticGeometry;
+        lastLayoutReport = AXNDescribeLayout(self, mount.scrollView, mount.rail);
     }
 }
 static void AXNListWillDisappear(id self, SEL command, BOOL animated) {
@@ -476,13 +459,14 @@ __attribute__((constructor)) static void AXNInitialize(void) {
     @autoreleasepool {
         if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]) return;
         // Register before compatibility checks so a rejected adapter can explain
-        // itself. Replies are fixed states, never notification data.
+        // itself. Reports contain bounded view metadata, never notification data.
         static int diagnosticToken;
         notify_register_dispatch(AXNDiagnosticQuery.UTF8String, &diagnosticToken, dispatch_get_main_queue(), ^(int token) {
             (void)token;
             AXNDiagnosticState result = diagnostic;
             if (hooksInstalled && !enabled) result = AXNDiagnosticDisabled;
             else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = mountDiagnostic;
+            AXNPublishDiagnosticReport(result, lastLayoutReport ?: @"No visible list layout captured yet.");
             notify_post(AXNDiagnosticReply(result).UTF8String);
         });
         NSInteger major = NSProcessInfo.processInfo.operatingSystemVersion.majorVersion;

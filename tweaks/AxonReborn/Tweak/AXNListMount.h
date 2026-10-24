@@ -2,8 +2,8 @@
 #import "AXNRailView.h"
 @interface AXNListMount : NSObject
 @property(nonatomic, strong, readonly) AXNRailView *rail;
-@property(nonatomic, weak, readonly) UICollectionView *collection;
-- (instancetype)initWithCollection:(UICollectionView *)collection;
+@property(nonatomic, weak, readonly) UIScrollView *scrollView;
+- (instancetype)initWithScrollView:(UIScrollView *)scrollView;
 - (BOOL)updateVisible:(BOOL)visible;
 - (void)detach;
 @end

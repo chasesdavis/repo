@@ -19,10 +19,43 @@ NSString *AXNDiagnosticMessage(NSUInteger state) {
         @"Axon attached to the notification list and mounted its selector during the last Lock Screen presentation. On iOS 17 the selector scrolls with the list; scroll to its top to see it. This confirms attachment, not complete device compatibility.",
         @"Axon stopped filtering after a native update failed. Disable Axon and respring before testing again.",
         @"This build supports testing on iOS 15 through 17 only.",
-        @"Axon read the notifications, but could not identify one native notification collection view. The iOS 17 list mount needs another adapter update.",
-        @"Axon found the notification collection, but it has not completed a visible layout. Open Notification Center with a notification present, then check again."
+        @"Axon read the notifications, but could not identify the native notification scroll view. Tap Copy Layout Report and send it with your test result.",
+        @"Axon found the notification scroll view, but its selector has not completed layout. Open Notification Center with a notification present, then check again. If it persists, tap Copy Layout Report."
     ];
     return state < messages.count ? messages[state] : @"Unknown diagnostic state.";
+}
+// Separate from settings so diagnostics do not trigger preference reloads.
+static CFStringRef const DiagnosticDomain = CFSTR("com.chasesdavis.axonreborn.diagnostics");
+static void SyncDiagnostic(void) {
+    CFPreferencesSynchronize(DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+}
+static id ReadDiagnostic(CFStringRef key) {
+    return CFBridgingRelease(CFPreferencesCopyValue(key, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+}
+NSString *AXNBeginDiagnosticQuery(void) {
+    NSString *request = NSUUID.UUID.UUIDString;
+    CFPreferencesSetValue(CFSTR("request"), (__bridge CFStringRef)request, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    CFPreferencesSetValue(CFSTR("response"), NULL, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    SyncDiagnostic();
+    return request;
+}
+void AXNPublishDiagnosticReport(NSUInteger state, NSString *report) {
+    SyncDiagnostic();
+    id request = ReadDiagnostic(CFSTR("request"));
+    if (![request isKindOfClass:NSString.class] || [request length] > 64) return;
+    NSDictionary *response = @{@"request":request, @"version":@"alpha4", @"state":@(state),
+        @"report":[report substringToIndex:MIN(report.length, (NSUInteger)8192)]};
+    CFPreferencesSetValue(CFSTR("response"), (__bridge CFDictionaryRef)response, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    SyncDiagnostic();
+}
+NSDictionary *AXNReadDiagnosticResponse(NSString *request) {
+    SyncDiagnostic();
+    id response = ReadDiagnostic(CFSTR("response"));
+    if (![response isKindOfClass:NSDictionary.class]) return nil;
+    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"alpha4"] ||
+        ![response[@"report"] isKindOfClass:NSString.class] || [response[@"report"] length] > 8192 ||
+        ![response[@"state"] isKindOfClass:NSNumber.class] || [response[@"state"] unsignedIntegerValue] >= AXNDiagnosticStateCount) return nil;
+    return response;
 }
 id AXNReadPreference(NSString *key, id fallback) {
     id value = CFBridgingRelease(CFPreferencesCopyValue((__bridge CFStringRef)key,

@@ -7,6 +7,7 @@
 @property(nonatomic, strong) NSMutableArray<NSNumber *> *diagnosticTokens;
 @property(nonatomic) BOOL waitingForDiagnostic;
 @property(nonatomic) NSUInteger diagnosticGeneration;
+@property(nonatomic, copy) NSString *diagnosticRequest;
 @end
 @implementation AXNSettingsController
 - (NSArray *)specifiers {
@@ -30,7 +31,10 @@
         if (notify_register_dispatch(AXNDiagnosticReply(state).UTF8String, &token, dispatch_get_main_queue(), ^(int t) {
             (void)t;
             AXNSettingsController *controller = weakSelf;
-            if (controller.waitingForDiagnostic) [controller showDiagnostic:AXNDiagnosticMessage(state)];
+            if (!controller.waitingForDiagnostic) return;
+            NSDictionary *response = AXNReadDiagnosticResponse(controller.diagnosticRequest);
+            if (response) [controller showDiagnostic:AXNDiagnosticMessage([response[@"state"] unsignedIntegerValue]) report:response[@"report"]];
+            else [controller showDiagnostic:[AXNDiagnosticMessage(state) stringByAppendingString:@"\n\nNo matching alpha4 layout report arrived. Respring after upgrading; if this persists, diagnostic preference sharing may be blocked."] report:nil];
         }) == NOTIFY_STATUS_OK) [self.diagnosticTokens addObject:@(token)];
     }
 }
@@ -38,18 +42,23 @@
     if (self.waitingForDiagnostic) return;
     self.waitingForDiagnostic = YES;
     NSUInteger generation = ++self.diagnosticGeneration;
+    self.diagnosticRequest = AXNBeginDiagnosticQuery();
     notify_post(AXNDiagnosticQuery.UTF8String);
     __weak typeof(self) weakSelf = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         AXNSettingsController *controller = weakSelf;
         if (controller.waitingForDiagnostic && controller.diagnosticGeneration == generation)
-            [controller showDiagnostic:@"No response from Axon in SpringBoard. Confirm alpha3 is installed, respring, and check that your Bootstrap configuration allows this tweak in SpringBoard. A blocked diagnostic notification can also cause this result."];
+            [controller showDiagnostic:@"No response from Axon in SpringBoard. Confirm alpha4 is installed, respring, and check that your Bootstrap configuration allows this tweak in SpringBoard. A blocked diagnostic notification can also cause this result." report:nil];
     });
 }
-- (void)showDiagnostic:(NSString *)message {
+- (void)showDiagnostic:(NSString *)message report:(NSString *)report {
     self.waitingForDiagnostic = NO;
     if (!self.view.window) return;
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Axon alpha3 — SpringBoard" message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Axon alpha4 — SpringBoard" message:message preferredStyle:UIAlertControllerStyleAlert];
+    if (report.length) [alert addAction:[UIAlertAction actionWithTitle:@"Copy Layout Report" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        (void)action;
+        UIPasteboard.generalPasteboard.string = [NSString stringWithFormat:@"%@\n\n%@", message, report];
+    }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }

@@ -5,7 +5,7 @@ FOUNDATION_EXPORT NSString * const AXNPreferencesChanged;
 FOUNDATION_EXPORT id AXNReadPreference(NSString *key, id fallback);
 FOUNDATION_EXPORT void AXNWritePreference(NSString *key, id value);
 FOUNDATION_EXPORT void AXNSynchronizePreferences(void);
-// Fixed diagnostic states only. No notification content or identifiers cross processes.
+// Diagnostic states and bounded layout metadata. No notification content or identifiers.
 typedef NS_ENUM(NSUInteger, AXNDiagnosticState) {
     AXNDiagnosticWaiting, AXNDiagnosticDisabled, AXNDiagnosticClasses,
     AXNDiagnosticSignatures, AXNDiagnosticSnapshot, AXNDiagnosticRequest,
@@ -16,3 +16,6 @@ typedef NS_ENUM(NSUInteger, AXNDiagnosticState) {
 FOUNDATION_EXPORT NSString * const AXNDiagnosticQuery;
 FOUNDATION_EXPORT NSString *AXNDiagnosticReply(NSUInteger state);
 FOUNDATION_EXPORT NSString *AXNDiagnosticMessage(NSUInteger state);
+FOUNDATION_EXPORT NSString *AXNBeginDiagnosticQuery(void);
+FOUNDATION_EXPORT void AXNPublishDiagnosticReport(NSUInteger state, NSString *report);
+FOUNDATION_EXPORT NSDictionary *AXNReadDiagnosticResponse(NSString *request);
