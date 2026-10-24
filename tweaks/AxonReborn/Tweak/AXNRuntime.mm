@@ -200,7 +200,9 @@ static NSString *AXNVisibleRect(id view) {
     char type[256] = {}; method_getReturnType(method, type, sizeof(type));
     if (strcmp(type, @encode(CGRect))) return @"unavailable";
     @try {
-        CGRect rect = ((CGRect (*)(id, SEL))objc_msgSend)(view, selector);
+        // Calling the checked IMP handles structure-return ABIs on both device
+        // arm64 and Intel simulator hosts without an objc_msgSend_stret cast.
+        CGRect rect = ((CGRect (*)(id, SEL))method_getImplementation(method))(view, selector);
         return [NSString stringWithFormat:@"(%.0f,%.0f,%.0f,%.0f)", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
     } @catch (NSException *exception) { (void)exception; return @"unavailable"; }
 }
