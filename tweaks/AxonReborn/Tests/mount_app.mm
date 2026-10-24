@@ -58,6 +58,9 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
 }
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
     fputs("AXN_UI_STAGE: application launched\n", stderr); fflush(stderr);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 45 * NSEC_PER_SEC), dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        fputs("AXN_UI_TEST_FAIL: application test watchdog expired; see last stage marker\n", stderr); fflush(stderr); exit(1);
+    });
     AXNRunPreferenceTests();
     self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
     UIViewController *controller = [UIViewController new];
@@ -261,6 +264,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(!AXNReadDiagnosticResponse(request) && !AXNReadDiagnosticResponse(nextRequest), "stale diagnostic accepted");
         AXNPublishDiagnosticReport(AXNDiagnosticCollection, report);
         Check(AXNReadDiagnosticResponse(nextRequest) != nil && AXNReadDiagnosticResponse(request) == nil, "response correlation failed");
+        fputs("AXN_UI_STAGE: feature tests\n", stderr); fflush(stderr);
         AXNRunRailFeatureTests(controller);
         fputs("AXN_UI_STAGE: runtime tests\n", stderr); fflush(stderr);
         AXNRunRuntimeTests(^{

@@ -37,6 +37,7 @@ static void RunAction(UIButton *button, NSString *name) {
     Expect(action && action.actionHandler && action.actionHandler(action), "accessibility action failed");
 }
 void AXNRunRailFeatureTests(UIViewController *parent) {
+    fputs("AXN_FEATURE_STAGE: start\n", stderr); fflush(stderr);
     NSArray *keys = @[@"PinnedApps", @"Density", @"Motion", @"Compact", @"ShowCounts"];
     NSMutableDictionary *saved = [NSMutableDictionary new];
     for (NSString *key in keys) saved[key] = AXNReadPreference(key, @0);
@@ -64,6 +65,7 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     Expect([alpha.accessibilityValue isEqualToString:@"1 notification"], "singular count is incorrect");
     __block NSUInteger allTaps = 0;
     rail.onSelect = ^(NSString *app) { if (!app) ++allTaps; };
+    fputs("AXN_FEATURE_STAGE: favorites\n", stderr); fflush(stderr);
     RunAction(alpha, @"Pin favorite"); RunAction(beta, @"Pin favorite");
     RunAction(beta, @"Move favorite first");
     Expect(stack.arrangedSubviews[1] == beta, "VoiceOver favorite reorder failed");
@@ -71,6 +73,7 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     Expect(allTaps == 1, "VoiceOver Show All did not reach selection handler");
     RunAction(alpha, @"Unpin favorite"); RunAction(beta, @"Unpin favorite");
     [rail updateWithItems:@[a, b] selected:a.bundleID];
+    fputs("AXN_FEATURE_STAGE: coalescing\n", stderr); fflush(stderr);
     [alpha setHighlighted:YES];
     [rail updateWithItems:@[b, a] selected:b.bundleID];
     Expect(stack.arrangedSubviews[1] == alpha && (alpha.accessibilityTraits & UIAccessibilityTraitSelected),
@@ -84,6 +87,7 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     Expect((beta.accessibilityTraits & UIAccessibilityTraitSelected) != 0, "deceleration changed selection presentation early");
     rail.simulatedDeceleration = NO; [rail scrollViewDidEndDecelerating:nil];
     Expect(!(beta.accessibilityTraits & UIAccessibilityTraitSelected), "scroll completion did not flush latest selection");
+    fputs("AXN_FEATURE_STAGE: density\n", stderr); fflush(stderr);
     CGFloat previous = 0, previousCapsule = 0;
     for (NSNumber *density in @[@0, @1, @2]) {
         AXNWritePreference(@"Density", density); [rail updateWithItems:@[a, b] selected:b.bundleID];
@@ -95,9 +99,11 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     }
     for (NSString *category in @[UIContentSizeCategoryLarge, UIContentSizeCategoryExtraExtraExtraLarge,
                                  UIContentSizeCategoryAccessibilityExtraExtraExtraLarge]) {
+        fprintf(stderr, "AXN_FEATURE_STAGE: category %s\n", category.UTF8String); fflush(stderr);
         [parent setOverrideTraitCollection:[UITraitCollection traitCollectionWithPreferredContentSizeCategory:category]
             forChildViewController:host];
         for (NSNumber *width in @[@320, @375, @430]) {
+            fprintf(stderr, "AXN_FEATURE_STAGE: width %.0f\n", width.doubleValue); fflush(stderr);
             host.view.frame = CGRectMake(0, 0, width.doubleValue, 700);
             [rail updateWithItems:@[a, b] selected:b.bundleID]; [host.view setNeedsLayout]; [host.view layoutIfNeeded];
             Expect(fabs(rail.bounds.size.width - width.doubleValue) < 1 &&
@@ -124,14 +130,7 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
             }
         }
     }
-    host.view.frame = CGRectMake(0, 0, 375, 700);
-    [rail updateWithItems:@[a, b] selected:b.bundleID]; [host.view layoutIfNeeded];
-    UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat defaultFormat]; format.scale = 1;
-    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:rail.bounds.size format:format];
-    UIImage *preview = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
-        [UIColor.blackColor setFill]; UIRectFill(rail.bounds); [rail.layer renderInContext:context.CGContext];
-    }];
-    printf("AXN_LARGE_PREVIEW:%s\n", [UIImagePNGRepresentation(preview) base64EncodedStringWithOptions:0].UTF8String); fflush(stdout);
+    fputs("AXN_FEATURE_STAGE: preferences and cleanup\n", stderr); fflush(stderr);
     AXNWritePreference(@"ShowCounts", @NO); AXNWritePreference(@"Compact", @YES);
     [rail updateWithItems:@[a, b] selected:b.bundleID]; [host.view layoutIfNeeded];
     Expect([beta.accessibilityValue hasPrefix:@"1001 notifications"], "visual count preference removed accessible count");
