@@ -4,6 +4,7 @@ This repo contains a first tranche of Bootstrap-compatible, roothide Theos tweak
 
 ## Tweaks
 
+- [Axon Reborn](tweaks/AxonReborn): experimental iOS 15–17 notification-grouping redesign, with RootHide Bootstrap on iOS 17 as the first test target. Source, interactive preview and a manual macOS build workflow are included; native compilation and device compatibility remain unverified.
 - AuraDock: dock glow and ambient dock styling.
 - KineticBadges: animated notification badge changes.
 - VelvetAlerts: softer notification/banner presentation.
@@ -92,4 +93,5 @@ https://chasesdavis.github.io/repo/
 ```
 
 If a package is on `main` but missing in Sileo, you forgot `publish-pages.sh`.
+
 

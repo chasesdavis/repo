@@ -1,0 +1,44 @@
+name: Build Axon Reborn (experimental)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    name: ${{ matrix.variant }} (unverified alpha)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: tweaks/AxonReborn
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [roothide, rootless, rootful]
+    env:
+      THEOS: ${{ runner.temp }}/axon-theos
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install packaging tools
+        run: brew install ldid dpkg
+      - name: Set up pinned RootHide Theos and its vendor dependencies
+        run: |
+          git clone --no-checkout https://github.com/roothide/theos.git "$THEOS"
+          git -C "$THEOS" checkout cfba89a53a05b4a1b822121158acc3669c20602f
+          git -C "$THEOS" submodule update --init --recursive
+          xcrun --sdk iphoneos --show-sdk-path
+      - name: Test portable state and package configuration
+        run: bash scripts/test.sh
+      - name: Compile and package
+        run: bash scripts/build.sh "${{ matrix.variant }}"
+      - name: Inspect package metadata
+        run: |
+          for package in packages/*.deb; do
+            dpkg-deb -I "$package"
+            dpkg-deb -c "$package"
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: axon-alpha-${{ matrix.variant }}
+          path: tweaks/AxonReborn/packages/*.deb
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>items</key><array>
+  <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>YOUR NOTIFICATIONS, IN FOCUS</string>
+    <key>footerText</key><string>Development preview. Enable, then close and reopen the Lock Screen. Compatibility with each iOS version and jailbreak still requires device testing.</string></dict>
+  <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Enable Axon Reborn</string><key>key</key><string>Enabled</string><key>default</key><false/></dict>
+  <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>APPEARANCE</string></dict>
+  <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Compact app capsules</string><key>key</key><string>Compact</string><key>default</key><false/></dict>
+  <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Notification counts</string><key>key</key><string>ShowCounts</string><key>default</key><true/></dict>
+  <dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Selection haptics</string><key>key</key><string>Haptics</string><key>default</key><true/></dict>
+  <dict><key>cell</key><string>PSLinkListCell</string><key>label</key><string>Order apps</string><key>key</key><string>Sort</string><key>default</key><integer>0</integer>
+    <key>detail</key><string>PSListItemsController</string><key>validValues</key><array><integer>0</integer><integer>1</integer></array><key>validTitles</key><array><string>Most recent</string><string>Most notifications</string></array></dict>
+  <dict><key>cell</key><string>PSGroupCell</string><key>footerText</key><string>Notification previews and actions stay in the native iOS cards. The selector reads app identity, icon, timestamp and count, and retains native request objects in memory while filtering. No notification text is exported or saved. Unknown hook signatures leave native notifications active. If notifications fail to restore, disable Axon Reborn and respring using your jailbreak app.</string></dict>
+  <dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>CREDITS</string><key>footerText</key><string>Original Axon: Nepeta &amp; Baw Appie. iOS 16 reference fork: dakotadawolfe. Axon Reborn is an independent experimental redesign, distributed under GPL-3.0-only.</string></dict>
+</array><key>title</key><string>Axon Reborn</string></dict></plist>
