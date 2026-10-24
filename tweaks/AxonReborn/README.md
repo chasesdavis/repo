@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40095451087). The RootHide `0.1.0~alpha8` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha, compiled but not device-verified.** All three package variants passed the [native CI build](https://github.com/chasesdavis/repo/actions/runs/40113204705). The RootHide `0.1.0~alpha9` package is published at https://chasesdavis.github.io/repo/ for device testing. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -50,37 +50,19 @@ Rootful is the usual term for what is sometimes called “rooted.” Package for
 
 The [build workflow](../../.github/workflows/build-axon-reborn.yml) runs on Axon source changes and can also be started manually. It uses pinned RootHide Theos and a patched iOS 16.5 SDK, runs portable checks, compiles the tweak and Settings bundle for arm64/arm64e, packages all three variants, inspects metadata, and uploads separate artifacts. Use `axon-alpha-roothide` for the first device target. All three variants built successfully on October 24, 2026; this does not establish on-device compatibility. Running the workflow does not install anything on your phone.
 
-### Alpha8 refresh of an already revealed locked state
+### Alpha9 native reveal and diagnostic correction
 
-The alpha7 device report showed `sectionRevealed=1`, `stateLocked=1` and both native reveal gates allowing the operation. All restored 324 requests with no filtered caches, but the visible count remained zero and the history sections still reported unrevealed. Alpha7 rejected the operation solely because of the lock. This report does not establish the meaning of the private display-style enum.
+The alpha8 device report recorded a revealed history list with five cached child views, while the coordinator's gesture flag was false and its state lock was true. The previous adapter misclassified this combination as hidden.
 
-Alpha8 distinguishes a state locked open from one locked hidden. For a locked-open state, it leaves the native lock and reveal flag unchanged, calls the checked master-list `_updateVisibilityOfHistorySection` method, refreshes the coordinator's sublist references and requests its normal subview update. A locked-hidden state or denied native gate still stops the operation. The unlocked path rechecks coordinator identity, policy and lock after the normal history request. Cleanup respects a state subsequently locked by iOS.
+Inspection of the [iOS 17.6.1 coordinator implementation](https://github.com/SuperChaoM/iPhone15-3_17.6.1_21G101_Restore/blob/95df6b804bee0e01538eb2ddad0413609938d063/System/Library/PrivateFrameworks/UserNotificationsUIKit.framework/NCNotificationListRevealCoordinator.m) shows that programmatic reveal updates the actual state and reveal percentage, and locks the interaction state, without setting the gesture's `sectionRevealed` flag. That flag is not a reliable test for whether programmatic reveal completed. The [master-list implementation](https://github.com/SuperChaoM/iPhone15-3_17.6.1_21G101_Restore/blob/95df6b804bee0e01538eb2ddad0413609938d063/System/Library/PrivateFrameworks/UserNotificationsUIKit.framework/NCNotificationMasterList.m) also shows that `visibleNotificationCount` counts incoming content above history, rather than all rendered history notifications. Earlier alpha6–8 interpretations of those fields were incorrect and are superseded here.
 
-The report now captures the last presentation before disappearance and filter cleanup, including any manual history swipe after the earlier selection sample. A `Sample:` label identifies when it was captured. It adds native list visible rectangles, rendered-view counts, sublist reveal flags and chronological section traversal. It does not enumerate card content or export request identifiers, dictionary keys or message text.
+Alpha9 uses the normal controller history request, checks the coordinator's `_isRevealed` result and refreshes newly created sublist views using that native state. It removes direct gesture-flag changes, the inferred lock rejection and the extra history-visibility update. Native reveal policy still takes precedence. An empty-history transition gate is handled without a false error for incoming-only selections. A pending native request is reported without manufacturing a reveal state. Cleanup restores Axon's app filters and leaves normal presentation cleanup to iOS.
 
-Simulator contract tests cover locked-open refresh without state writes, locked-hidden rejection, native policy/identity changes during a request, cleanup after iOS takes ownership, final presentation sampling, rectangle signature validation and report privacy. These tests use controlled doubles, not Apple's private implementation. Physical-device verification is still required.
+The [section-list implementation](https://github.com/SuperChaoM/iPhone15-3_17.6.1_21G101_Restore/blob/95df6b804bee0e01538eb2ddad0413609938d063/System/Library/PrivateFrameworks/UserNotificationsUIKit.framework/NCNotificationStructuredSectionList.m) distinguishes configured view defaults from current presentation and includes authentication-related hidden-cache handling. Hidden requests therefore remain owned by iOS; Axon does not change authentication, preview permissions or those caches.
 
-### Alpha7 child-section reveal coordinator
+Reports label the raw count as above-history content, include actual reveal state/percentage and distinguish the gesture flag. They preserve both the selection-settled summary and the later presentation sample. Native list coordinates are converted into the master viewport, and cached child views are counted without reading their contents. A cached-view count is not a count of readable notification cards or proof of correct filtering.
 
-The device was already using List display mode. With All selected, alpha6 restored all 323 requests and cleared all filtered caches, but the combined history and summarized sections still reported unrevealed. This narrows the remaining issue to native section presentation, not app-filter restoration.
-
-Alpha7 keeps the app filter and adds a checked `NCNotificationListRevealCoordinator` path. It consults the coordinator's native reveal/transition gates and section-state lock, requests history reveal, refreshes its sublist references, sets its normal section-revealed state, and asks it to update the child views. Missing signatures, a denied gate or a locked state stop this path. It does not set force-reveal, authentication, preview permissions or a guessed display-style enum.
-
-The previous section-revealed state is retained and restored when the list leaves presentation, Axon is disabled, or the coordinator is replaced. A later native collapse is respected. A transient denial of another reveal request does not itself collapse an existing presentation.
-
-Simulator contract tests cover stale child sections, native reveal and transition denial, locked interaction state, preserving an already revealed state, cleanup, coordinator replacement and missing coordinator handling. These test doubles validate the adapter's control flow, not the private implementation on the phone. The change still needs device testing.
-
-The report adds the coordinator class, section-revealed and lock flags, native permission results, sublist count and a fixed result label. No notification content or identifiers are exported.
-
-### Alpha6 reveal timing and native-model diagnostics
-
-The alpha5 device report recorded seven taps, 27 expected requests, 41 applied app rules and a successful reveal method call, but zero native visible notifications. This proves the callback and filter predicate are running; it does not establish where the selected requests are stored or whether native history opened.
-
-Alpha6 hides other apps before restoring the newly selected app, then requests history reveal on the next main-queue turn after layout. Stale selections and controllers that have become inactive cannot run deferred reveal. A bounded sample 350 ms later records the model. This addresses a possible ordering/timing problem; it is not a confirmed diagnosis of the device's blank list.
-
-The report now includes the native history-revealed flag, content-to-reveal flag, raw display-style value, section visibility/reveal flags and aggregate total/selected request counts in all/filtered/hidden containers. Combined sections are traversed with limits and duplicate protection. Unknown getters and unparsed container contents are marked explicitly. No dictionary keys, app identifiers, request identifiers, text or object descriptions are exported. The new zero-visible diagnostic describes the mismatch instead of reporting mount success alone.
-
-Simulator tests verify hide-before-restore ordering, deferred reveal, rapid-selection and offscreen cancellation, model-count reporting and omission of dictionary keys, alongside the existing filtering/restore tests. They still do not emulate SpringBoard. After upgrading and respringing, select an app, wait a second, test All, and copy the report if the cards remain absent.
+The reference implementation is iOS 17.6.1; the test phone runs iOS 17.0. Runtime signature checks and simulator contract tests reduce adapter errors but do not establish equivalence between those versions. The tests cover programmatic reveal with a false gesture flag, native policy and identity changes, empty history, pending requests, view geometry, privacy and retention of separate samples. Physical app-selection testing remains required.
 
 ### Alpha5 iOS 17 selection
 
@@ -88,7 +70,7 @@ Alpha4 mounted the capsules on the test device, but the user reported that selec
 
 Alpha5 uses the checked native `toggleFilteringForSectionIdentifier:shouldFilter:` interface for existing app groups on iOS 17. It also hooks `notificationMasterList:shouldFilterNotificationRequest:` to preserve the native decision and add the selected-app restriction for incoming requests. The iOS 17 event hooks now forward insert, remove and modify operations to iOS instead of suppressing or replaying request lifecycles for presentation filtering. iOS 15–16 retain the earlier adapter.
 
-Selecting an app or All requests `revealNotificationHistory:YES animated:YES` (deferred until after layout in alpha6). Repeated appearance callbacks in the same active presentation no longer reset selection. All, disabling and leaving the list restore only app rules owned by Axon; exclusions reported by the original native policy are retained. A partial mutation failure attempts rollback and disables that controller's filter.
+Selecting an app or All requests native history reveal after layout. Repeated appearance callbacks in the same active presentation no longer reset selection. All, disabling and leaving the list restore only app rules owned by Axon; exclusions reported by the original native policy are retained. A partial mutation failure attempts rollback and disables that controller's filter.
 
 Simulator contract tests exercise the actual runtime reconciliation code against a fake controller: switching apps, All, native policy precedence, arrivals and dismissals, repeated appearance, history reveal, disappearance cleanup and partial-failure rollback. Capsule UIAction dispatch is also tested. These tests validate our control flow and method contract, not Apple's private implementation. On-device filtering and history presentation still need verification.
 
@@ -108,7 +90,7 @@ After updating, respring, enable Axon, and open the Lock Screen with notificatio
 
 The status describes the last observed Lock Screen presentation, not complete compatibility. The report contains runtime view class names, geometry, getter result types and whether the rail intersects the list viewport. It does not include notification text, application or notification identifiers, accessibility labels, object descriptions or screenshots. Reports stay in memory until a diagnostic request; the latest requested report is shared locally through a separate preferences domain and is copied only when you tap the copy action. There is no network upload. A request token prevents an older report from being shown as the current reply.
 
-A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching alpha8 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
+A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching alpha9 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
 
 ## Development safety and limitations
 
@@ -118,7 +100,7 @@ A timeout means no reply was received; it does not by itself prove injection is 
 4. On a replay failure the adapter attempts to restore All and disables itself for that controller. Restoration is best-effort. If it fails, disable the tweak and respring through the jailbreak's existing controls.
 5. Grouped/coalesced notification counts, bulk clears, Focus, Scheduled Summary, notification list modes, media controls, native quick actions, rotation, concurrent list controllers and authentication need physical-device tests. Counts represent distinct requests observed by this adapter and are not yet guaranteed to equal every visually nested notification.
 6. No notification body export, analytics or network endpoint is implemented. The optional layout report is limited to structural UI metadata. Native request objects are retained temporarily in process memory for filtering; these objects may themselves contain message content.
-7. The user's alpha3 diagnostic confirmed injection, the enabled preference and notification reading on iOS 17 RootHide Bootstrap. The user's alpha4 screenshot confirmed capsule mounting. The alpha5 report confirmed taps and predicate execution but zero visible notifications. Alpha6 device reports confirmed filter restoration but unrevealed child sections, with List mode selected. Alpha7 device feedback showed a locked-open coordinator rejected by the adapter. Alpha8 permits a native presentation refresh in that state; its resulting phone behavior still needs verification.
+7. The user's alpha3 diagnostic confirmed injection, the enabled preference and notification reading on iOS 17 RootHide Bootstrap. The user's alpha4 screenshot confirmed capsule mounting. The alpha5 report confirmed taps and predicate execution but zero visible notifications. Alpha6–8 reports confirmed app-filter restoration, but their reveal-state interpretation was incorrect. Alpha9 corrects that interpretation and uses the native programmatic reveal path; its resulting phone behavior still needs verification.
 8. iOS 17 mounts in the checked native notification scroll view with reserved top content inset. iOS 15–16 retain the guarded adjunct-stack adapter. Unsupported or ambiguous layouts leave the native presentation active.
 
 ## Validation completed here
