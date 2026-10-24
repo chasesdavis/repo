@@ -61,7 +61,7 @@ static NSString *Geometry(UIView *view) {
         view.window != nil, view.hidden, view.alpha];
 }
 NSString *AXNDescribeLayout(UIViewController *owner, UIScrollView *list, UIView *rail) {
-    NSMutableString *report = [NSMutableString stringWithFormat:@"Axon alpha7 layout\nowner=%@\n", NSStringFromClass(owner.class) ?: @"nil"];
+    NSMutableString *report = [NSMutableString stringWithFormat:@"Axon alpha8 layout\nowner=%@\n", NSStringFromClass(owner.class) ?: @"nil"];
     for (NSString *getter in @[@"masterListView", @"scrollView", @"collectionView"]) {
         id value = ReadViewGetter(owner, getter);
         [report appendFormat:@"%@=%@\n", getter, value ? NSStringFromClass([value class]) : @"nil"];

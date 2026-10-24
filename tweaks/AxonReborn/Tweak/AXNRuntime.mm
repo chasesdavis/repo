@@ -186,12 +186,33 @@ static void AXNCaptureFilterReport(AXNListState *state) {
 static NSString *AXNScalar(id object, NSString *name) {
     SEL selector = NSSelectorFromString(name);
     @try {
-        if (AXNMethodMatches(object_getClass(object), selector, "B", 2))
+        if (AXNMethodMatches(object_getClass(object), selector, "Bc", 2))
             return ((BOOL (*)(id, SEL))objc_msgSend)(object, selector) ? @"1" : @"0";
         if (AXNMethodMatches(object_getClass(object), selector, "Q", 2))
             return [NSString stringWithFormat:@"%lu", (unsigned long)((NSUInteger (*)(id, SEL))objc_msgSend)(object, selector)];
     } @catch (NSException *exception) { (void)exception; }
     return @"unavailable";
+}
+static NSString *AXNVisibleRect(id view) {
+    SEL selector = NSSelectorFromString(@"visibleRect");
+    Method method = class_getInstanceMethod(object_getClass(view), selector);
+    if (!method || method_getNumberOfArguments(method) != 2) return @"unavailable";
+    char type[256] = {}; method_getReturnType(method, type, sizeof(type));
+    if (strcmp(type, @encode(CGRect))) return @"unavailable";
+    @try {
+        CGRect rect = ((CGRect (*)(id, SEL))objc_msgSend)(view, selector);
+        return [NSString stringWithFormat:@"(%.0f,%.0f,%.0f,%.0f)", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
+    } @catch (NSException *exception) { (void)exception; return @"unavailable"; }
+}
+// Only structural properties of known list views; never enumerate card content.
+static NSString *AXNListPresentation(id value) {
+    if (![value isKindOfClass:UIScrollView.class]) return value ? NSStringFromClass([value class]) : @"nil";
+    UIScrollView *view = value;
+    id visible = AXNObject(view, @"visibleViews");
+    NSString *count = [visible isKindOfClass:NSDictionary.class] ? [NSString stringWithFormat:@"%lu", (unsigned long)[visible count]] : @"unavailable";
+    return [NSString stringWithFormat:@"%@ revealed=%@ sublistsRevealed=%@ currentlyVisible=%@ visibleRect=%@ renderedViews=%@ window=%d hidden=%d alpha=%.2f",
+        NSStringFromClass(view.class), AXNScalar(view, @"isRevealed"), AXNScalar(view, @"areSublistsRevealed"),
+        AXNScalar(view, @"isNotificationListViewCurrentlyVisible"), AXNVisibleRect(view), count, view.window != nil, view.hidden, view.alpha];
 }
 // Traverse collection values only, never dictionary keys, text or descriptions.
 static NSString *AXNRequestCounts(id container, AXNListState *state) {
@@ -228,6 +249,10 @@ static NSString *AXNModelReport(AXNListState *state) {
         AXNScalar(coordinator, @"isSectionRevealedStateLocked"), AXNScalar(coordinator, @"isForceRevealed"),
         AXNScalar(coordinator, @"_shouldAllowNotificationListReveal"), AXNScalar(coordinator, @"_shouldAllowNotificationListRevealTransition"),
         (unsigned long)AXNArray(AXNObject(coordinator, @"subLists")).count];
+    [report appendFormat:@"Master view: %@\n", AXNListPresentation(AXNObject(master, @"masterListView"))];
+    NSArray *sublists = AXNArray(AXNObject(coordinator, @"subLists"));
+    for (NSUInteger i = 0; i < MIN((NSUInteger)8, sublists.count); ++i)
+        [report appendFormat:@"coordinator view %lu: %@\n", (unsigned long)i + 1, AXNListPresentation(sublists[i])];
     NSMutableArray *pending = [NSMutableArray arrayWithArray:AXNArray(AXNObject(master, @"notificationSections")) ?: @[]];
     NSHashTable *seen = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
     NSUInteger visited = 0;
@@ -240,11 +265,27 @@ static NSString *AXNModelReport(AXNListState *state) {
             AXNRequestCounts(AXNObject(section, @"allNotificationRequests"), state),
             AXNRequestCounts(AXNObject(section, @"filteredNotificationRequests"), state),
             AXNRequestCounts(AXNObject(section, @"hiddenNotificationRequests"), state)];
-        NSArray *children = AXNArray(AXNObject(section, @"sectionLists"));
-        NSUInteger room = 16 - MIN((NSUInteger)16, visited + pending.count);
-        if (children) [pending addObjectsFromArray:[children subarrayWithRange:NSMakeRange(0, MIN(room, children.count))]];
+        [report appendFormat:@" section view: %@\n", AXNListPresentation(AXNObject(section, @"sectionListView"))];
+        for (NSString *getter in @[@"sectionLists", @"chronologicalSectionLists"]) {
+            NSArray *children = AXNArray(AXNObject(section, getter));
+            NSUInteger room = 16 - MIN((NSUInteger)16, visited + pending.count);
+            if (children) [pending addObjectsFromArray:[children subarrayWithRange:NSMakeRange(0, MIN(room, children.count))]];
+        }
     }
+    if (pending.count) [report appendString:@"Additional sections omitted by report limit.\n"];
     return report;
+}
+static void AXNCapturePresentation(AXNListState *state, NSString *phase) {
+    if (!useListMount || !state.ready || !state.selectionTaps) return;
+    AXNCaptureFilterReport(state);
+    if (state.selectionSettled) {
+        if (state.nativeCountAvailable && state.nativeVisibleCount > 0) diagnostic = AXNDiagnosticReady;
+        else if (!state.revealedSelection) diagnostic = AXNDiagnosticReveal;
+        else if (state.nativeCountAvailable && !state->index.visibleKeys().empty()) diagnostic = AXNDiagnosticZeroVisible;
+    }
+    lastModelReport = [NSString stringWithFormat:@"Sample: %@\n%@", phase, AXNModelReport(state)];
+    AXNListMount *mount = objc_getAssociatedObject(state.owner, listMountKey);
+    if (mount) lastLayoutReport = AXNDescribeLayout(state.owner, mount.scrollView, mount.rail);
 }
 static void AXNRequestSelectionReveal(AXNListState *state) {
     state.revealedSelection = NO; state.selectionSettled = NO;
@@ -261,8 +302,7 @@ static void AXNRequestSelectionReveal(AXNListState *state) {
             AXNListState *settled = weakState;
             if (!enabled || !settled.ready || settled != activeState || settled.selectionTaps != generation) return;
             settled.selectionSettled = YES;
-            AXNCaptureFilterReport(settled);
-            lastModelReport = AXNModelReport(settled);
+            AXNCapturePresentation(settled, @"selection-settled");
             AXNRefresh();
         });
     });
@@ -587,6 +627,9 @@ static void AXNListDidLayout(id self, SEL command) {
 }
 static void AXNListWillDisappear(id self, SEL command, BOOL animated) {
     AXNListState *state = objc_getAssociatedObject(self, stateKey);
+    // Preserve the final visible state (including any manual history swipe)
+    // before cleanup, rather than reporting only the earlier tap-time sample.
+    if (activeState == state) AXNCapturePresentation(state, @"before-disappearance");
     // Mark inactive before changing insets: synchronous layout must not remount
     // a selector while the controller is disappearing.
     if (activeState == state) activeState = nil;
@@ -643,6 +686,7 @@ __attribute__((constructor)) static void AXNInitialize(void) {
         static int diagnosticToken;
         notify_register_dispatch(AXNDiagnosticQuery.UTF8String, &diagnosticToken, dispatch_get_main_queue(), ^(int token) {
             (void)token;
+            if (activeState) AXNCapturePresentation(activeState, @"diagnostic-query");
             AXNDiagnosticState result = diagnostic;
             if (hooksInstalled && !enabled) result = AXNDiagnosticDisabled;
             else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = mountDiagnostic;
