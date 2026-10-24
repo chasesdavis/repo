@@ -81,8 +81,8 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
         options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
         animations:^{ self.transform = target; } completion:nil];
 }
-- (void)endTracking:(UITouch *)touch withEvent:(UIEvent *)event {
-    [super endTracking:touch withEvent:event];
+- (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
+    [super endTrackingWithTouch:touch withEvent:event];
     if (self.interactionEnded) self.interactionEnded();
 }
 - (void)cancelTrackingWithEvent:(UIEvent *)event {
