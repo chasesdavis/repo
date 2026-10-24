@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: experimental alpha10, awaiting build and device validation.** Alpha9 compiled successfully but the tester reports that its Lock Screen behavior remains incorrect. Alpha10 changes presentation layout; build and publication status will be updated after validation. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
+**Status: experimental alpha10, compiled; phone behavior still needs verification.** All three package variants and the UIKit/runtime regression tests passed in [build 40123791616](https://github.com/chasesdavis/repo/actions/runs/40123791616). The RootHide `0.1.0~alpha10` package is published at https://chasesdavis.github.io/repo/. Alpha9 filtering/reveal reports improved, but the tester still reported incorrect Lock Screen behavior; alpha10 changes the list alignment and selection positioning. There is no claim that every iOS/device/jailbreak combination works. This project starts disabled in Settings.
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -135,3 +135,4 @@ Primary references:
 - https://github.com/roothide/Bootstrap/releases
 - https://github.com/opa334/Dopamine
 - https://github.com/palera1n/palera1n
+
