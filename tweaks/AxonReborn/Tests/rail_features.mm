@@ -107,6 +107,13 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
                     UIView *view = pending.lastObject; [pending removeLastObject];
                     if ([view isKindOfClass:UILabel.class] && !view.hidden) {
                         CGRect rect = [view convertRect:view.bounds toView:button];
+                        if (rect.origin.y < -0.5 || CGRectGetMaxY(rect) > button.bounds.size.height + 0.5) {
+                            UILabel *label = (UILabel *)view;
+                            fprintf(stderr, "AXN_GEOMETRY: category=%s width=%.1f rail=%.1f preferred=%.1f button=%.1f label=%s font=%.1f y=%.1f h=%.1f\n",
+                                category.UTF8String, width.doubleValue, rail.bounds.size.height, rail.preferredRailHeight,
+                                button.bounds.size.height, label.text.UTF8String, label.font.pointSize, rect.origin.y, rect.size.height);
+                            fflush(stderr);
+                        }
                         Expect(rect.origin.y >= -0.5 && CGRectGetMaxY(rect) <= button.bounds.size.height + 0.5,
                             "large text clipped vertically");
                     }

@@ -43,10 +43,6 @@ jobs:
         run: bash scripts/test.sh
       - name: Compile and package
         run: bash scripts/build.sh "${{ matrix.variant }}"
-      - name: Test selector mounting with public UIKit in Simulator
-        if: matrix.variant == 'roothide'
-        timeout-minutes: 8
-        run: bash scripts/test-ui.sh
       - name: Inspect package metadata
         run: |
           for package in packages/*.deb; do
@@ -61,9 +57,17 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  ui:
+    name: Native runtime and capsule UI tests
+    runs-on: macos-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Test public UIKit controls and runtime contracts
+        run: bash tweaks/AxonReborn/scripts/test-ui.sh
   stage-candidate:
     name: Verify and stage RootHide candidate
-    needs: build
+    needs: [build, ui]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
