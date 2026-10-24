@@ -43,6 +43,10 @@ jobs:
         run: bash scripts/test.sh
       - name: Compile and package
         run: bash scripts/build.sh "${{ matrix.variant }}"
+      - name: Test selector mounting with public UIKit in Simulator
+        if: matrix.variant == 'roothide'
+        timeout-minutes: 6
+        run: bash scripts/test-ui.sh
       - name: Inspect package metadata
         run: |
           for package in packages/*.deb; do

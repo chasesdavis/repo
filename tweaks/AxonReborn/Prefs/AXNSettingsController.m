@@ -43,13 +43,13 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         AXNSettingsController *controller = weakSelf;
         if (controller.waitingForDiagnostic && controller.diagnosticGeneration == generation)
-            [controller showDiagnostic:@"No response from Axon in SpringBoard. Confirm alpha2 is installed, respring, and check that your Bootstrap configuration allows this tweak in SpringBoard. A blocked diagnostic notification can also cause this result."];
+            [controller showDiagnostic:@"No response from Axon in SpringBoard. Confirm alpha3 is installed, respring, and check that your Bootstrap configuration allows this tweak in SpringBoard. A blocked diagnostic notification can also cause this result."];
     });
 }
 - (void)showDiagnostic:(NSString *)message {
     self.waitingForDiagnostic = NO;
     if (!self.view.window) return;
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Axon alpha2 — SpringBoard" message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Axon alpha3 — SpringBoard" message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }

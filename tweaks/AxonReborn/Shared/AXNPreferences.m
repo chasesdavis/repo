@@ -16,9 +16,11 @@ NSString *AXNDiagnosticMessage(NSUInteger state) {
         @"Axon could not identify a native notification request. Filtering is disabled; the request adapter needs an update.",
         @"Axon attached to the list, but could not mount its selector in the Lock Screen layout. The view adapter needs an update.",
         @"Axon attached successfully, but its last notification snapshot was empty. Keep a notification in Notification Center and reopen the Lock Screen.",
-        @"Axon attached to the notification list and mounted its selector during the last Lock Screen presentation. This confirms attachment, not complete device compatibility.",
+        @"Axon attached to the notification list and mounted its selector during the last Lock Screen presentation. On iOS 17 the selector scrolls with the list; scroll to its top to see it. This confirms attachment, not complete device compatibility.",
         @"Axon stopped filtering after a native update failed. Disable Axon and respring before testing again.",
-        @"This build supports testing on iOS 15 through 17 only."
+        @"This build supports testing on iOS 15 through 17 only.",
+        @"Axon read the notifications, but could not identify one native notification collection view. The iOS 17 list mount needs another adapter update.",
+        @"Axon found the notification collection, but it has not completed a visible layout. Open Notification Center with a notification present, then check again."
     ];
     return state < messages.count ? messages[state] : @"Unknown diagnostic state.";
 }

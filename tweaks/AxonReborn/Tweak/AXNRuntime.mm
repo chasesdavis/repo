@@ -6,6 +6,7 @@
 #import <substrate.h>
 #import <notify.h>
 #import "AXNRailView.h"
+#import "AXNListMount.h"
 #import "../Shared/AXNPreferences.h"
 #include "../Core/NotificationIndex.hpp"
 #include <cstring>
@@ -16,8 +17,10 @@ static AXNHook hooks[3];
 static bool enabled = false;
 static AXNDiagnosticState diagnostic = AXNDiagnosticWaiting;
 static bool hooksInstalled = false, mountSucceeded = false, mountFailed = false;
+static bool useListMount = false;
+static AXNDiagnosticState mountDiagnostic = AXNDiagnosticMount;
 static bool presentedContent = false;
-static const void *stateKey = &stateKey, *railKey = &railKey;
+static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &listMountKey;
 
 @interface AXNListState : NSObject {
 @public
@@ -41,6 +44,7 @@ static NSHashTable<AXNRailView *> *rails;
 static NSHashTable<UIViewController *> *listOwners, *hostOwners;
 static __weak AXNListState *activeState;
 static void AXNRefresh(void);
+static void AXNMountList(UIViewController *owner);
 
 static const char *AXNUnqualified(const char *type) {
     while (*type && strchr("rnNoORV", *type)) ++type;
@@ -252,6 +256,7 @@ static NSString *AXNAppName(NSString *bundleID) {
 }
 static void AXNRender(void) {
     AXNListState *state = activeState;
+    if (useListMount && enabled && state.ready) AXNMountList(state.owner);
     NSMutableArray<AXNRailItem *> *items = [NSMutableArray new];
     NSString *selection = nil;
     if (enabled && state.ready) {
@@ -277,6 +282,17 @@ static void AXNRender(void) {
         }
     }
     for (AXNRailView *rail in rails) [rail updateWithItems:items selected:selection];
+    if (useListMount) {
+        for (UIViewController *owner in listOwners.allObjects) {
+            AXNListMount *mount = objc_getAssociatedObject(owner, listMountKey);
+            BOOL visible = enabled && state.ready && owner == state.owner && items.count > 0 && owner.viewIfLoaded.window;
+            if (mount && visible) {
+                mountSucceeded = [mount updateVisible:YES];
+                mountFailed = !mountSucceeded;
+                mountDiagnostic = AXNDiagnosticGeometry;
+            } else [mount updateVisible:NO];
+        }
+    }
     if (enabled && state.ready) diagnostic = items.count ? AXNDiagnosticReady : AXNDiagnosticEmpty;
     // Content must not depend on an already visible rail: UIKit may not load or
     // present the adjunct controller until isPresentingContent returns YES.
@@ -298,7 +314,56 @@ static void AXNRefresh(void) {
     pending = true;
     dispatch_async(dispatch_get_main_queue(), ^{ pending = false; AXNRender(); });
 }
+// Resolve the collection through a checked getter first, then through a bounded
+// UIKit hierarchy walk. Never choose between multiple possible lists or inspect
+// notification card contents. Stop descending at each collection view.
+static UICollectionView *AXNCollection(UIViewController *owner) {
+    UIView *root = owner.viewIfLoaded;
+    if (!root) return nil;
+    id candidate = AXNObject(owner, @"collectionView");
+    if ([candidate isKindOfClass:UICollectionView.class] &&
+        (candidate == root || [candidate isDescendantOfView:root])) return candidate;
+    NSMutableArray<UIView *> *pending = [NSMutableArray arrayWithObject:root];
+    UICollectionView *found = nil;
+    NSUInteger visited = 0;
+    while (pending.count && visited++ < 256) {
+        UIView *view = pending.lastObject; [pending removeLastObject];
+        if ([view isKindOfClass:AXNRailView.class]) continue;
+        if ([view isKindOfClass:UICollectionView.class]) {
+            if (found) return nil;
+            found = (UICollectionView *)view;
+        } else [pending addObjectsFromArray:view.subviews];
+    }
+    return pending.count ? nil : found;
+}
+static void AXNMountList(UIViewController *owner) {
+    if (!useListMount || !enabled || !owner.viewIfLoaded.window) return;
+    UICollectionView *collection = AXNCollection(owner);
+    AXNListMount *mount = objc_getAssociatedObject(owner, listMountKey);
+    if (mount && (mount.collection != collection || mount.rail.superview != collection)) {
+        [rails removeObject:mount.rail]; [mount detach];
+        objc_setAssociatedObject(owner, listMountKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        mount = nil;
+    }
+    if (!collection) {
+        mountSucceeded = false; mountFailed = true; mountDiagnostic = AXNDiagnosticCollection;
+        return;
+    }
+    if (mount) return;
+    mount = [[AXNListMount alloc] initWithCollection:collection];
+    __weak UIViewController *weakOwner = owner;
+    mount.rail.onSelect = ^(NSString *bundleID) {
+        AXNListState *state = objc_getAssociatedObject(weakOwner, stateKey);
+        if (!enabled || !state.ready || state != activeState) return;
+        if (bundleID) state->index.select(std::string(bundleID.UTF8String));
+        else state->index.select(std::nullopt);
+        AXNReconcile(state); AXNRefresh();
+    };
+    objc_setAssociatedObject(owner, listMountKey, mount, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [rails addObject:mount.rail];
+}
 static void AXNMount(UIViewController *owner) {
+    if (useListMount) return;
     [hostOwners addObject:owner];
     if (!enabled) return;
     AXNRailView *rail = objc_getAssociatedObject(owner, railKey);
@@ -327,6 +392,7 @@ static void AXNMount(UIViewController *owner) {
 static void (*listDidAppearOriginal)(id, SEL, BOOL);
 static void (*listWillAppearOriginal)(id, SEL, BOOL);
 static void (*listDidLoadOriginal)(id, SEL);
+static void (*listDidLayoutOriginal)(id, SEL);
 static void (*listWillDisappearOriginal)(id, SEL, BOOL);
 static void (*hostDidLoadOriginal)(id, SEL);
 static void (*hostDidAppearOriginal)(id, SEL, BOOL);
@@ -342,7 +408,23 @@ static void AXNListWillAppear(id self, SEL command, BOOL animated) {
 static void AXNListDidAppear(id self, SEL command, BOOL animated) {
     listDidAppearOriginal(self, command, animated); AXNAttachList(self);
 }
+static void AXNListDidLayout(id self, SEL command) {
+    listDidLayoutOriginal(self, command);
+    if (!useListMount || !enabled) return;
+    AXNListState *state = objc_getAssociatedObject(self, stateKey);
+    if (!state.ready || state != activeState) return;
+    AXNListMount *oldMount = objc_getAssociatedObject(self, listMountKey);
+    AXNMountList(self);
+    AXNListMount *mount = objc_getAssociatedObject(self, listMountKey);
+    if (mount != oldMount) AXNRefresh();
+    else if (mount && ((UIViewController *)self).viewIfLoaded.window && state->index.size()) {
+        mountSucceeded = [mount updateVisible:YES]; mountFailed = !mountSucceeded;
+        mountDiagnostic = AXNDiagnosticGeometry;
+    }
+}
 static void AXNListWillDisappear(id self, SEL command, BOOL animated) {
+    AXNListMount *mount = objc_getAssociatedObject(self, listMountKey);
+    [mount updateVisible:NO];
     AXNListState *state = objc_getAssociatedObject(self, stateKey);
     if (state) AXNRestore(state);
     if (activeState == state) activeState = nil;
@@ -398,14 +480,16 @@ __attribute__((constructor)) static void AXNInitialize(void) {
             (void)token;
             AXNDiagnosticState result = diagnostic;
             if (hooksInstalled && !enabled) result = AXNDiagnosticDisabled;
-            else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = AXNDiagnosticMount;
+            else if (diagnostic == AXNDiagnosticReady && (!mountSucceeded || mountFailed)) result = mountDiagnostic;
             notify_post(AXNDiagnosticReply(result).UTF8String);
         });
         NSInteger major = NSProcessInfo.processInfo.operatingSystemVersion.majorVersion;
         if (major < 15 || major > 17) { diagnostic = AXNDiagnosticOS; return; }
+        useListMount = major >= 17;
         Class list = NSClassFromString(@"NCNotificationStructuredListViewController");
         Class host = NSClassFromString(@"CSNotificationAdjunctListViewController");
-        if (!list || !host || ![list isSubclassOfClass:UIViewController.class] || ![host isSubclassOfClass:UIViewController.class]) { diagnostic = AXNDiagnosticClasses; return; }
+        if (!list || ![list isSubclassOfClass:UIViewController.class] ||
+            (!useListMount && (!host || ![host isSubclassOfClass:UIViewController.class]))) { diagnostic = AXNDiagnosticClasses; return; }
         const char *names[3] = {"insertNotificationRequest:", "removeNotificationRequest:", "modifyNotificationRequest:"};
         IMP voidCallbacks[3] = {(IMP)AXNInsertVoid, (IMP)AXNRemoveVoid, (IMP)AXNModifyVoid};
         IMP boolCallbacks[3] = {(IMP)AXNInsertBool, (IMP)AXNRemoveBool, (IMP)AXNModifyBool};
@@ -428,12 +512,15 @@ __attribute__((constructor)) static void AXNInitialize(void) {
         MSHookMessageEx(list, @selector(viewDidLoad), (IMP)AXNListDidLoad, (IMP *)&listDidLoadOriginal);
         MSHookMessageEx(list, @selector(viewWillAppear:), (IMP)AXNListWillAppear, (IMP *)&listWillAppearOriginal);
         MSHookMessageEx(list, @selector(viewWillDisappear:), (IMP)AXNListWillDisappear, (IMP *)&listWillDisappearOriginal);
+        MSHookMessageEx(list, @selector(viewDidLayoutSubviews), (IMP)AXNListDidLayout, (IMP *)&listDidLayoutOriginal);
+        if (!useListMount) {
         MSHookMessageEx(host, @selector(viewDidLoad), (IMP)AXNHostDidLoad, (IMP *)&hostDidLoadOriginal);
         MSHookMessageEx(host, @selector(viewDidAppear:), (IMP)AXNHostDidAppear, (IMP *)&hostDidAppearOriginal);
         MSHookMessageEx(host, @selector(viewDidLayoutSubviews), (IMP)AXNHostDidLayout, (IMP *)&hostDidLayoutOriginal);
         MSHookMessageEx(host, @selector(viewWillDisappear:), (IMP)AXNHostWillDisappear, (IMP *)&hostWillDisappearOriginal);
         if (AXNMethodMatches(host, @selector(isPresentingContent), "B", 2))
             MSHookMessageEx(host, @selector(isPresentingContent), (IMP)AXNHostHasContent, (IMP *)&hostHasContentOriginal);
+        }
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, AXNPreferenceCallback,
             (__bridge CFStringRef)AXNPreferencesChanged, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
         hooksInstalled = true;
