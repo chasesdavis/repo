@@ -439,12 +439,12 @@ static void AXNAttachList(UIViewController *owner) {
 static void AXNForgetClearSelection(AXNListState *state) {
     state.clearingSelectedApp = nil; state.clearNeighbors = nil; state.clearDeadline = 0;
 }
-static void AXNContinueAfterClear(AXNListState *state, const std::optional<std::string> &previous) {
-    if (!state.clearingSelectedApp) return;
+static BOOL AXNContinueAfterClear(AXNListState *state, const std::optional<std::string> &previous) {
+    if (!state.clearingSelectedApp) return NO;
     if (state != activeState || NSDate.timeIntervalSinceReferenceDate > state.clearDeadline) {
-        AXNForgetClearSelection(state); return;
+        AXNForgetClearSelection(state); return NO;
     }
-    if (state->index.selection() || !previous || *previous != state.clearingSelectedApp.UTF8String) return;
+    if (state->index.selection() || !previous || *previous != state.clearingSelectedApp.UTF8String) return NO;
     auto groups = state->index.groups(axon::Sort::Identifier);
     for (NSString *neighbor in state.clearNeighbors) {
         for (const auto &group : groups) if (group.app == neighbor.UTF8String) {
@@ -452,8 +452,13 @@ static void AXNContinueAfterClear(AXNListState *state, const std::optional<std::
         }
         if (state->index.selection()) break;
     }
-    // Only All remains when no captured neighboring app still exists.
+    // If every captured neighbor vanished but a new app arrived, choose a live app.
+    if (!state->index.selection() && !groups.empty()) {
+        auto current = state->index.groups([AXNReadPreference(@"Sort", @0) integerValue] == 1 ? axon::Sort::Count : axon::Sort::Recent);
+        state->index.select(current.front().app);
+    }
     AXNForgetClearSelection(state);
+    return state->index.selection().has_value();
 }
 static bool AXNHandle(id owner, AXNEvent event, id request) {
     // Preserve the native calling thread; never mutate UIKit/model state off-main.
@@ -490,10 +495,11 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
         : state->index.includes(record.key));
     bool success = !shouldCall || AXNCallOriginal(owner, event, request);
     if (!success) return false;
+    BOOL advancedAfterClear = NO;
     if (event == Remove) {
         auto previousSelection = state->index.selection();
         state->index.erase(record.key); state->visible.erase(record.key);
-        AXNContinueAfterClear(state, previousSelection);
+        advancedAfterClear = AXNContinueAfterClear(state, previousSelection);
         [state.requests removeObjectForKey:AXNKey(record.key)];
     } else {
         state->index.upsert(record); state.requests[AXNKey(record.key)] = request;
@@ -503,7 +509,11 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
         AXNRestore(state); state.ready = NO; diagnostic = AXNDiagnosticSnapshot; AXNRefresh();
         return success;
     }
-    AXNReconcile(state); AXNCaptureFilterReport(state); AXNRefresh();
+    if (AXNReconcile(state) && advancedAfterClear && useListMount) {
+        ++state.selectionTaps; lastSelectionReport = nil;
+        AXNRequestSelectionReveal(state);
+    }
+    AXNCaptureFilterReport(state); AXNRefresh();
     return success;
 }
 #define AXN_EVENT_CALLBACKS(Name, Event) \

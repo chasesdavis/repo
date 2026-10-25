@@ -194,6 +194,14 @@ static void RunClearTests(void) {
     Require(AXNClearSnapshot(state, @"c", @[newArrival], @[]), "last clear failed");
     AXNHandle(owner, Remove, newArrival);
     Require(state->index.size() == 0 && !state->index.selection(), "last clear failed empty fallback");
+    AXNHandle(owner, Insert, c); state->index.select(std::string("c"));
+    Require(AXNClearSnapshot(state, @"c", @[c], @[]), "new neighbor fixture clear failed");
+    AXNHandle(owner, Insert, a); AXNHandle(owner, Remove, c);
+    Require(state->index.selection() == std::optional<std::string>("a"), "newly arriving neighbor fell back to All");
+    AXNHandle(owner, Insert, c);
+    Require(AXNClearSnapshot(state, @"a", @[a], @[@"c"]), "explicit selection fixture clear failed");
+    AXNSelectApp(state, nil); AXNHandle(owner, Remove, a);
+    Require(!state->index.selection(), "clear completion overrode user's later selection");
     activeState = nil;
     Require(!AXNClearSnapshot(state, @"c", snapshot, @[]), "stale controller cleared requests");
     puts("AXN_CLEAR_TEST_PASS: exact app snapshot, new arrivals, stale identity, native failure, neighbors and empty fallback");
