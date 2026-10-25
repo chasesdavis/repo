@@ -107,8 +107,20 @@ static TestRevealCoordinator *Coordinator(void) {
 @property(nonatomic) BOOL historyRevealed;
 @property(nonatomic) BOOL failNextToggle;
 @property(nonatomic, copy) void (^revealEffect)(void);
+@property(nonatomic, strong) NSArray *clearRequests;
+@property(nonatomic) BOOL clearUnavailable;
+@property(nonatomic) BOOL throwOnClear;
 @end
 @implementation FilterOwner
+- (id)delegate { return self.clearUnavailable ? nil : self; }
+- (void)notificationStructuredListViewController:(id)owner requestsClearingNotificationRequests:(NSArray *)requests {
+    (void)owner; self.clearRequests = requests;
+}
+- (void)notificationListBaseComponent:(id)component requestsClearingPresentables:(NSArray *)requests {
+    (void)component;
+    if (self.throwOnClear) [NSException raise:@"test" format:@"native clear refused"];
+    [self notificationStructuredListViewController:self requestsClearingNotificationRequests:requests];
+}
 - (NSUInteger)visibleNotificationCount { return self.aboveHistoryCount; }
 - (void)toggleFilteringForSectionIdentifier:(NSString *)app shouldFilter:(BOOL)filter {
     ++self.toggleCalls;
@@ -139,6 +151,53 @@ static TestRequest *Request(NSString *app, NSString *identifier) {
     TestRequest *request = [TestRequest new]; request.sectionIdentifier = app;
     request.notificationIdentifier = identifier; request.timestamp = [NSDate date]; return request;
 }
+static void RunClearTests(void) {
+    FilterOwner *owner = [FilterOwner new];
+    owner.operations = [NSMutableArray new]; owner.filteredApps = [NSMutableSet new]; owner.nativeExcludedApps = [NSMutableSet new];
+    owner.masterList = [TestMaster new]; owner.masterList.revealCoordinator = Coordinator();
+    TestRequest *a = Request(@"a", @"1"), *b = Request(@"b", @"1"), *c = Request(@"c", @"1");
+    TestSection *section = [TestSection new]; section.allNotificationRequests = [NSMutableArray arrayWithArray:@[a, b, c]];
+    owner.masterList.notificationSections = @[section]; AXNAttachList(owner);
+    AXNListState *state = objc_getAssociatedObject(owner, stateKey);
+    state->index.select(std::string("c")); Require(AXNReconcile(state), "clear fixture filter failed");
+    NSArray *snapshot = AXNClearSnapshotForApp(state, @"c");
+    Require(snapshot.count == 1 && snapshot.firstObject == c, "clear snapshot crossed apps");
+    Require(AXNClearSnapshot(state, @"c", snapshot, @[@"b", @"a"]) && state->index.size() == 3 &&
+        owner.clearRequests.count == 1 && owner.clearRequests.firstObject == c,
+        "clear did not dispatch exact native requests or optimistically removed counts");
+    Require(AXNHandle(owner, Remove, c) && state->index.selection() == std::optional<std::string>("b"),
+        "clearing final app selected All instead of previous neighbor");
+    Require(![owner.filteredApps containsObject:@"b"], "clear neighbor remained filtered");
+    AXNHandle(owner, Insert, c);
+    Require(AXNClearSnapshot(state, @"b", @[b], @[@"c", @"a"]), "middle clear failed");
+    AXNHandle(owner, Remove, b);
+    Require(state->index.selection() == std::optional<std::string>("c"), "middle clear did not select right neighbor");
+    snapshot = AXNClearSnapshotForApp(state, @"c");
+    TestRequest *newArrival = Request(@"c", @"2"); AXNHandle(owner, Insert, newArrival);
+    Require(AXNClearSnapshot(state, @"c", @[c, c, a], @[@"a"]) && owner.clearRequests.count == 1 &&
+        owner.clearRequests.firstObject == c, "clear included another app, duplicate or post-confirmation arrival");
+    TestRequest *replacement = Request(@"c", @"1"); state.requests[@[@"c", @"1"]] = replacement;
+    Require(!AXNClearSnapshot(state, @"c", snapshot, @[@"a"]), "stale request identity cleared a replacement");
+    state.requests[@[@"c", @"1"]] = c;
+    AXNHandle(owner, Remove, c);
+    Require(state->index.selection() == std::optional<std::string>("c") && state->index.contains({"c", "2"}),
+        "new arrival was removed or clear moved away from a surviving capsule");
+    owner.clearUnavailable = YES;
+    Require(!AXNClearSnapshot(state, @"c", @[newArrival], @[@"a"]), "unsupported clear route accepted");
+    owner.clearUnavailable = NO; owner.throwOnClear = YES;
+    Require(!AXNClearSnapshot(state, @"c", @[newArrival], @[@"a"]) && !state.clearingSelectedApp,
+        "native clear failure left a pending selection");
+    owner.throwOnClear = NO;
+    Require(AXNClearSnapshot(state, @"a", @[a], @[@"c"]), "unselected clear failed");
+    AXNHandle(owner, Remove, a);
+    Require(state->index.selection() == std::optional<std::string>("c"), "unselected clear changed selection");
+    Require(AXNClearSnapshot(state, @"c", @[newArrival], @[]), "last clear failed");
+    AXNHandle(owner, Remove, newArrival);
+    Require(state->index.size() == 0 && !state->index.selection(), "last clear failed empty fallback");
+    activeState = nil;
+    Require(!AXNClearSnapshot(state, @"c", snapshot, @[]), "stale controller cleared requests");
+    puts("AXN_CLEAR_TEST_PASS: exact app snapshot, new arrivals, stale identity, native failure, neighbors and empty fallback");
+}
 void AXNRunRuntimeTests(void (^completion)(void)) {
     enabled = true; useListMount = true; nativeFilterHookInstalled = true;
     nativeShouldFilterOriginal = OriginalPolicy;
@@ -147,6 +206,7 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
     hooks[Insert] = {@selector(insertNotificationRequest:), (IMP)OriginalInsert, 'v'};
     hooks[Remove] = {@selector(removeNotificationRequest:), (IMP)OriginalRemove, 'v'};
     listWillDisappearOriginal = OriginalDisappear;
+    RunClearTests();
     // Handoff and mount-loss must not strand the previous selection's rules.
     FilterOwner *firstOwner = [FilterOwner new], *secondOwner = [FilterOwner new];
     for (FilterOwner *candidate in @[firstOwner, secondOwner]) {
@@ -346,3 +406,4 @@ void AXNRunRuntimeTests(void (^completion)(void)) {
         });
     });
 }
+

@@ -9,6 +9,10 @@
 
 @interface AXNRailView : UIView
 @property(nonatomic, copy) void (^onSelect)(NSString *bundleID);
+// Requests a confirmation; the rail never clears native requests itself.
+@property(nonatomic, copy) void (^onRequestClear)(NSString *bundleID);
+- (NSArray<NSString *> *)replacementAppsForClearing:(NSString *)bundleID;
 - (CGFloat)preferredRailHeight;
 - (void)updateWithItems:(NSArray<AXNRailItem *> *)items selected:(NSString *)selected;
 @end
+

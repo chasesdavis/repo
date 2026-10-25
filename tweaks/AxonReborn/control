@@ -1,6 +1,6 @@
 Package: com.chasesdavis.axonreborn
 Name: Axon Reborn (Beta)
-Version: 0.2.0~beta1
+Version: 0.2.0~beta2
 Architecture: iphoneos-arm
 Description: App capsules, favorites and adaptive controls for iOS 15-17. Beta; device validation required.
 Maintainer: Chase Davis
@@ -8,3 +8,4 @@ Author: Chase Davis; original Axon by Nepeta & Baw Appie
 Section: Tweaks
 Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0), firmware (<< 18.0)
 Conflicts: me.nepeta.axon, io.ominousness.stackxi, com.thomasfinch.priorityhub, com.ioscreatix.intelixbeta, com.ioscreatix.intelix, com.spiritoflogic.ncunify, com.spiritoflogic.unifyx, com.hidan.nclink10, org.coolstar.ventana-modern, org.coolstar.ventana, org.s1ris.spinxi
+

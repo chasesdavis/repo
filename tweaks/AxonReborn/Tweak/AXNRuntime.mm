@@ -46,6 +46,9 @@ static const void *stateKey = &stateKey, *railKey = &railKey, *listMountKey = &l
 @property(nonatomic) BOOL ready;
 @property(nonatomic) BOOL replaying;
 @property(nonatomic, strong) AXNNativeFilter *nativeFilter;
+@property(nonatomic, copy) NSString *clearingSelectedApp;
+@property(nonatomic, copy) NSArray<NSString *> *clearNeighbors;
+@property(nonatomic) NSTimeInterval clearDeadline;
 @property(nonatomic) NSUInteger selectionTaps;
 @property(nonatomic) BOOL revealedSelection;
 @property(nonatomic) BOOL selectionSettled;
@@ -433,6 +436,25 @@ static void AXNAttachList(UIViewController *owner) {
     diagnostic = state->index.size() ? AXNDiagnosticReady : AXNDiagnosticEmpty;
     AXNRefresh();
 }
+static void AXNForgetClearSelection(AXNListState *state) {
+    state.clearingSelectedApp = nil; state.clearNeighbors = nil; state.clearDeadline = 0;
+}
+static void AXNContinueAfterClear(AXNListState *state, const std::optional<std::string> &previous) {
+    if (!state.clearingSelectedApp) return;
+    if (state != activeState || NSDate.timeIntervalSinceReferenceDate > state.clearDeadline) {
+        AXNForgetClearSelection(state); return;
+    }
+    if (state->index.selection() || !previous || *previous != state.clearingSelectedApp.UTF8String) return;
+    auto groups = state->index.groups(axon::Sort::Identifier);
+    for (NSString *neighbor in state.clearNeighbors) {
+        for (const auto &group : groups) if (group.app == neighbor.UTF8String) {
+            state->index.select(group.app); break;
+        }
+        if (state->index.selection()) break;
+    }
+    // Only All remains when no captured neighboring app still exists.
+    AXNForgetClearSelection(state);
+}
 static bool AXNHandle(id owner, AXNEvent event, id request) {
     // Preserve the native calling thread; never mutate UIKit/model state off-main.
     if (!NSThread.isMainThread) {
@@ -469,7 +491,9 @@ static bool AXNHandle(id owner, AXNEvent event, id request) {
     bool success = !shouldCall || AXNCallOriginal(owner, event, request);
     if (!success) return false;
     if (event == Remove) {
+        auto previousSelection = state->index.selection();
         state->index.erase(record.key); state->visible.erase(record.key);
+        AXNContinueAfterClear(state, previousSelection);
         [state.requests removeObjectForKey:AXNKey(record.key)];
     } else {
         state->index.upsert(record); state.requests[AXNKey(record.key)] = request;
@@ -572,10 +596,96 @@ static void AXNRefresh(void) {
     dispatch_async(dispatch_get_main_queue(), ^{ pending = false; AXNRender(); });
 }
 static void AXNSelectApp(AXNListState *state, NSString *bundleID) {
+    AXNForgetClearSelection(state);
     if (bundleID && [AXNReadPreference(@"TapSelectedToAll", @YES) boolValue] &&
         state->index.selection() == std::optional<std::string>(bundleID.UTF8String)) bundleID = nil;
     if (bundleID) state->index.select(std::string(bundleID.UTF8String));
     else state->index.select(std::nullopt);
+}
+// Clearing goes through the same controller/delegate action as native card clear.
+// Never simulate deletion by removing requests only from Axon's index.
+static BOOL AXNCanClear(AXNListState *state) {
+    if (!NSThread.isMainThread || !enabled || !state.ready || state != activeState || !state.owner) return NO;
+    SEL clear = NSSelectorFromString(@"notificationListBaseComponent:requestsClearingPresentables:");
+    SEL delegateClear = NSSelectorFromString(@"notificationStructuredListViewController:requestsClearingNotificationRequests:");
+    id delegate = AXNObject(state.owner, @"delegate");
+    return AXNObject(state.owner, @"masterList") && AXNMethodMatches(state.owner.class, clear, "v", 4) &&
+        delegate && AXNMethodMatches(object_getClass(delegate), delegateClear, "v", 4);
+}
+static NSArray *AXNClearSnapshotForApp(AXNListState *state, NSString *app) {
+    if (!app.length || app.length > 1024 || !AXNCanClear(state)) return @[];
+    NSMutableArray *requests = [NSMutableArray new];
+    for (NSArray<NSString *> *key in state.requests) if ([key.firstObject isEqualToString:app])
+        [requests addObject:state.requests[key]];
+    return [requests copy];
+}
+static BOOL AXNClearSnapshot(AXNListState *state, NSString *app, NSArray *snapshot, NSArray<NSString *> *neighbors) {
+    if (!AXNCanClear(state) || !app.length || !snapshot.count || snapshot.count > 8192) return NO;
+    NSMutableArray *current = [NSMutableArray new];
+    NSHashTable *seen = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
+    for (id request in snapshot) {
+        axon::Record record;
+        if (AXNRecord(request, record) && record.key.first == app.UTF8String &&
+            state.requests[AXNKey(record.key)] == request && ![seen containsObject:request]) {
+            [current addObject:request]; [seen addObject:request];
+        }
+    }
+    if (!current.count) return NO;
+    AXNForgetClearSelection(state);
+    if (state->index.selection() == std::optional<std::string>(app.UTF8String)) {
+        state.clearingSelectedApp = app; state.clearNeighbors = neighbors;
+        state.clearDeadline = NSDate.timeIntervalSinceReferenceDate + 10;
+    }
+    @try {
+        ((void (*)(id, SEL, id, id))objc_msgSend)(state.owner,
+            NSSelectorFromString(@"notificationListBaseComponent:requestsClearingPresentables:"),
+            AXNObject(state.owner, @"masterList"), [current copy]);
+        return YES; // Dispatched; only native removal callbacks change the index/counts.
+    } @catch (NSException *exception) {
+        (void)exception; AXNForgetClearSelection(state); return NO;
+    }
+}
+static void AXNClearNotice(UIViewController *owner, NSString *message) {
+    if (!owner.viewIfLoaded.window || owner.presentedViewController) return;
+    UIAlertController *notice = [UIAlertController alertControllerWithTitle:@"Clear notifications" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [notice addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
+    [owner presentViewController:notice animated:NO completion:nil];
+}
+static void AXNConfirmClear(AXNListState *state, NSString *app, NSArray<NSString *> *neighbors) {
+    UIViewController *owner = state.owner;
+    if (!owner.viewIfLoaded.window || owner.presentedViewController) return;
+    NSArray *snapshot = AXNClearSnapshotForApp(state, app);
+    if (!snapshot.count) {
+        AXNClearNotice(owner, @"There are no current requests to clear, or this iOS clear action is unavailable. Use the native notification controls."); return;
+    }
+    NSString *name = AXNAppName(app);
+    NSString *message = [NSString stringWithFormat:@"Clear %lu %@ from %@? This cannot be undone. Notifications arriving after this confirmation opened will stay.",
+        (unsigned long)snapshot.count, snapshot.count == 1 ? @"notification" : @"notifications", name];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Clear app notifications?" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    __weak AXNListState *weakState = state;
+    [alert addAction:[UIAlertAction actionWithTitle:@"Clear notifications" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        (void)action;
+        AXNListState *current = weakState;
+        if (!current.owner.viewIfLoaded.window || !AXNClearSnapshot(current, app, snapshot, neighbors)) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                AXNClearNotice(owner, @"The notification list changed or iOS could not accept the clear request. Use the native cards to check what remains.");
+            });
+        }
+    }]];
+    [owner presentViewController:alert animated:NO completion:nil];
+}
+static void AXNWireClearAction(AXNRailView *rail, UIViewController *owner) {
+    __weak UIViewController *weakOwner = owner; __weak AXNRailView *weakRail = rail;
+    rail.onRequestClear = ^(NSString *app) {
+        NSArray *neighbors = [weakRail replacementAppsForClearing:app];
+        // Wait for the long-press menu to yield its presentation context.
+        dispatch_async(dispatch_get_main_queue(), ^{
+            AXNListState *state = useListMount ? objc_getAssociatedObject(weakOwner, stateKey) : activeState;
+            if (enabled && state.ready && state == activeState && weakRail.window)
+                AXNConfirmClear(state, app, neighbors);
+        });
+    };
 }
 static void AXNRestoreForMissingMount(UIViewController *owner) {
     AXNListState *state = objc_getAssociatedObject(owner, stateKey);
@@ -620,6 +730,7 @@ static void AXNMountList(UIViewController *owner) {
         }
         AXNCaptureFilterReport(state); AXNRefresh();
     };
+    AXNWireClearAction(mount.rail, owner);
     objc_setAssociatedObject(owner, listMountKey, mount, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [rails addObject:mount.rail];
 }
@@ -642,6 +753,7 @@ static void AXNMount(UIViewController *owner) {
         AXNSelectApp(state, bundleID);
         AXNReconcile(state); AXNRefresh();
     };
+    AXNWireClearAction(rail, owner);
     [stack addArrangedSubview:rail];
     [rail.widthAnchor constraintEqualToAnchor:stack.widthAnchor].active = YES;
     objc_setAssociatedObject(owner, railKey, rail, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -799,3 +911,4 @@ __attribute__((constructor)) static void AXNInitialize(void) {
         hooksInstalled = true;
     }
 }
+

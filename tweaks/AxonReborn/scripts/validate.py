@@ -27,8 +27,9 @@ print("PASS: plist, package variants, deployment target, source hygiene and shel
 
 for path in (root / "scripts").glob("*.py"):
     compile(path.read_text(), str(path), "exec")
-expected = {"Enabled":False, "Compact":False, "ShowCounts":True, "Haptics":True, "Motion":True,
-            "TapSelectedToAll":True, "RevealFocus":True, "Accent":0, "Sort":0, "Density":1}
+expected = {"Enabled":False, "Compact":False, "ShowCounts":True, "ShowAll":True, "Haptics":True,
+            "TapSelectedToAll":True, "RevealFocus":True, "Accent":0, "Sort":0, "Density":0}
 actual = {entry["key"]:entry["default"] for entry in settings["items"] if "key" in entry}
 assert actual == expected, (actual, expected)
 print("PASS: release script syntax and settings schema alignment")
+

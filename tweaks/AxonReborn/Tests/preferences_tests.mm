@@ -7,7 +7,7 @@ static void Expect(BOOL value, const char *message) {
     if (!value) { fprintf(stderr, "AXN_UI_TEST_FAIL: %s\n", message); fflush(stderr); exit(1); }
 }
 void AXNRunPreferenceTests(void) {
-    NSArray *keys = @[@"Enabled", @"Compact", @"ShowCounts", @"Haptics", @"Motion", @"TapSelectedToAll",
+    NSArray *keys = @[@"Enabled", @"Compact", @"ShowCounts", @"ShowAll", @"Haptics", @"Motion", @"TapSelectedToAll",
         @"RevealFocus", @"Accent", @"Sort", @"Density", @"PinnedApps"];
     NSMutableDictionary *saved = [NSMutableDictionary new];
     for (NSString *key in keys) {
@@ -22,7 +22,7 @@ void AXNRunPreferenceTests(void) {
             (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
         AXNSynchronizePreferences();
         Expect(![AXNReadPreference(@"Enabled", @YES) boolValue], "malformed boolean escaped schema");
-        Expect([AXNReadPreference(@"Density", @0) integerValue] == 1, "malformed density escaped schema");
+        Expect([AXNReadPreference(@"Density", @0) integerValue] == 0, "malformed density escaped schema");
     }
     AXNWritePreference(@"Accent", @3);
     Expect([AXNReadPreference(@"Accent", @0) integerValue] == 3, "valid enum failed");
@@ -38,11 +38,13 @@ void AXNRunPreferenceTests(void) {
         [NSSet setWithArray:validated].count == 32, "pin sanitization or capacity failed");
     AXNWritePreference(@"Enabled", @YES); AXNWritePreference(@"RevealFocus", @NO);
     AXNWritePreference(@"Density", @2); AXNWritePreference(@"Motion", @NO);
+    AXNWritePreference(@"ShowAll", @NO);
+    Expect(![AXNReadPreference(@"ShowAll", @YES) boolValue], "ShowAll switch failed");
     AXNResetAppearance();
     Expect([AXNReadPreference(@"Enabled", @NO) boolValue] && ![AXNReadPreference(@"RevealFocus", @YES) boolValue],
         "appearance reset changed enable or Focus policy");
-    Expect([AXNReadPreference(@"Density", @0) integerValue] == 1 &&
-        [AXNReadPreference(@"Motion", @NO) boolValue] && [AXNReadPreference(@"PinnedApps", @[]) count] == 0,
+    Expect([AXNReadPreference(@"Density", @0) integerValue] == 0 &&
+        ![AXNReadPreference(@"Motion", @YES) boolValue] && [AXNReadPreference(@"ShowAll", @NO) boolValue] && [AXNReadPreference(@"PinnedApps", @[]) count] == 0,
         "appearance reset did not restore defaults");
     AXNWritePreference(@"Accent", @1);
     CFPreferencesSetValue(CFSTR("Accent"), (__bridge CFNumberRef)@2,
@@ -56,3 +58,4 @@ void AXNRunPreferenceTests(void) {
     AXNSynchronizePreferences();
     puts("AXN_PREFERENCES_TEST_PASS: malformed values, enum bounds, favorite limits, cached reload and reset isolation");
 }
+

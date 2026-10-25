@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: 0.2.0~beta1 published for RootHide; automated build, runtime and UIKit gates passed.** This is a beta candidate, with stable 1.0 gated on actual device acceptance. Read the [detailed release plan](docs/PREMIUM_RELEASE_PLAN.md) and [current validation record](docs/VALIDATION.md). The tester reports that alpha10 looks better; full Focus, interaction, privacy and performance checks remain necessary on the iOS 17.0 RootHide device. Native cards and authentication stay under iOS control.
+**Status: 0.2.0~beta2 candidate under automated validation.** Beta1 device feedback reported choppy animations and taller capsule modes crossing into the clock. Beta2 removes capsule animation and keeps Slim's vertical footprint for every spacing mode. Native notification behavior still requires phone validation. See [beta2 changes and checks](docs/BETA2.md).
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -10,24 +10,26 @@ Open `Design/preview.html` in a browser for the interactive visual concept. It w
 
 ## Install the RootHide beta
 
-Refresh [the Sileo repository](https://chasesdavis.github.io/repo/), install **Axon Reborn (Beta) 0.2.0~beta1**, and respring through your jailbreak controls. Existing preferences are retained; on a new installation enable Axon in Settings. Test with notifications present. Use **Expand While in Focus** for the native authenticated Focus expansion action. Rootful/rootless packages are build artifacts in [the successful candidate run](https://github.com/chasesdavis/repo/actions/runs/40138163664), not packages published to this RootHide feed.
+Refresh [the Sileo repository](https://chasesdavis.github.io/repo/), install the latest published **Axon Reborn (Beta)**, and respring through your jailbreak controls. Existing preferences are retained; on a new installation enable Axon in Settings. Test with notifications present. Use **Expand While in Focus** for the native authenticated Focus expansion action. Rootful/rootless packages are build artifacts in [the successful candidate run](https://github.com/chasesdavis/repo/actions/runs/40138163664), not packages published to this RootHide feed.
 
 Record actual results in [the device acceptance checklist](docs/DEVICE_ACCEPTANCE.md). Build success does not certify SpringBoard behavior on the phone.
 
-## Beta1 premium polish
+## Current capsule behavior
 
-- Slim, Balanced and Roomy capsule sizes share geometry with the native list inset.
+- Slim, Balanced and Roomy share the same vertical height and native inset; Balanced/Roomy add horizontal padding. Slim is the new default.
 - Dynamic Type, stacked accessibility headings, scalable count badges and 48-point minimum targets.
 - Favorites support Move favorite first and VoiceOver actions for pin/unpin and Show All.
 - Touch/scroll updates coalesce until interaction ends; surviving controls are moved in place.
-- Capsule animations have a switch and automatically quiet in Low Power Mode or Reduce Motion. Contrast/transparency changes update live.
+- Capsule spring, scale, arrival-pulse and animated horizontal scrolling effects are removed, including for saved beta1 animation settings. Contrast/transparency changes update live.
 - Settings use a validated, bounded cache. Reset appearance preserves enable and Focus settings.
 - Use native notifications provides direct recovery through the existing disable/restore path.
 - Missing selectors and controller handoffs restore Axon's app rules; snapshots are bounded.
 - Icon collection uses one pass, and app names are cached per controller.
 - Package inspection and staged publication include binary slices, install paths, metadata, checksums and public-byte verification.
 
-Long-press a pinned capsule for **Move favorite first**. In Settings, choose **Capsule size**, **Accent color**, **Compact app capsules** and **Capsule animations**. Notification counts represent indexed requests, not read/unread status.
+Long-press a pinned capsule for **Move favorite first**. Long-press an app for **Clear app notifications…**, then confirm. Only its captured requests are sent to the native clear action; later arrivals stay. Clearing a selected app chooses the next surviving app to its right, then the nearest left neighbor at the end, preserving the horizontal position. Clearing an unselected app keeps the current selection. The capsule can return when new notifications arrive.
+
+In Settings, choose **Capsule spacing**, **Accent color**, **Compact app capsules**, and **Show All capsule**. Hiding All keeps the Show all notifications menu/VoiceOver action available. Notification counts represent indexed requests, not read/unread status.
 
 ## What changed
 
@@ -77,7 +79,7 @@ On iOS 17, choosing an app with matching requests in `upcomingMissedSectionList`
 
 The behavior is based on the [iOS 17.6.1 summarized-section implementation](https://github.com/SuperChaoM/iPhone15-3_17.6.1_21G101_Restore/blob/95df6b804bee0e01538eb2ddad0413609938d063/System/Library/PrivateFrameworks/UserNotificationsUIKit.framework/NCNotificationSummarizedSectionList.m). The phone runs iOS 17.0, so device verification remains necessary. The contract test covers inactive Focus, nonmatching/all selection, authentication denial, authorized expansion and an already expanded section.
 
-Capsules now have four accent palettes (Mint, Violet, Ocean, Rose), a distinct selected border and count badge, spring press feedback, and count pulses for arrivals. Reduce Motion suppresses these animations and Reduce Transparency uses solid material. The heading shows the selected app and its count out of all indexed requests. Compact mode keeps other apps small while displaying the selected app's name.
+Capsules now have four accent palettes (Mint, Violet, Ocean, Rose), a distinct selected border and count badge. Beta2 removes the original spring press feedback and arrival count pulses; Reduce Transparency uses solid material. The heading shows the selected app and its count out of all indexed requests. Compact mode keeps other apps small while displaying the selected app's name.
 
 Touch and hold an app for **Pin favorite / Unpin favorite** or **Show all notifications**. Up to 32 favorites persist as app identifiers in local settings and appear first, keeping their pin order. Apps with no notifications remain absent until they have requests again. Regular apps keep the user's recent/count ordering. Tapping the selected app again returns to All; this can be disabled in Settings. Existing buttons survive count-only updates so those refreshes do not discard an in-flight touch.
 
@@ -131,7 +133,7 @@ After updating, respring, enable Axon, and open the Lock Screen with notificatio
 
 The status describes the last observed Lock Screen presentation, not complete compatibility. The report contains runtime view class names, geometry, getter result types and whether the rail intersects the list viewport. It does not include notification text, application or notification identifiers, accessibility labels, object descriptions or screenshots. Reports stay in memory until a diagnostic request; the latest requested report is shared locally through a separate preferences domain and is copied only when you tap the copy action. There is no network upload. A request token prevents an older report from being shown as the current reply.
 
-A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching beta1 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
+A timeout means no reply was received; it does not by itself prove injection is disabled. A reply without a matching beta2 report can indicate an old SpringBoard process or blocked diagnostic preference sharing. Respring after upgrading.
 
 ## Development safety and limitations
 
@@ -168,3 +170,4 @@ Primary references:
 - https://github.com/roothide/Bootstrap/releases
 - https://github.com/opa334/Dopamine
 - https://github.com/palera1n/palera1n
+

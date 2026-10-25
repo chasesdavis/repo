@@ -111,7 +111,7 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         UIStackView *capsules = (UIStackView *)appButton.superview;
         Check([capsules.arrangedSubviews containsObject:appButton], "count updates replaced an existing control");
         UIButton *secondButton = (UIButton *)capsules.arrangedSubviews.lastObject;
-        Check((secondButton.accessibilityTraits & UIAccessibilityTraitSelected) != 0 && secondButton.menu.children.count == 2,
+        Check((secondButton.accessibilityTraits & UIAccessibilityTraitSelected) != 0 && secondButton.menu.children.count == 3,
             "selected capsule or long-press controls missing");
         [mount.rail togglePin:secondItem.bundleID];
         Check(capsules.arrangedSubviews[1] == secondButton && [secondButton.accessibilityValue containsString:@"pinned"],
@@ -198,6 +198,20 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
         Check(fabs(CGRectGetMaxY(nativeMount.rail.frame) - CGRectGetMinY(card.frame)) < 0.5, "short selected group is not directly beneath selector");
         Check(fabs(native.contentOffset.y + 196 + expected) < 0.5, "resting scroll did not reveal header");
         Check(card.superview == native, "mount reparented a native card");
+        // Density changes must retain Slim's proven clock clearance and card origin.
+        CGFloat slimY = [nativeMount.rail convertRect:nativeMount.rail.bounds toView:nativeOwner.view].origin.y;
+        CGFloat slimHeight = nativeMount.rail.bounds.size.height;
+        CGFloat slimCardY = [native convertRect:card.frame toView:nativeOwner.view].origin.y;
+        for (NSNumber *density in @[@1, @2, @0]) {
+            AXNWritePreference(@"Density", density);
+            [nativeMount.rail updateWithItems:@[item] selected:nil];
+            [nativeMount updateVisible:YES]; [native layoutIfNeeded];
+            CGRect inOwner = [nativeMount.rail convertRect:nativeMount.rail.bounds toView:nativeOwner.view];
+            Check(fabs(inOwner.origin.y - slimY) < 0.5 && fabs(inOwner.size.height - slimHeight) < 0.5,
+                "Balanced/Roomy moved selector toward clock or increased its height");
+            Check(fabs([native convertRect:card.frame toView:nativeOwner.view].origin.y - slimCardY) < 0.5,
+                "density changed native card position");
+        }
         // Large and small app selections must start at the same place, and
         // switching from a long, scrolled list must expose the new selection.
         for (NSNumber *height in @[@123, @2100, @71, @600, @0, @123]) {
@@ -278,3 +292,4 @@ static id WrongAlignmentGetter(id self, SEL command) { (void)self; (void)command
 int main(int argc, char *argv[]) {
     @autoreleasepool { return UIApplicationMain(argc, argv, nil, NSStringFromClass(TestDelegate.class)); }
 }
+

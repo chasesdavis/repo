@@ -38,11 +38,11 @@ static void RunAction(UIButton *button, NSString *name) {
 }
 void AXNRunRailFeatureTests(UIViewController *parent) {
     fputs("AXN_FEATURE_STAGE: start\n", stderr); fflush(stderr);
-    NSArray *keys = @[@"PinnedApps", @"Density", @"Motion", @"Compact", @"ShowCounts"];
+    NSArray *keys = @[@"PinnedApps", @"Density", @"Motion", @"Compact", @"ShowCounts", @"ShowAll"];
     NSMutableDictionary *saved = [NSMutableDictionary new];
     for (NSString *key in keys) saved[key] = AXNReadPreference(key, @0);
     AXNWritePreference(@"PinnedApps", @[]); AXNWritePreference(@"Motion", @NO);
-    AXNWritePreference(@"Compact", @NO); AXNWritePreference(@"ShowCounts", @YES);
+    AXNWritePreference(@"ShowAll", @YES); AXNWritePreference(@"Compact", @NO); AXNWritePreference(@"ShowCounts", @YES);
     UIViewController *host = [UIViewController new];
     [parent addChildViewController:host]; host.view.frame = CGRectMake(0, 0, 320, 700);
     [parent.view addSubview:host.view]; [host didMoveToParentViewController:parent];
@@ -88,14 +88,14 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     rail.simulatedDeceleration = NO; [rail scrollViewDidEndDecelerating:nil];
     Expect(!(beta.accessibilityTraits & UIAccessibilityTraitSelected), "scroll completion did not flush latest selection");
     fputs("AXN_FEATURE_STAGE: density\n", stderr); fflush(stderr);
-    CGFloat previous = 0, previousCapsule = 0;
+    CGFloat previous = rail.preferredRailHeight, previousWidth = 0;
     for (NSNumber *density in @[@0, @1, @2]) {
         AXNWritePreference(@"Density", density); [rail updateWithItems:@[a, b] selected:b.bundleID];
         [host.view setNeedsLayout]; [host.view layoutIfNeeded];
-        Expect(rail.preferredRailHeight > previous && fabs(rail.bounds.size.height - rail.preferredRailHeight) < 1,
+        Expect(fabs(rail.preferredRailHeight - previous) < 0.5 && fabs(rail.bounds.size.height - rail.preferredRailHeight) < 1,
             "density does not match shared geometry");
-        Expect(beta.bounds.size.height > previousCapsule, "density expanded header whitespace instead of capsules");
-        previousCapsule = beta.bounds.size.height; previous = rail.preferredRailHeight;
+        Expect(beta.bounds.size.width > previousWidth, "density did not add horizontal spacing");
+        previousWidth = beta.bounds.size.width;
     }
     for (NSString *category in @[UIContentSizeCategoryLarge, UIContentSizeCategoryExtraExtraExtraLarge,
                                  UIContentSizeCategoryAccessibilityExtraExtraExtraLarge]) {
@@ -130,6 +130,61 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
             }
         }
     }
+    // Even saved beta1 Motion=YES cannot re-enable the removed animations.
+    AXNWritePreference(@"Motion", @YES);
+    [alpha setHighlighted:YES];
+    Expect(CGAffineTransformIsIdentity(alpha.transform) && alpha.layer.animationKeys.count == 0,
+        "capsule still scales or springs when pressed");
+    [alpha setHighlighted:NO]; ++a.count;
+    [rail updateWithItems:@[a, b] selected:a.bundleID];
+    NSMutableArray *views = [NSMutableArray arrayWithObject:alpha];
+    while (views.count) {
+        UIView *view = views.lastObject; [views removeLastObject];
+        Expect(view.layer.animationKeys.count == 0, "capsule arrival still animates");
+        [views addObjectsFromArray:view.subviews];
+    }
+    AXNWritePreference(@"ShowAll", @NO); [rail updateWithItems:@[a, b] selected:a.bundleID];
+    Expect(Buttons(rail).count == 2 && stack.arrangedSubviews.firstObject == alpha,
+        "All switch did not remove just the All capsule");
+    RunAction(alpha, @"Show all notifications");
+    Expect(allTaps == 2, "hidden All removed recovery action");
+    __block NSString *clearApp = nil;
+    rail.onRequestClear = ^(NSString *app) { clearApp = app; };
+    [rail updateWithItems:@[a, b] selected:nil];
+    RunAction(beta, @"Clear app notifications…");
+    Expect([clearApp isEqual:b.bundleID], "clear action requested wrong app");
+    Expect([[rail replacementAppsForClearing:a.bundleID] isEqual:@[b.bundleID]] &&
+        [[rail replacementAppsForClearing:b.bundleID] isEqual:@[a.bundleID]], "neighbor order wrong at ends");
+    AXNWritePreference(@"PinnedApps", @[b.bundleID]); [rail updateWithItems:@[a, b] selected:nil];
+    Expect([[rail replacementAppsForClearing:b.bundleID] isEqual:@[a.bundleID]], "neighbor order ignored favorites");
+    AXNWritePreference(@"PinnedApps", @[]);
+    [parent setOverrideTraitCollection:[UITraitCollection traitCollectionWithPreferredContentSizeCategory:UIContentSizeCategoryLarge]
+        forChildViewController:host];
+    host.view.frame = CGRectMake(0, 0, 320, 700);
+    NSMutableArray *many = [NSMutableArray new];
+    for (NSUInteger i = 0; i < 12; ++i) {
+        AXNRailItem *item = [AXNRailItem new];
+        item.bundleID = [NSString stringWithFormat:@"test.app%lu", (unsigned long)i];
+        item.name = [NSString stringWithFormat:@"Application %lu", (unsigned long)i]; item.count = 2; [many addObject:item];
+    }
+    AXNRailItem *last = many.lastObject;
+    [rail updateWithItems:many selected:last.bundleID]; [host.view layoutIfNeeded];
+    UIScrollView *scroll = (UIScrollView *)stack.superview;
+    [scroll setContentOffset:CGPointMake(MAX(0, scroll.contentSize.width - scroll.bounds.size.width), 0) animated:NO];
+    CGFloat endOffset = scroll.contentOffset.x;
+    NSString *neighbor = [rail replacementAppsForClearing:last.bundleID].firstObject;
+    [many removeLastObject];
+    [rail updateWithItems:many selected:neighbor]; [host.view layoutIfNeeded];
+    Expect(scroll.contentOffset.x > 100 && scroll.contentOffset.x <= endOffset &&
+        fabs(scroll.contentOffset.x - MAX(0, scroll.contentSize.width - scroll.bounds.size.width)) < 1,
+        "clearing last capsule jumped to start instead of nearest remaining end");
+    [rail updateWithItems:many selected:nil]; [host.view layoutIfNeeded];
+    Expect(scroll.contentOffset.x > 100, "hidden All reset horizontal position");
+    AXNWritePreference(@"ShowAll", @YES); [rail updateWithItems:@[a, b] selected:b.bundleID];
+    [host.view layoutIfNeeded];
+    beta = nil;
+    for (UIButton *button in Buttons(rail)) if ([button.accessibilityLabel isEqualToString:b.name]) beta = button;
+    Expect(Buttons(rail).count == 3 && beta, "All switch could not restore its capsule");
     fputs("AXN_FEATURE_STAGE: preferences and cleanup\n", stderr); fflush(stderr);
     AXNWritePreference(@"ShowCounts", @NO); AXNWritePreference(@"Compact", @YES);
     [rail updateWithItems:@[a, b] selected:b.bundleID]; [host.view layoutIfNeeded];
@@ -137,5 +192,6 @@ void AXNRunRailFeatureTests(UIViewController *parent) {
     [rail updateWithItems:@[] selected:nil]; Expect(rail.hidden, "empty rail stayed visible");
     [host willMoveToParentViewController:nil]; [host.view removeFromSuperview]; [host removeFromParentViewController];
     for (NSString *key in keys) AXNWritePreference(key, saved[key]);
-    puts("AXN_RAIL_FEATURE_TEST_PASS: held touch, scroll coalescing, VoiceOver actions, favorites, densities, large text and narrow widths");
+    puts("AXN_RAIL_FEATURE_TEST_PASS: no capsule animation, equal-height spacing, ShowAll, clear action, neighbor order, end deletion viewport, held touch, VoiceOver and large text");
 }
+

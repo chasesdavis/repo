@@ -46,7 +46,7 @@ void AXNPublishDiagnosticReport(NSUInteger state, NSString *report) {
     SyncDiagnostic();
     id request = ReadDiagnostic(CFSTR("request"));
     if (![request isKindOfClass:NSString.class] || [request length] > 64) return;
-    NSDictionary *response = @{@"request":request, @"version":@"beta1", @"state":@(state),
+    NSDictionary *response = @{@"request":request, @"version":@"beta2", @"state":@(state),
         @"report":[report substringToIndex:MIN(report.length, (NSUInteger)8192)]};
     CFPreferencesSetValue(CFSTR("response"), (__bridge CFDictionaryRef)response, DiagnosticDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     SyncDiagnostic();
@@ -55,7 +55,7 @@ NSDictionary *AXNReadDiagnosticResponse(NSString *request) {
     SyncDiagnostic();
     id response = ReadDiagnostic(CFSTR("response"));
     if (![response isKindOfClass:NSDictionary.class]) return nil;
-    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"beta1"] ||
+    if (![response[@"request"] isEqual:request] || ![response[@"version"] isEqual:@"beta2"] ||
         ![response[@"report"] isKindOfClass:NSString.class] || [response[@"report"] length] > 8192 ||
         ![response[@"state"] isKindOfClass:NSNumber.class] || [response[@"state"] unsignedIntegerValue] >= AXNDiagnosticStateCount) return nil;
     return response;
@@ -64,9 +64,9 @@ NSDictionary *AXNReadDiagnosticResponse(NSString *request) {
 static NSDictionary<NSString *, id> *Defaults(void) {
     static NSDictionary *values; static dispatch_once_t once;
     dispatch_once(&once, ^{
-        values = @{@"Enabled":@NO, @"Compact":@NO, @"ShowCounts":@YES,
-            @"Haptics":@YES, @"Motion":@YES, @"TapSelectedToAll":@YES,
-            @"RevealFocus":@YES, @"Accent":@0, @"Sort":@0, @"Density":@1, @"PinnedApps":@[]};
+        values = @{@"Enabled":@NO, @"Compact":@NO, @"ShowCounts":@YES, @"ShowAll":@YES,
+            @"Haptics":@YES, @"Motion":@NO, @"TapSelectedToAll":@YES,
+            @"RevealFocus":@YES, @"Accent":@0, @"Sort":@0, @"Density":@0, @"PinnedApps":@[]};
     });
     return values;
 }
@@ -132,7 +132,7 @@ void AXNWritePreference(NSString *key, id value) {
 }
 void AXNResetAppearance(void) {
     @synchronized (AXNPreferencesDomain) {
-        for (NSString *key in @[@"Compact", @"ShowCounts", @"Haptics", @"Motion", @"TapSelectedToAll",
+        for (NSString *key in @[@"Compact", @"ShowCounts", @"ShowAll", @"Haptics", @"Motion", @"TapSelectedToAll",
                                @"Accent", @"Sort", @"Density", @"PinnedApps"]) {
             CFPreferencesSetValue((__bridge CFStringRef)key, NULL,
                 (__bridge CFStringRef)AXNPreferencesDomain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
@@ -141,3 +141,4 @@ void AXNResetAppearance(void) {
     }
     NotifyPreferences();
 }
+

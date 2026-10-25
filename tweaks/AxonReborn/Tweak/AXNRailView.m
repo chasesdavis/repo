@@ -13,10 +13,6 @@ static UIColor *Accent(void) {
     NSInteger choice = [AXNReadPreference(@"Accent", @0) integerValue];
     return colors[MAX(0, MIN(3, choice))];
 }
-static BOOL MotionEnabled(void) {
-    return [AXNReadPreference(@"Motion", @YES) boolValue] &&
-        !UIAccessibilityIsReduceMotionEnabled() && !NSProcessInfo.processInfo.lowPowerModeEnabled;
-}
 static UIFont *RailFont(UIFontTextStyle style, UITraitCollection *traits) {
     return [UIFont preferredFontForTextStyle:style compatibleWithTraitCollection:traits];
 }
@@ -33,20 +29,22 @@ static CGFloat HeaderHeight(UITraitCollection *traits) {
 static CGFloat CapsuleHeight(UITraitCollection *traits) {
     CGFloat text = MAX(RailFont(UIFontTextStyleHeadline, traits).lineHeight,
         MAX(RailFont(UIFontTextStyleSubheadline, traits).lineHeight, BadgeFont(traits).lineHeight));
-    return MAX(48, ceil(text) + 24) + 12 * [AXNReadPreference(@"Density", @1) integerValue];
+    // All spacing modes retain Slim's vertical footprint. Extra room grows sideways.
+    return MAX(48, ceil(text) + 24);
 }
 static NSMutableArray<NSString *> *PinnedApps(void) {
     return [AXNReadPreference(@"PinnedApps", @[]) mutableCopy];
 }
 
 @interface AXNCapsule : UIButton
+@property(nonatomic, copy) NSString *appIdentifier;
 @property(nonatomic, strong) UIVisualEffectView *material;
 @property(nonatomic, strong) UIImageView *iconView;
 @property(nonatomic, strong) UIImageView *pinView;
 @property(nonatomic, strong) UILabel *nameLabel;
 @property(nonatomic, strong) UILabel *badge;
-@property(nonatomic) NSUInteger previousCount;
-@property(nonatomic) BOOL configured;
+@property(nonatomic, strong) NSLayoutConstraint *leadingPadding;
+@property(nonatomic, strong) NSLayoutConstraint *trailingPadding;
 @property(nonatomic, copy) void (^interactionEnded)(void);
 @end
 @implementation AXNCapsule
@@ -71,14 +69,15 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     row.userInteractionEnabled = NO; row.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:row];
     for (UIView *view in @[_iconView, _pinView, _nameLabel, _badge]) view.translatesAutoresizingMaskIntoConstraints = NO;
+    _leadingPadding = [row.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:12];
+    _trailingPadding = [row.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-12];
     [NSLayoutConstraint activateConstraints:@[
         [_material.topAnchor constraintEqualToAnchor:self.topAnchor], [_material.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
         [_material.leadingAnchor constraintEqualToAnchor:self.leadingAnchor], [_material.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
         [self.heightAnchor constraintGreaterThanOrEqualToConstant:48],
         [_iconView.widthAnchor constraintEqualToConstant:32], [_iconView.heightAnchor constraintEqualToConstant:32],
         [_nameLabel.widthAnchor constraintLessThanOrEqualToConstant:150],
-        [row.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:12],
-        [row.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-12],
+        _leadingPadding, _trailingPadding,
         [row.centerYAnchor constraintEqualToAnchor:self.centerYAnchor]]];
     // Hidden arranged views collapse without fighting required width constraints.
     for (NSLayoutConstraint *c in @[
@@ -90,11 +89,10 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
 }
 - (void)setHighlighted:(BOOL)highlighted {
     [super setHighlighted:highlighted];
-    CGAffineTransform target = highlighted ? CGAffineTransformMakeScale(0.96, 0.96) : CGAffineTransformIdentity;
-    if (!MotionEnabled()) { self.transform = CGAffineTransformIdentity; return; }
-    [UIView animateWithDuration:0.18 delay:0 usingSpringWithDamping:0.75 initialSpringVelocity:0
-        options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
-        animations:^{ self.transform = target; } completion:nil];
+    // Immediate feedback only: no spring, scaling or animation on a system surface.
+    [self.layer removeAllAnimations];
+    self.transform = CGAffineTransformIdentity;
+    self.alpha = highlighted ? 0.78 : 1.0;
 }
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
     [super endTrackingWithTouch:touch withEvent:event];
@@ -105,7 +103,12 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     if (self.interactionEnded) self.interactionEnded();
 }
 - (void)configure:(AXNRailItem *)item total:(NSUInteger)total selected:(BOOL)selected pinned:(BOOL)pinned traits:(UITraitCollection *)traits {
+    self.appIdentifier = item.bundleID;
     UIColor *accent = Accent(); NSUInteger count = item ? item.count : total;
+    CGFloat padding = 12 + 4 * [AXNReadPreference(@"Density", @0) integerValue];
+    self.leadingPadding.constant = padding; self.trailingPadding.constant = -padding;
+    [self.layer removeAllAnimations]; [self.badge.layer removeAllAnimations];
+    self.transform = CGAffineTransformIdentity;
     BOOL reduceTransparency = UIAccessibilityIsReduceTransparencyEnabled() || UIAccessibilityDarkerSystemColorsEnabled();
     if ((self.material.effect != nil) == reduceTransparency)
         self.material.effect = reduceTransparency ? nil : [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark];
@@ -130,16 +133,12 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
             ? @"Activate again to show all notifications. Actions include favorites."
             : @"Filters to this app. Actions include favorites and Show All.");
     self.accessibilityTraits = UIAccessibilityTraitButton | (selected ? UIAccessibilityTraitSelected : 0);
-    if (self.configured && count > self.previousCount && self.window && !self.badge.hidden && MotionEnabled()) {
-        CABasicAnimation *pulse = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-        pulse.fromValue = @1.18; pulse.toValue = @1; pulse.duration = 0.25;
-        [self.badge.layer addAnimation:pulse forKey:@"arrival"];
-    }
-    self.previousCount = count; self.configured = YES;
+
 }
 @end
 
 @interface AXNRailView () <UIScrollViewDelegate>
+- (void)applyItems:(NSArray<AXNRailItem *> *)items selected:(NSString *)selected;
 @property(nonatomic, strong) UILabel *heading;
 @property(nonatomic, strong) UILabel *summary;
 @property(nonatomic, strong) UIStackView *header;
@@ -192,6 +191,18 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(environmentChanged:) name:name object:nil];
     return self;
 }
+- (NSArray<NSString *> *)replacementAppsForClearing:(NSString *)bundleID {
+    // Follow the displayed order, including favorites; All is never a neighbor.
+    NSMutableArray<NSString *> *order = [NSMutableArray new];
+    for (AXNCapsule *button in self.stack.arrangedSubviews)
+        if (button.appIdentifier.length) [order addObject:button.appIdentifier];
+    NSUInteger position = [order indexOfObject:bundleID];
+    if (position == NSNotFound) return @[];
+    NSMutableArray *neighbors = [NSMutableArray new];
+    for (NSUInteger i = position + 1; i < order.count; ++i) [neighbors addObject:order[i]];
+    for (NSUInteger i = position; i > 0; --i) [neighbors addObject:order[i - 1]];
+    return neighbors;
+}
 - (CGFloat)preferredRailHeight {
     return 28 + HeaderHeight(self.traitCollection) + CapsuleHeight(self.traitCollection);
 }
@@ -222,7 +233,7 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
 - (void)environmentChanged:(NSNotification *)notification {
     (void)notification;
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (!MotionEnabled()) for (AXNCapsule *button in self.buttons.allValues) {
+        for (AXNCapsule *button in self.buttons.allValues) {
             [button.layer removeAllAnimations]; [button.badge.layer removeAllAnimations];
             button.transform = CGAffineTransformIdentity;
         }
@@ -285,6 +296,19 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
                     (void)action; [weakSelf moveFavoriteFirst:key]; return weakSelf != nil;
                 }]];
         }
+        UIAction *clear = [UIAction actionWithTitle:@"Clear app notifications…" image:[UIImage systemImageNamed:@"trash"]
+            identifier:nil handler:^(__kindof UIAction *action) {
+                (void)action; if (weakSelf.onRequestClear) weakSelf.onRequestClear(key);
+            }];
+        clear.attributes = UIMenuElementAttributesDestructive;
+        if (!self.onRequestClear) clear.attributes |= UIMenuElementAttributesDisabled;
+        [menu addObject:clear];
+        if (self.onRequestClear) [accessibility addObject:[[UIAccessibilityCustomAction alloc]
+            initWithName:@"Clear app notifications…" actionHandler:^BOOL(UIAccessibilityCustomAction *action) {
+                (void)action;
+                if (!weakSelf.onRequestClear) return NO;
+                weakSelf.onRequestClear(key); return YES;
+            }]];
         [menu addObject:all];
         [accessibility addObject:[[UIAccessibilityCustomAction alloc] initWithName:@"Show all notifications"
             actionHandler:^BOOL(UIAccessibilityCustomAction *action) {
@@ -297,6 +321,9 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     return button;
 }
 - (void)updateWithItems:(NSArray<AXNRailItem *> *)items selected:(NSString *)selected {
+    [UIView performWithoutAnimation:^{ [self applyItems:items selected:selected]; }];
+}
+- (void)applyItems:(NSArray<AXNRailItem *> *)items selected:(NSString *)selected {
     if ([self interactionActive] && items.count) {
         self.pendingItems = [items copy]; self.pendingSelection = [selected copy]; self.hasPendingUpdate = YES;
         return;
@@ -323,8 +350,11 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     self.headerHeight.constant = HeaderHeight(self.traitCollection);
     self.railHeight.constant = self.preferredRailHeight;
     CGPoint offset = self.scroll.contentOffset;
-    NSMutableArray *desired = [NSMutableArray arrayWithObject:[self buttonForItem:nil total:total pins:pins]];
-    NSMutableSet *keys = [NSMutableSet setWithObject:@""];
+    NSMutableArray *desired = [NSMutableArray new];
+    NSMutableSet *keys = [NSMutableSet new];
+    if ([AXNReadPreference(@"ShowAll", @YES) boolValue]) {
+        [desired addObject:[self buttonForItem:nil total:total pins:pins]]; [keys addObject:@""];
+    }
     for (AXNRailItem *item in ordered) { [desired addObject:[self buttonForItem:item total:total pins:pins]]; [keys addObject:item.bundleID]; }
     for (NSString *key in self.buttons.allKeys) if (![keys containsObject:key]) { [self.buttons[key] removeFromSuperview]; [self.buttons removeObjectForKey:key]; }
     // Move arranged entries in place. Never detach a surviving control.
@@ -336,7 +366,7 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
     self.scroll.contentOffset = CGPointMake(MIN(MAX(0, offset.x), maxX), 0);
     if (selectionChanged && !self.scroll.tracking && !self.scroll.decelerating) {
         UIView *active = self.buttons[selected ?: @""];
-        [self.scroll scrollRectToVisible:[active convertRect:active.bounds toView:self.scroll] animated:MotionEnabled()];
+        if (active) [self.scroll scrollRectToVisible:[active convertRect:active.bounds toView:self.scroll] animated:NO];
     }
 }
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
@@ -345,3 +375,4 @@ static NSMutableArray<NSString *> *PinnedApps(void) {
         selected:self.hasPendingUpdate ? self.pendingSelection : self.selected];
 }
 @end
+
