@@ -22,4 +22,8 @@ The adapter checks Objective-C signatures for `notificationListBaseComponent:req
 The larger density modes no longer introduce height beyond Slim. This avoids the reported density-dependent clock overlap; it does not certify every Dynamic Type size or Lock Screen arrangement. Clearing is irreversible after confirmation, and does not mute an app or uninstall it. Standard iOS notification animations remain controlled by iOS.
 
 ## Candidate validation
-Pending native CI, package inspection and publication. Physical checks on iOS 17.0 RootHide: spacing versus clock, long-press confirmation/cancel, selected and unselected clears near both ends, new arrivals during confirmation, Focus, and ShowAll off/on. No physical beta2 pass is claimed.
+All five jobs passed in [build 40146059731](https://github.com/chasesdavis/repo/actions/runs/40146059731) from source `ac6bf4fdfd8fec35cdf4dc9eff9501135aca64ac`. RootHide beta2 was published in commit `beb5f19d78e2975ab3b73875c728a2fce0d92bd7`; the Pages job verified all 34 public package/index files. Package: 93858 bytes; SHA256 `4eac64d0c24e4d27f286b796d180fb05ca62f19486688c544a6e183759827eb0`. Physical checks on iOS 17.0 RootHide: spacing versus clock, long-press confirmation/cancel, selected and unselected clears near both ends, new arrivals during confirmation, Focus, and ShowAll off/on. No physical beta2 pass is claimed.
+
+The native UIKit and runtime tests passed, including delayed clear handling, new arrivals, and explicit later selection taking priority. Independent post-download verification matched all 11 Git blob hashes and all 34 manifest hashes. The host's dpkg metadata reader could not restore a macOS archive group ID; read-only archive parsing independently confirmed version and architecture instead. Package metadata/install layout/Mach-O inspection passed on the CI runners.
+
+[Verified Pages deployment 40146431276](https://github.com/chasesdavis/repo/actions/runs/40146431276).

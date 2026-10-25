@@ -2,7 +2,7 @@
 
 A complete visual and architectural redesign of Axon's app-grouped Lock Screen notifications. Initial target: **iOS 15–17**, with **rootful**, **rootless**, and **RootHide** package configurations.
 
-**Status: 0.2.0~beta2 candidate under automated validation.** Beta1 device feedback reported choppy animations and taller capsule modes crossing into the clock. Beta2 removes capsule animation and keeps Slim's vertical footprint for every spacing mode. Native notification behavior still requires phone validation. See [beta2 changes and checks](docs/BETA2.md).
+**Status: 0.2.0~beta2 published for RootHide; automated validation and public-byte checks passed.** Beta1 device feedback reported choppy animations and taller capsule modes crossing into the clock. Beta2 removes capsule animation and keeps Slim's vertical footprint for every spacing mode. Native notification behavior still requires phone validation. See [beta2 changes and checks](docs/BETA2.md).
 
 **First device target: the user’s iOS 17 device running RootHide Bootstrap.** RootHide is the default build variant. The exact Bootstrap version and SpringBoard injection setting still need to be recorded during device testing.
 
@@ -10,7 +10,7 @@ Open `Design/preview.html` in a browser for the interactive visual concept. It w
 
 ## Install the RootHide beta
 
-Refresh [the Sileo repository](https://chasesdavis.github.io/repo/), install the latest published **Axon Reborn (Beta)**, and respring through your jailbreak controls. Existing preferences are retained; on a new installation enable Axon in Settings. Test with notifications present. Use **Expand While in Focus** for the native authenticated Focus expansion action. Rootful/rootless packages are build artifacts in [the successful candidate run](https://github.com/chasesdavis/repo/actions/runs/40138163664), not packages published to this RootHide feed.
+Refresh [the Sileo repository](https://chasesdavis.github.io/repo/), install **Axon Reborn (Beta) 0.2.0~beta2**, and respring through your jailbreak controls. Existing preferences are retained; on a new installation enable Axon in Settings. Test with notifications present. Use **Expand While in Focus** for the native authenticated Focus expansion action. Rootful/rootless packages are build artifacts in [the successful candidate run](https://github.com/chasesdavis/repo/actions/runs/40146059731), not packages published to this RootHide feed.
 
 Record actual results in [the device acceptance checklist](docs/DEVICE_ACCEPTANCE.md). Build success does not certify SpringBoard behavior on the phone.
 
@@ -138,7 +138,7 @@ A timeout means no reply was received; it does not by itself prove injection is 
 ## Development safety and limitations
 
 1. No device or OS/jailbreak combination has been certified. Do not distribute as stable or install on a primary device as a validated release.
-2. iOS 17 filtering uses native app-filter rules and preserves the original native predicate; iOS 15–16 use list insert/remove operations modeled after Axon. Neither adapter intentionally clears the notification dispatcher/store. Private APIs can still change behavior even when signatures match.
+2. iOS 17 filtering uses native app-filter rules and preserves the original native predicate; iOS 15–16 use list insert/remove operations modeled after Axon. Filtering does not clear the notification dispatcher/store. The explicitly confirmed Clear app notifications action delegates removal to iOS's native clear handler. Private APIs can still change behavior even when signatures match.
 3. The adapter only supports the structured list's one-request methods returning `void` or `BOOL`. Unknown signatures, missing classes or incomplete initial snapshots disable filtering.
 4. On a replay failure the adapter attempts to restore All and disables itself for that controller. Restoration is best-effort. If it fails, disable the tweak and respring through the jailbreak's existing controls.
 5. Grouped/coalesced notification counts, bulk clears, Focus, Scheduled Summary, notification list modes, media controls, native quick actions, rotation, concurrent list controllers and authentication need physical-device tests. Counts represent distinct requests observed by this adapter and are not yet guaranteed to equal every visually nested notification.

@@ -1,6 +1,17 @@
 # Validation record — October 24, 2026
 
-## Published beta candidate
+## Current beta2 release
+- Source: `ac6bf4fdfd8fec35cdf4dc9eff9501135aca64ac`; [build 40146059731](https://github.com/chasesdavis/repo/actions/runs/40146059731), all five jobs passed.
+- RootHide publication: `beb5f19d78e2975ab3b73875c728a2fce0d92bd7`; Pages verified all 34 public package/index files.
+- Package: `com.chasesdavis.axonreborn_0.2.0~beta2_iphoneos-arm64e.deb`, 93858 bytes.
+- SHA256: `4eac64d0c24e4d27f286b796d180fb05ca62f19486688c544a6e183759827eb0`.
+- Native UIKit tests passed: no capsule spring/pulse/scroll animation, equal-height horizontal spacing, ShowAll on/off, accessible clear action and end-of-row viewport retention.
+- Runtime tests passed: one-app native clear dispatch, exact current request identities, preserved post-confirmation arrivals, right/left neighbor selection, newly arrived neighbors, manual-selection priority, native rejection and inactive-controller guards. Existing filtering, Focus authentication and recovery tests remain green.
+- Rootful, rootless and RootHide package builds and metadata/install/Mach-O inspection passed. Only RootHide is published to this Sileo feed.
+- Physical beta1 feedback reported choppy motion and taller modes crossing the clock. Beta2 removes those capsule effects and vertical size differences. Beta2 physical-device verification is still pending; see [BETA2.md](BETA2.md).
+
+
+## Beta1 baseline
 - Version: **0.2.0~beta1**.
 - Source commit: `a8f195011fcb45038073ac2f627d96a83c51533f`.
 - [Build 40138163664](https://github.com/chasesdavis/repo/actions/runs/40138163664): **all five jobs passed**.
