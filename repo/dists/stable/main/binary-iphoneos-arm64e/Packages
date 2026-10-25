@@ -1244,3 +1244,20 @@ MD5sum: fd9c04cb6dbc1bed0576c27c8c0f5270
 SHA1: 482c5e15772167fe6cf21e2fb58cee39621b985d
 SHA256: 61fb1e5a03c415c7adcf81cce5850e482eddfdf63cad173fbc30ae590db027c5
 
+Package: com.chasesdavis.axonreborn
+Name: Axon Reborn (Beta)
+Description: App capsules, favorites and adaptive controls for iOS 15-17. Beta; device validation required.
+Maintainer: Chase Davis
+Author: Chase Davis; original Axon by Nepeta & Baw Appie
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0), firmware (<< 18.0)
+Conflicts: me.nepeta.axon, io.ominousness.stackxi, com.thomasfinch.priorityhub, com.ioscreatix.intelixbeta, com.ioscreatix.intelix, com.spiritoflogic.ncunify, com.spiritoflogic.unifyx, com.hidan.nclink10, org.coolstar.ventana-modern, org.coolstar.ventana, org.s1ris.spinxi
+Architecture: iphoneos-arm64e
+Version: 0.2.0~beta2
+Installed-Size: 640
+Filename: debs/com.chasesdavis.axonreborn_0.2.0~beta2_iphoneos-arm64e.deb
+Size: 93858
+MD5sum: 0fe2f86d6799cca0e57ed8f8f17c52ac
+SHA1: 00e9a585f800682273eb5b80b2c982cca0799570
+SHA256: 4eac64d0c24e4d27f286b796d180fb05ca62f19486688c544a6e183759827eb0
+

@@ -1,177 +1,177 @@
 {
-  "version": "0.2.0~beta1",
-  "source_commit": "a8f195011fcb45038073ac2f627d96a83c51533f",
-  "build_run": 40138163664,
+  "version": "0.2.0~beta2",
+  "source_commit": "ac6bf4fdfd8fec35cdf4dc9eff9501135aca64ac",
+  "build_run": 40146059731,
   "files": [
     {
       "path": "repo/Packages",
-      "bytes": 50772,
-      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+      "bytes": 51713,
+      "sha256": "f176c9a31f3bf09e65d57be002e35bac8aefb681dc6f835e22fa84666a8fac37"
     },
     {
       "path": "repo/Packages.bz2",
-      "bytes": 11560,
-      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+      "bytes": 11672,
+      "sha256": "51161f68c7d471cdaa269461da48960ad443d4e5b4429715ebefbb9fb0bb06dd"
     },
     {
       "path": "repo/Packages.gz",
-      "bytes": 12369,
-      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+      "bytes": 12482,
+      "sha256": "013447774dcde4d8b643f5b2b6026d0e49dcb8ba64bcd292e9ed036ecda78cf4"
     },
     {
       "path": "repo/Packages.lzma",
-      "bytes": 11092,
-      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+      "bytes": 11182,
+      "sha256": "54ffb8e052e914537bc81d22c6090da1fb1d7213d04cd9bb2bea56d17bbf3968"
     },
     {
       "path": "repo/Packages.xz",
-      "bytes": 11136,
-      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+      "bytes": 11228,
+      "sha256": "03806f7120419556f101688494d0535d290cec0120e15a91d7d38b1de6b35bdc"
     },
     {
       "path": "repo/Packages.zst",
-      "bytes": 11248,
-      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+      "bytes": 11340,
+      "sha256": "77959c6e60e9084098b3ea053da699d3d252a1182c62a58465c8c4c348e7b28f"
     },
     {
       "path": "repo/Release",
       "bytes": 1626,
-      "sha256": "bc22705eb3d67bd16bd0876faa5581a0358436055482fecc584f52ab2ef61044"
+      "sha256": "f7bab68742c1a2fbb515e7dc8ae3dd04d3a2ac577733f9494d42eec7e2ffae72"
     },
     {
-      "path": "repo/debs/com.chasesdavis.axonreborn_0.2.0~beta1_iphoneos-arm64e.deb",
-      "bytes": 86812,
-      "sha256": "61fb1e5a03c415c7adcf81cce5850e482eddfdf63cad173fbc30ae590db027c5"
+      "path": "repo/debs/com.chasesdavis.axonreborn_0.2.0~beta2_iphoneos-arm64e.deb",
+      "bytes": 93858,
+      "sha256": "4eac64d0c24e4d27f286b796d180fb05ca62f19486688c544a6e183759827eb0"
     },
     {
       "path": "repo/dists/ios17/Release",
       "bytes": 3996,
-      "sha256": "076ccc0d271e87923ab65aa789d8588df47923797ec0727c365e8ed0641b72bd"
+      "sha256": "f9b687b938adc212b2174656e1c3c63b4b887ca861c8656e56a72bcc16cbc493"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages",
-      "bytes": 50772,
-      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+      "bytes": 51713,
+      "sha256": "f176c9a31f3bf09e65d57be002e35bac8aefb681dc6f835e22fa84666a8fac37"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.bz2",
-      "bytes": 11560,
-      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+      "bytes": 11672,
+      "sha256": "51161f68c7d471cdaa269461da48960ad443d4e5b4429715ebefbb9fb0bb06dd"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.gz",
-      "bytes": 12369,
-      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+      "bytes": 12482,
+      "sha256": "013447774dcde4d8b643f5b2b6026d0e49dcb8ba64bcd292e9ed036ecda78cf4"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.lzma",
-      "bytes": 11092,
-      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+      "bytes": 11182,
+      "sha256": "54ffb8e052e914537bc81d22c6090da1fb1d7213d04cd9bb2bea56d17bbf3968"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.xz",
-      "bytes": 11136,
-      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+      "bytes": 11228,
+      "sha256": "03806f7120419556f101688494d0535d290cec0120e15a91d7d38b1de6b35bdc"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64/Packages.zst",
-      "bytes": 11248,
-      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+      "bytes": 11340,
+      "sha256": "77959c6e60e9084098b3ea053da699d3d252a1182c62a58465c8c4c348e7b28f"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages",
-      "bytes": 50772,
-      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+      "bytes": 51713,
+      "sha256": "f176c9a31f3bf09e65d57be002e35bac8aefb681dc6f835e22fa84666a8fac37"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.bz2",
-      "bytes": 11560,
-      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+      "bytes": 11672,
+      "sha256": "51161f68c7d471cdaa269461da48960ad443d4e5b4429715ebefbb9fb0bb06dd"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.gz",
-      "bytes": 12369,
-      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+      "bytes": 12482,
+      "sha256": "013447774dcde4d8b643f5b2b6026d0e49dcb8ba64bcd292e9ed036ecda78cf4"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.lzma",
-      "bytes": 11092,
-      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+      "bytes": 11182,
+      "sha256": "54ffb8e052e914537bc81d22c6090da1fb1d7213d04cd9bb2bea56d17bbf3968"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.xz",
-      "bytes": 11136,
-      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+      "bytes": 11228,
+      "sha256": "03806f7120419556f101688494d0535d290cec0120e15a91d7d38b1de6b35bdc"
     },
     {
       "path": "repo/dists/ios17/main/binary-iphoneos-arm64e/Packages.zst",
-      "bytes": 11248,
-      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+      "bytes": 11340,
+      "sha256": "77959c6e60e9084098b3ea053da699d3d252a1182c62a58465c8c4c348e7b28f"
     },
     {
       "path": "repo/dists/stable/Release",
       "bytes": 3997,
-      "sha256": "c04030a9cafb1aa5e5abe8aad21c78bbdf140ae3d2f876eec141ee3a0c91e8cf"
+      "sha256": "d629845ad360637d8a8dbf23f70fe084790ca6d48879d12b31bd18c7282e453b"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages",
-      "bytes": 50772,
-      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+      "bytes": 51713,
+      "sha256": "f176c9a31f3bf09e65d57be002e35bac8aefb681dc6f835e22fa84666a8fac37"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.bz2",
-      "bytes": 11560,
-      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+      "bytes": 11672,
+      "sha256": "51161f68c7d471cdaa269461da48960ad443d4e5b4429715ebefbb9fb0bb06dd"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.gz",
-      "bytes": 12369,
-      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+      "bytes": 12482,
+      "sha256": "013447774dcde4d8b643f5b2b6026d0e49dcb8ba64bcd292e9ed036ecda78cf4"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.lzma",
-      "bytes": 11092,
-      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+      "bytes": 11182,
+      "sha256": "54ffb8e052e914537bc81d22c6090da1fb1d7213d04cd9bb2bea56d17bbf3968"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.xz",
-      "bytes": 11136,
-      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+      "bytes": 11228,
+      "sha256": "03806f7120419556f101688494d0535d290cec0120e15a91d7d38b1de6b35bdc"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64/Packages.zst",
-      "bytes": 11248,
-      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+      "bytes": 11340,
+      "sha256": "77959c6e60e9084098b3ea053da699d3d252a1182c62a58465c8c4c348e7b28f"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages",
-      "bytes": 50772,
-      "sha256": "c8e387a677f1bcfbad11910b851c1c53e3ab2e9152b48b6c58079561cc6d4398"
+      "bytes": 51713,
+      "sha256": "f176c9a31f3bf09e65d57be002e35bac8aefb681dc6f835e22fa84666a8fac37"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.bz2",
-      "bytes": 11560,
-      "sha256": "48fe218abef91f3b208f687122b8367fe2a0669c8417e801c57c57828863e225"
+      "bytes": 11672,
+      "sha256": "51161f68c7d471cdaa269461da48960ad443d4e5b4429715ebefbb9fb0bb06dd"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.gz",
-      "bytes": 12369,
-      "sha256": "06c1f0ac6cba3d03adef8996b7017a461bd351e7ae44667c1906d6b7843ce3b4"
+      "bytes": 12482,
+      "sha256": "013447774dcde4d8b643f5b2b6026d0e49dcb8ba64bcd292e9ed036ecda78cf4"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.lzma",
-      "bytes": 11092,
-      "sha256": "d5dc321fb30b33bcc056011b09ed42fe1a3ac63c159b67b4e39f453b2b22185b"
+      "bytes": 11182,
+      "sha256": "54ffb8e052e914537bc81d22c6090da1fb1d7213d04cd9bb2bea56d17bbf3968"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.xz",
-      "bytes": 11136,
-      "sha256": "dd50f9aafbc462f1adf26c1a24af01654df428270dd652bed3231d5fa36c6077"
+      "bytes": 11228,
+      "sha256": "03806f7120419556f101688494d0535d290cec0120e15a91d7d38b1de6b35bdc"
     },
     {
       "path": "repo/dists/stable/main/binary-iphoneos-arm64e/Packages.zst",
-      "bytes": 11248,
-      "sha256": "870f9112ae17a127a1600fdcbb3fc75e21b13e8db362e53830a6d053b3b74c6f"
+      "bytes": 11340,
+      "sha256": "77959c6e60e9084098b3ea053da699d3d252a1182c62a58465c8c4c348e7b28f"
     }
   ]
 }
