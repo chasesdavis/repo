@@ -1,7 +1,7 @@
 Package: com.chasedavis.stayon17
 Name: StayOn17
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 17.0), preferenceloader
-Version: 1.0.0-1
+Version: 1.0.0-2
 Architecture: iphoneos-arm64
 Description: Per-app iOS version gate bypass with compatibility scanner. Spoofs OS version only for enabled bundle IDs plus App Store install daemons.
 Maintainer: Chase Davis

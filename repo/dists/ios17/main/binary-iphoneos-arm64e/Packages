@@ -1008,6 +1008,22 @@ MD5sum: 3707bc70e1a3fd388a29efce80f8a86f
 SHA1: dbe13776dd1835f3775a7431c4487cd249ad0598
 SHA256: 4516be41530bb0ae17f2a6b67f70dca6e208e642617d90b4325b012f34e5ad6f
 
+Package: com.chasedavis.stayon17
+Name: StayOn17
+Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 17.0), preferenceloader
+Description: Per-app iOS version gate bypass with compatibility scanner. Spoofs OS version only for enabled bundle IDs plus App Store install daemons.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Architecture: iphoneos-arm64e
+Version: 1.0.0-2
+Installed-Size: 688
+Filename: debs/com.chasedavis.stayon17_1.0.0-2_iphoneos-arm64e.deb
+Size: 30848
+MD5sum: 8f616b093d0bc3e4a269579fc08519b4
+SHA1: 6cc56916f3bc759739024b0d1e3fefdf665e039b
+SHA256: 5589afe156d2c97371074aca4659965629bfe609d9ddda96fc30f22c30bae946
+
 Package: com.chasedavis.velvetalerts
 Name: VelvetAlerts
 Depends: mobilesubstrate

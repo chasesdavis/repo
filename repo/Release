@@ -5,25 +5,25 @@ Codename: ios17
 Architectures: iphoneos-arm64 iphoneos-arm64e
 Components: main
 Description: Local roothide Bootstrap tweak repo
-Date: Wed, 28 Oct 2026 16:44:59 UTC
+Date: Wed, 28 Oct 2026 16:49:30 UTC
 MD5Sum:
- dc293aac2e33d0f81cdc957540974fcd            52357 Packages
- e81d3154f91aa974f0e5504e52308a49            12768 Packages.gz
- 8be101bf3f0f540a75c8abe805c0cf05            11420 Packages.xz
- 62e832c6916a715c2bcb7f26f09fe1e8            11528 Packages.zst
- 418cdb7697697deb7944ce4ac8e77484            11851 Packages.bz2
- 7a242cb6947086e0b5706a9edc789471            11367 Packages.lzma
+ f09d8dc57c85f2080219403e3ab58793            53001 Packages
+ fbab408b22cb9245628d54eebd62d342            12881 Packages.gz
+ ab32c8661217889d28d0c5f26ab9b03f            11500 Packages.xz
+ 7e9262a7193381eca6c8e3838e6e72b2            11615 Packages.zst
+ 05e8093bf21b870fffce44e316db8ac2            11947 Packages.bz2
+ f99ca35da84216518138783be3bd159f            11448 Packages.lzma
 SHA1:
- 09c5618b9c3154afa69f664d7c50bd5aa3613040            52357 Packages
- 5f2fc404082d925a3bf639753b27f96826d732ef            12768 Packages.gz
- 7fea3eaafc8715413b7fdd963c5acf4cef8bb04f            11420 Packages.xz
- 792619a8bc4f2cc037db88a1eda5c50273ad90a4            11528 Packages.zst
- 84aa41ee7d4144b804280ca20bcb643b56581972            11851 Packages.bz2
- 1ad07e427e4ffd273c0fed487b1119ed4ee90abd            11367 Packages.lzma
+ 7062645e9f9588ee4fb3d18b27e81491ddc407a3            53001 Packages
+ 46482d345ebd6224cf18396206ad5a8c45e3f2aa            12881 Packages.gz
+ 266a30e3b010271048bcab749ba6a0085e7355f2            11500 Packages.xz
+ 25c8dd243118b5e23022502909fce1ff9434be23            11615 Packages.zst
+ 917754969ebca22ebd5d75f165ff33ab2f2ca3c8            11947 Packages.bz2
+ 911b5179c5279d03824225aa2ffa576a3fec814a            11448 Packages.lzma
 SHA256:
- b7f47e282d68e6b9d6c323c609bc7bcd89ec606a4a4a11ffe4d677b7391daba4            52357 Packages
- e9b9c62c62289aec7b85ee8a0f8c0618fd57b97600c7a6c806ed4d9474923e4f            12768 Packages.gz
- 8bc1be5704b7538802afe14cebc5c4772df45db42b36bb32ef053c64475a10c4            11420 Packages.xz
- 54580e45192f02e3aa53dff625776bacbba9cfc52af7d3b9f48b9d892e7c7731            11528 Packages.zst
- 86f70a063aca5783822081e597199f4115e6461a640a3ecbcb2d0ed3df66f36c            11851 Packages.bz2
- fd6711d5cab08ac3439e487e183bad7a4a7bd9e44c554fef71499c60b71efb4d            11367 Packages.lzma
+ 59c9e1ad10723a20ec4f9ee2c29ef81219c9e518867733cdf96050778235af88            53001 Packages
+ 7ae21b125eabdf8feb33d6acfac95c6288303fa6adbead62958d2e8887772c11            12881 Packages.gz
+ 721203656f13de19173a6817aa839bd0d85ff4d1c37ae4ad1a6fb7bb47a2765c            11500 Packages.xz
+ 9748ed6be494a364e414cb397b31c03499ea4c835f714f4092b903bad3dab06e            11615 Packages.zst
+ 986438d3c9e1383915145ed28a49f2ec95cb9517c828a15a4b0177fd1a9e416e            11947 Packages.bz2
+ 5f00ca4f8005e7f835aa903ae2c620ce108ee2f9a9e509992ac1308aa936502e            11448 Packages.lzma
