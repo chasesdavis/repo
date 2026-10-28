@@ -83,3 +83,7 @@ After adding packages, regenerate the indexes with `scripts/package-repo.sh`, co
 Sileo source URL: https://chasesdavis.github.io/repo/
 
 The older `scripts/publish-pages.sh` flow is not required by the current Actions deployment.
+
+## StayOn17
+
+See docs/stayon17.md
