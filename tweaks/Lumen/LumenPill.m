@@ -3,7 +3,6 @@
 #import "LumenPrefs.h"
 #import "LumenProviders.h"
 
-static const CGFloat kLumenPillHeight = 26.0;
 static const CGFloat kLumenPillInset = 18.0;
 static const CGFloat kLumenFontSize = 13.0;
 static const NSTimeInterval kLumenFastTick = 1.0;
@@ -146,7 +145,7 @@ static const NSTimeInterval kLumenSlowTick = 10.0;
 static const NSInteger kLumenFocusHideTag = 91743;
 
 - (void)suppressFocusIndicatorIn:(UIView *)host {
-    if (!LumenEnabled() || !LumenHideClock()) {
+    if (!LumenEnabled() || !LumenHideFocus()) {
         return;
     }
     for (UIView *view in host.subviews) {
@@ -179,7 +178,8 @@ static const NSInteger kLumenFocusHideTag = 91743;
     self.pill.clipsToBounds = NO;
 
     self.blur = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark]];
-    self.blur.layer.cornerRadius = kLumenPillHeight / 2.0;
+    CGFloat h = LumenPillHeight();
+    self.blur.layer.cornerRadius = h / 2.0;
     self.blur.layer.cornerCurve = kCACornerCurveContinuous;
     self.blur.clipsToBounds = YES;
     self.blur.userInteractionEnabled = NO;
@@ -273,9 +273,8 @@ static const NSInteger kLumenFocusHideTag = 91743;
     CGFloat padding = 10.0;
     CGFloat contentWidth = self.label.bounds.size.width + iconWidth + gap + padding * 2.0;
     CGFloat maxWidth = self.host.bounds.size.width - kLumenPillInset * 2.0;
-    CGFloat width = MIN(MAX(contentWidth, kLumenPillHeight + 8.0), maxWidth);
-
-    CGFloat height = kLumenPillHeight;
+    CGFloat height = LumenPillHeight();
+    CGFloat width = MIN(MAX(contentWidth, height + 8.0), maxWidth);
     CGFloat y = MAX(([self statusBarHeight] - height) / 2.0, 2.0);
     self.pill.frame = CGRectMake(kLumenPillInset, y, width, height);
     self.blur.frame = self.pill.bounds;

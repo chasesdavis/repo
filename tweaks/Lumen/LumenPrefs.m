@@ -1,8 +1,6 @@
 #import "LumenPrefs.h"
 #import <notify.h>
 
-// libnotify is not in the SDK tbd set; weak-link it so the prefs bundle can
-// still build against the same source as the tweak.
 extern uint32_t notify_post(const char *name) __attribute__((weak_import));
 
 NSString *const LumenDomain = @"com.chasedavis.lumen";
@@ -12,7 +10,9 @@ static NSArray<NSString *> *LumenAllPills(void) {
     static NSArray<NSString *> *pills;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        pills = @[ @"time", @"date", @"battery", @"playing", @"network", @"storage", @"countdown", @"message" ];
+        pills = @[ @"time", @"date", @"battery", @"playing", @"event",
+                   @"alarm", @"weather", @"network", @"storage", @"unlocks",
+                   @"countdown", @"message" ];
     });
     return pills;
 }
@@ -39,13 +39,9 @@ void LumenReloadPrefs(void) {
     }
 }
 
-BOOL LumenEnabled(void) {
-    return LumenBoolPref(@"enabled", YES);
-}
-
-BOOL LumenHideClock(void) {
-    return LumenBoolPref(@"hideClock", YES);
-}
+BOOL LumenEnabled(void) { return LumenBoolPref(@"enabled", YES); }
+BOOL LumenHideClock(void) { return LumenBoolPref(@"hideClock", YES); }
+BOOL LumenHideFocus(void) { return LumenBoolPref(@"hideFocus", YES); }
 
 NSArray<NSString *> *LumenEnabledPills(void) {
     NSMutableArray<NSString *> *result = [NSMutableArray array];
@@ -61,7 +57,8 @@ NSArray<NSString *> *LumenEnabledPills(void) {
 }
 
 BOOL LumenPillEnabled(NSString *pill) {
-    return LumenBoolPref([@"pill." stringByAppendingString:pill], ![pill isEqualToString:@"message"] && ![pill isEqualToString:@"countdown"]);
+    BOOL fallback = ![pill isEqualToString:@"message"] && ![pill isEqualToString:@"countdown"];
+    return LumenBoolPref([@"pill." stringByAppendingString:pill], fallback);
 }
 
 NSString *LumenDefaultPill(void) {
@@ -69,19 +66,13 @@ NSString *LumenDefaultPill(void) {
     return [value isKindOfClass:[NSString class]] ? value : @"time";
 }
 
-BOOL LumenUseCustomColor(void) {
-    return LumenBoolPref(@"customColor", NO);
-}
+BOOL LumenUseCustomColor(void) { return LumenBoolPref(@"customColor", NO); }
 
 static UIColor *LumenColorFromHex(NSString *hex, UIColor *fallback) {
-    if (![hex isKindOfClass:[NSString class]] || hex.length < 7) {
-        return fallback;
-    }
+    if (![hex isKindOfClass:[NSString class]] || hex.length < 7) return fallback;
     unsigned int rgba = 0;
     NSScanner *scanner = [NSScanner scannerWithString:[hex substringFromIndex:1]];
-    if (![scanner scanHexInt:&rgba]) {
-        return fallback;
-    }
+    if (![scanner scanHexInt:&rgba]) return fallback;
     return [UIColor colorWithRed:((rgba >> 16) & 0xFF) / 255.0
                            green:((rgba >> 8) & 0xFF) / 255.0
                             blue:(rgba & 0xFF) / 255.0
@@ -90,9 +81,7 @@ static UIColor *LumenColorFromHex(NSString *hex, UIColor *fallback) {
 
 UIColor *LumenAccentColor(void) {
     UIColor *fallback = [UIColor colorWithRed:0.36 green:0.78 blue:0.98 alpha:1.0];
-    if (!LumenUseCustomColor()) {
-        return fallback;
-    }
+    if (!LumenUseCustomColor()) return fallback;
     id hex = LumenPref(@"accentHex");
     return [hex isKindOfClass:[NSString class]] ? LumenColorFromHex(hex, fallback) : fallback;
 }
@@ -100,7 +89,7 @@ UIColor *LumenAccentColor(void) {
 CGFloat LumenFontScale(void) {
     id value = LumenPref(@"fontScale");
     CGFloat scale = [value isKindOfClass:[NSNumber class]] ? [value doubleValue] : 1.0;
-    return MIN(MAX(scale, 0.8), 1.3);
+    return MIN(MAX(scale, 0.8), 1.4);
 }
 
 CGFloat LumenPillOpacity(void) {
@@ -109,11 +98,15 @@ CGFloat LumenPillOpacity(void) {
     return MIN(MAX(opacity, 0.0), 0.9);
 }
 
+CGFloat LumenPillHeight(void) {
+    id value = LumenPref(@"pillHeight");
+    CGFloat height = [value isKindOfClass:[NSNumber class]] ? [value doubleValue] : 26.0;
+    return MIN(MAX(height, 20.0), 36.0);
+}
+
 NSDate *LumenCountdownDate(void) {
     id value = LumenPref(@"countdownDate");
-    if (![value isKindOfClass:[NSNumber class]]) {
-        return nil;
-    }
+    if (![value isKindOfClass:[NSNumber class]]) return nil;
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:[value doubleValue]];
     return [date timeIntervalSinceNow] > 0 ? date : nil;
 }

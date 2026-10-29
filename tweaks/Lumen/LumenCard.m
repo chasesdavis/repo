@@ -109,6 +109,10 @@ static LumenCard *gLumenVisibleCard = nil;
         @"storage": @"Storage",
         @"countdown": @"Countdown",
         @"message": @"Quick message",
+        @"event": @"Next event",
+        @"alarm": @"Alarm & timer",
+        @"weather": @"Weather",
+        @"unlocks": @"Unlocks",
     }[self.pill] ?: @"Lumen";
 }
 
@@ -116,8 +120,20 @@ static LumenCard *gLumenVisibleCard = nil;
     if ([self.pill isEqualToString:@"battery"]) {
         return [LumenBatteryDetails() componentsJoinedByString:@"\n"];
     }
+    if ([self.pill isEqualToString:@"event"]) {
+        return [LumenNextEventDetails() componentsJoinedByString:@"\n"];
+    }
+    if ([self.pill isEqualToString:@"alarm"]) {
+        return [LumenAlarmDetails() componentsJoinedByString:@"\n"];
+    }
+    if ([self.pill isEqualToString:@"weather"]) {
+        return [LumenWeatherDetails() componentsJoinedByString:@"\n"];
+    }
+    if ([self.pill isEqualToString:@"unlocks"]) {
+        return LumenUnlocksSummary();
+    }
     if ([self.pill isEqualToString:@"storage"]) {
-        return [NSString stringWithFormat:@"%@ still available.", LumenStorageSummary()];
+        return [NSString stringWithFormat:@"%@ free\n%@ active memory", LumenStorageSummary(), LumenMemorySummary()];
     }
     if ([self.pill isEqualToString:@"countdown"]) {
         NSDate *target = LumenCountdownDate();
@@ -146,6 +162,18 @@ static LumenCard *gLumenVisibleCard = nil;
     if ([self.pill isEqualToString:@"playing"]) {
         return @[ @"Play or pause", @"Next track", @"Previous track" ];
     }
+    if ([self.pill isEqualToString:@"event"]) {
+        return @[ @"Open Calendar", @"Close" ];
+    }
+    if ([self.pill isEqualToString:@"weather"]) {
+        return @[ @"Refresh", @"Close" ];
+    }
+    if ([self.pill isEqualToString:@"event"]) {
+        return @[ @"Open Calendar", @"Close" ];
+    }
+    if ([self.pill isEqualToString:@"weather"]) {
+        return @[ @"Refresh", @"Close" ];
+    }
     if ([self.pill isEqualToString:@"message"]) {
         return @[ @"New message" ];
     }
@@ -171,6 +199,10 @@ static LumenCard *gLumenVisibleCard = nil;
         LumenMediaNext();
     } else if ([title hasPrefix:@"Previous"]) {
         LumenMediaPrevious();
+    } else if ([title hasPrefix:@"Open Calendar"]) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"calshow://"] options:@{} completionHandler:nil];
+    } else if ([title hasPrefix:@"Open Calendar"]) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"calshow://"] options:@{} completionHandler:nil];
     } else if ([title hasPrefix:@"New message"]) {
         [self composeMessage];
         return;

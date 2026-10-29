@@ -9,7 +9,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = Lumen
 Lumen_FILES = Tweak.xm LumenPrefs.m LumenPill.m LumenProviders.m LumenCard.m
 Lumen_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
-Lumen_FRAMEWORKS = UIKit Foundation QuartzCore MessageUI
+Lumen_FRAMEWORKS = UIKit Foundation QuartzCore MessageUI EventKit
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

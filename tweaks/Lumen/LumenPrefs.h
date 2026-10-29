@@ -10,6 +10,7 @@ extern NSString *const LumenPrefsChangedNotification;
 
 BOOL LumenEnabled(void);
 BOOL LumenHideClock(void);
+BOOL LumenHideFocus(void);
 NSArray<NSString *> *LumenEnabledPills(void);
 NSString *LumenDefaultPill(void);
 BOOL LumenPillEnabled(NSString *pill);
@@ -17,6 +18,7 @@ BOOL LumenUseCustomColor(void);
 UIColor *LumenAccentColor(void);
 CGFloat LumenFontScale(void);
 CGFloat LumenPillOpacity(void);
+CGFloat LumenPillHeight(void);
 NSDate *LumenCountdownDate(void);
 void LumenSetPref(NSString *key, id value);
 void LumenReloadPrefs(void);

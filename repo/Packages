@@ -41,11 +41,11 @@ Tag: role::tweak, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/lumen/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/lumen/
 Architecture: iphoneos-arm64e
-Version: 1.0.1
-Installed-Size: 424
-Filename: debs/com.chasedavis.lumen_1.0.1_iphoneos-arm64e.deb
-Size: 37908
-MD5sum: f65cbbcebb89584b4b75fce8be65bf7b
-SHA1: 21a7dfedfdd036309265a8b8ec351bc1357285aa
-SHA256: 70b67c19e47c2b00d0305dd77dc0e3a60abe5d7dcf89ef2d4200055bcf2643fd
+Version: 1.1.0
+Installed-Size: 436
+Filename: debs/com.chasedavis.lumen_1.1.0_iphoneos-arm64e.deb
+Size: 40588
+MD5sum: bd6dada4426d1d0ced8a3cec32aacf55
+SHA1: e7300415aa03fdc5bd75a164022b0bd4be3535ad
+SHA256: 7b800926044d61947db8faa8e0fb9c3ecef80cc4600c717937d9c54ad7c08df1
 
