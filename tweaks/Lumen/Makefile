@@ -18,6 +18,7 @@ LumenPrefs_FILES = Prefs/LumenPrefsController.m LumenPrefs.m
 LumenPrefs_CFLAGS = -fobjc-arc -I.
 LumenPrefs_FRAMEWORKS = UIKit Foundation
 LumenPrefs_PRIVATE_FRAMEWORKS = Preferences
+LumenPrefs_LDFLAGS = -F$(THEOS)/sdks/iPhoneOS16.5.sdk/System/Library/PrivateFrameworks
 LumenPrefs_INSTALL_PATH = /Library/PreferenceBundles
 
 include $(THEOS_MAKE_PATH)/bundle.mk

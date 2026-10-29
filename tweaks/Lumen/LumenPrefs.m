@@ -12,6 +12,7 @@ static NSArray<NSString *> *LumenAllPills(void) {
     dispatch_once(&once, ^{
         pills = @[ @"time", @"date", @"battery", @"playing", @"event",
                    @"alarm", @"weather", @"network", @"storage", @"unlocks",
+                   @"cpu", @"uptime", @"data", @"volume", @"brightness",
                    @"countdown", @"message" ];
     });
     return pills;

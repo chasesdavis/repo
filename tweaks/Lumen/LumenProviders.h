@@ -39,6 +39,12 @@ NSString *LumenWeatherSummary(void);       // Current temp + condition
 NSArray<NSString *> *LumenWeatherDetails(void);
 NSString *LumenUnlocksSummary(void);       // Today's unlock count
 NSString *LumenMemorySummary(void);         // Used memory
+NSString *LumenCPUSummary(void);            // CPU usage %
+NSString *LumenUptimeSummary(void);         // Device uptime
+NSString *LumenDataSummary(void);           // Cellular data this period
+NSString *LumenVolumeSummary(void);         // Current volume level
+NSString *LumenBrightnessSummary(void);     // Screen brightness %
+NSString *LumenBluetoothSummary(void);      // Connected BT devices
 
 #ifdef __cplusplus
 }

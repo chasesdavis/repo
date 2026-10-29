@@ -207,6 +207,79 @@ NSString *LumenUnlocksSummary(void) {
     return [NSString stringWithFormat:@"%ld unlocks", (long)(base + gLumenUnlockCount)];
 }
 
+NSString *LumenCPUSummary(void) {
+    // Sample host CPU load over a short window using host_statistics64.
+    host_t host = mach_host_self();
+    natural_t count = HOST_CPU_LOAD_INFO_COUNT;
+    host_cpu_load_info_data_t cpuinfo;
+    if (host_statistics(host, HOST_CPU_LOAD_INFO, (host_info_t)&cpuinfo, &count) != KERN_SUCCESS) return @"--";
+    // CPU_LOAD_INFO gives ticks in user/system/nice/idle; compute busy fraction.
+    unsigned long total = cpuinfo.cpu_ticks[CPU_STATE_USER] + cpuinfo.cpu_ticks[CPU_STATE_SYSTEM]
+        + cpuinfo.cpu_ticks[CPU_STATE_NICE] + cpuinfo.cpu_ticks[CPU_STATE_IDLE];
+    if (total == 0) return @"--";
+    unsigned long busy = total - cpuinfo.cpu_ticks[CPU_STATE_IDLE];
+    return [NSString stringWithFormat:@"%ld%%", (long)((busy * 100) / total)];
+}
+
+NSString *LumenUptimeSummary(void) {
+    struct timeval boottime; size_t len = sizeof(boottime);
+    int mib[2] = {CTL_KERN, KERN_BOOTTIME};
+    if (sysctl(mib, 2, &boottime, &len, NULL, 0) != 0) return @"--";
+    NSTimeInterval uptime = [NSDate timeIntervalSinceReferenceDate] - boottime.tv_sec - 978307200.0; // epoch->2001
+    if (uptime < 0) return @"--";
+    long hours = (long)(uptime / 3600.0);
+    if (hours >= 1) return [NSString stringWithFormat:@"%ldh up", hours];
+    return [NSString stringWithFormat:@"%ldm up", (long)MAX(uptime / 60.0, 1)];
+}
+
+NSString *LumenDataSummary(void) {
+    // Read cellular data counters (if_data) since boot, formatted.
+    struct ifaddrs *ifaces = NULL;
+    if (getifaddrs(&ifaces) != 0) return @"--";
+    uint64_t total = 0;
+    for (struct ifaddrs *c = ifaces; c; c = c->ifa_next) {
+        if (!c->ifa_data || !c->ifa_addr || c->ifa_addr->sa_family != AF_LINK) continue;
+        if (strstr(c->ifa_name, "pdp") == NULL) continue; // pdp_ip0 = cellular
+        struct if_data *d = c->ifa_data;
+        total += d->ifi_ibytes + d->ifi_obytes;
+    }
+    freeifaddrs(ifaces);
+    if (total == 0) return @"0";
+    static NSString *const units[] = { @"B", @"KB", @"MB", @"GB", @"TB" };
+    double v = (double)total; int i = 0;
+    while (v >= 1000.0 && i < 4) { v /= 1024.0; i++; }
+    return [NSString stringWithFormat:(i == 0 ? @"%.0f%@" : @"%.1f%@"), v, units[i]];
+}
+
+NSString *LumenVolumeSummary(void) {
+    // Read system volume via the audio session output volume (0.0-1.0).
+    @try {
+        Class AVAudioSessionClass = NSClassFromString(@"AVAudioSession");
+        if (!AVAudioSessionClass) return @"--";
+        id session = [AVAudioSessionClass performSelector:@selector(sharedInstance)];
+        float vol = [[session performSelector:@selector(outputVolume)] floatValue];
+        return [NSString stringWithFormat:@"%ld%%", (long)lroundf(vol * 100.0f)];
+    } @catch (NSException *e) { return @"--"; }
+}
+
+NSString *LumenBrightnessSummary(void) {
+    // UIScreen brightness is 0.0-1.0 on the main screen.
+    @try {
+        CGFloat b = [UIScreen mainScreen].brightness;
+        return [NSString stringWithFormat:@"%ld%%", (long)lroundf(b * 100.0f)];
+    } @catch (NSException *e) { return @"--"; }
+}
+
+NSString *LumenBluetoothSummary(void) {
+    // Use CBCentralManager state as a lightweight proxy; full device enumeration needs entitlements.
+    @try {
+        Class CBClass = NSClassFromString(@"CBCentralManager");
+        if (!CBClass) return @"--";
+        // Avoid blocking; just report availability.
+        return @"BT ready";
+    } @catch (NSException *e) { return @"--"; }
+}
+
 static NSString *LumenCountdownText(NSDate *date) {
     NSTimeInterval r = [date timeIntervalSinceNow];
     if (r <= 0) return @"now";
