@@ -3,6 +3,7 @@
         bundle = "LumenPrefs";
         cell = PSLinkCell;
         detail = "LumenPrefsController";
+        isController = true;
         icon = "icon.png";
         label = "Lumen";
     };
