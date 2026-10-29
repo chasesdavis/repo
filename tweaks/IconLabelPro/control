@@ -1,9 +1,0 @@
-Package: com.chasedavis.iconlabelpro
-Name: IconLabelPro
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Refines SpringBoard icon labels with cleaner typography, shadows, and hidden dock labels.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

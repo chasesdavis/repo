@@ -1,89 +1,51 @@
-# iOS 17 Roothide Tweak Lab
+# Lumen
 
-This repo contains a first tranche of Bootstrap-compatible, roothide Theos tweaks plus a local static Sileo/APT repo.
+Free status bar pill for iOS 15 - 17 on roothide and rootful jailbreaks. No paid tier, no subscription, donations only.
 
-## Tweaks
+Turn the status bar clock into a small capsule that shows one live value at a time. Long press cycles pills, tap opens a card. Nothing is sent anywhere; everything is read from public system APIs.
 
-- [Axon Reborn](tweaks/AxonReborn): experimental iOS 15–17 notification-grouping redesign, with RootHide Bootstrap on iOS 17 as the first test target. Source, interactive preview and a macOS build workflow are included. All three package variants compile in CI; the experimental RootHide package is published for device testing and starts disabled. Device compatibility remains unverified.
-- AuraDock: dock glow and ambient dock styling.
-- KineticBadges: animated notification badge changes.
-- VelvetAlerts: softer notification/banner presentation.
-- GhostDock: auto-hiding dock with quick reveal.
-- IconLabelPro: cleaner icon label typography and dock-label hiding.
-- VolumeRibbon: compact volume HUD ribbon styling.
-- SilentToast: small toast when silent mode changes.
-- ChargingAurora: charging edge glow on SpringBoard.
-- SpotifyReframe: Spotify-only UI redesign with glass cards, tuned artwork, player chrome, and Settings controls.
-- LowerInstall: install apps meant for newer iOS (installd + App Store version spoof; julioverne port for RootHide/iOS 15–17).
-- Codex `0.155.1-4`: a small RootHide Bootstrap package. Sileo only installs the launcher. The first time you run `codex`, it downloads the agent.
+## Pills
 
-Premium suite:
+- Time, date, battery
+- Now playing with play, pause, next and previous
+- Network throughput, free storage
+- Countdown to a chosen date
+- Quick message composer
 
-- IslandCommand Pro
-- DockShelf Pro
-- FocusLens Pro
-- NotificationForge
-- ControlCenter Studio
-- HomeScreenZen Pro
-- ApertureFX
-- StatusLab Pro
-- LockScreen Atmosphere
-- SpringBoard Automations
+Settings live in Settings -> Lumen: master switch, clock hiding, per-pill toggles, opacity, accent color and text scale. Changes apply instantly.
 
-The premium packages are versioned `1.0.4-1` and include PreferenceLoader panes in Settings. They install disabled by default so they can be enabled and tested one at a time.
+## Repo
 
-## Build All
+Add to Sileo or Zebra:
 
-```bash
-cd "/Users/chase/ios17 tweaks"
-./scripts/build-all.sh
-./scripts/package-repo.sh
-./scripts/audit-tweaks.sh
-```
+    https://chasesdavis.github.io/repo/
 
-Built `.deb` files are copied into `repo/debs/`. Static repo metadata is written to `repo/`.
+Package id com.chasedavis.lumen. This repo ships Lumen only.
 
-Theos rejects project paths containing spaces, so `build-all.sh` stages each tweak into `/tmp/ios17_tweak_lab_build/` before compiling and then copies packages back.
+## Build
 
-## Install
+    export THEOS=~/theos
+    ./scripts/build.sh       # builds the deb into repo/debs
+    ./scripts/index-repo.sh  # regenerates Packages and Release
 
-Manual install fallback:
+build.sh builds with THEOS_PACKAGE_SCHEME=roothide for arm64 and arm64e.
 
-1. Copy a `.deb` from `repo/debs/` to the iPhone.
-2. Open it with Sileo or Zebra.
-3. Install, then respring or run `sbreload`.
+## Layout
 
-Static repo flow:
+- tweaks/Lumen - tweak sources, hooks and the Settings bundle
+- repo - static APT/Sileo repo, published by GitHub Pages
+- scripts - build and index helpers
 
-1. Host the `repo/` folder on any static server.
-2. Add that URL as a source in Sileo.
-3. Refresh sources and install packages.
+## Notes
 
-Published repo URL:
+- The clock keeps its layout slot when hidden; it is only made transparent, so other status items never shift.
+- MediaRemote is resolved with dlsym, so there is no private framework in the link line.
+- Now playing is polled on a background queue and cached, so the pill never blocks the main thread.
 
-```text
-https://chasesdavis.github.io/repo/
-```
+## Donate
 
-For local network testing, serve the folder from the Mac:
+paypal.me/chasesdavis
 
-```bash
-cd "/Users/chase/ios17 tweaks"
-./scripts/serve-repo.sh 8088
-```
+## License
 
-Then add the printed `http://<mac-lan-ip>:8088/` URL to Sileo.
-
-## Publishing to Sileo (important)
-
-GitHub Pages deploys the `repo/` directory from `main` through [Deploy Sileo repo to Pages](.github/workflows/deploy-pages.yml).
-
-After adding packages, regenerate the indexes with `scripts/package-repo.sh`, commit the package and metadata changes under `repo/`, and push to `main`. Wait for the Pages deployment to succeed before refreshing Sileo.
-
-Sileo source URL: https://chasesdavis.github.io/repo/
-
-The older `scripts/publish-pages.sh` flow is not required by the current Actions deployment.
-
-## StayOn17
-
-See docs/stayon17.md
+MIT.

@@ -1,9 +1,0 @@
-Package: com.chasedavis.airplanecomet
-Name: AirplaneComet
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Shows a small comet-style toast when airplane or network mode notifications fire.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

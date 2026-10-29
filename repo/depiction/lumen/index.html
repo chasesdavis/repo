@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lumen</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080c10;
+      --card: #111820;
+      --line: #1d2833;
+      --text: #eef5fb;
+      --muted: #93a5b6;
+      --accent: #5cc7fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: -apple-system-body;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 24px 18px 56px; }
+    header { display: flex; gap: 14px; align-items: center; margin-bottom: 22px; }
+    header img { width: 64px; height: 64px; border-radius: 15px; }
+    h1 { font-size: 24px; margin: 0 0 2px; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 0; }
+    .pill {
+      display: inline-block;
+      background: rgba(92, 199, 250, 0.14);
+      color: var(--accent);
+      border: 1px solid rgba(92, 199, 250, 0.3);
+      border-radius: 100px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin: 0 0 10px; }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 7px; }
+    li:last-child { margin-bottom: 0; }
+    code {
+      background: #0b1218;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 0.86em;
+      color: var(--accent);
+    }
+    .donate {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      background: linear-gradient(180deg, #2a9fd6, #1b7fb4);
+      color: #fff;
+      font-weight: 700;
+      border-radius: 13px;
+      padding: 14px;
+      margin-top: 4px;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+    footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="../../assets/lumen/icon.png" alt="">
+      <div>
+        <h1>Lumen</h1>
+        <p class="sub">Chase Davis &middot; iOS 15 &ndash; 17 &middot; roothide</p>
+        <span class="pill">Free, no subscription</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>What it does</h2>
+      <p>Lumen turns the status bar clock into a small pill. It shows one live value at a time and a tap opens a card with the detail, without leaving the app you are in.</p>
+      <ul>
+        <li>Time, date and battery</li>
+        <li>Now playing, with transport controls in the card</li>
+        <li>Network throughput and free storage</li>
+        <li>Countdown to a date you choose</li>
+        <li>Quick message composer from anywhere</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How to use it</h2>
+      <ul>
+        <li>Long press the pill to cycle through your enabled pills</li>
+        <li>Tap the pill to open its card</li>
+        <li>Pick which pills exist and tune opacity, color and text size in <code>Settings &rarr; Lumen</code></li>
+        <li>Changes apply instantly, no respring</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Compatibility</h2>
+      <ul>
+        <li>iPhone and iPad, iOS 15.0 through 17.x</li>
+        <li>Dopamine roothide and rootful ElleKit setups</li>
+        <li>arm64 and arm64e</li>
+        <li>No dependencies beyond ElleKit and PreferenceLoader</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Support the work</h2>
+      <p class="muted">Lumen is free and has no paid tier. If it earns a spot on your status bar, a donation keeps it maintained.</p>
+      <a class="donate" href="https://paypal.me/chasesdavis">Donate</a>
+    </section>
+
+    <footer>Built by Chase Davis. Source and issues on GitHub.</footer>
+  </div>
+</body>
+</html>

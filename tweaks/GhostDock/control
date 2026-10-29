@@ -1,9 +1,0 @@
-Package: com.chasedavis.ghostdock
-Name: GhostDock
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Auto-hides the SpringBoard dock after inactivity and reveals it with a bottom gesture.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

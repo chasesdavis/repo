@@ -1,9 +1,0 @@
-Package: com.chasedavis.signalbloom
-Name: SignalBloom
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds a gentle bloom pulse to SpringBoard signal, Wi-Fi, and status glyph surfaces.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

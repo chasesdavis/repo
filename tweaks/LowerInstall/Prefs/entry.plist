@@ -1,9 +1,0 @@
-{
-	entry = {
-		bundle = LowerInstallPrefs;
-		cell = PSLinkCell;
-		detail = LowerInstallPrefsController;
-		isController = 1;
-		label = LowerInstall;
-	};
-}

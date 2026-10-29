@@ -1,9 +1,0 @@
-Package: com.chasedavis.dockbadgesonly
-Name: DockBadgesOnly
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Hides dock icon labels while keeping dock notification badges visually prominent.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

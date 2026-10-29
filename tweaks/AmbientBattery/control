@@ -1,9 +1,0 @@
-Package: com.chasedavis.ambientbattery
-Name: AmbientBattery
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds an edge glow that shifts color with battery level on SpringBoard.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

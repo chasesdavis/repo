@@ -1,9 +1,0 @@
-Package: com.chasedavis.screenshotflashplus
-Name: ScreenshotFlashPlus
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Replaces the plain screenshot flash with a short prismatic SpringBoard flash.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

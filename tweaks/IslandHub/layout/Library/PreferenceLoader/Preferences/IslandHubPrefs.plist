@@ -1,9 +1,0 @@
-{
-    entry = {
-        bundle = IslandHubPrefs;
-        cell = PSLinkCell;
-        detail = IslandHubPrefsListController;
-        isController = 1;
-        label = IslandHub;
-    };
-}

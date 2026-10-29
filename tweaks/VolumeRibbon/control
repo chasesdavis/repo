@@ -1,9 +1,0 @@
-Package: com.chasedavis.volumeribbon
-Name: VolumeRibbon
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Restyles SpringBoard volume HUD surfaces into a compact translucent ribbon.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

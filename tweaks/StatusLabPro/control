@@ -1,9 +1,0 @@
-Package: com.chasedavis.statuslabpro
-Name: StatusLab Pro
-Depends: mobilesubstrate, preferenceloader
-Version: 1.0.4-1
-Architecture: iphoneos-arm64
-Description: Premium status bar customization suite with signal glow, battery styling, activity tinting, and time polish.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

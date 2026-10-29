@@ -1,9 +1,0 @@
-Package: com.chasedavis.controlcenterstudio
-Name: ControlCenter Studio
-Depends: mobilesubstrate, preferenceloader
-Version: 1.0.4-1
-Architecture: iphoneos-arm64
-Description: Premium Control Center theme engine with module styling, glyph packs, compact surfaces, and animation polish.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

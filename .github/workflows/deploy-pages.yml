@@ -1,6 +1,4 @@
-# Reliable GitHub Pages deploy for the static Sileo/APT repo.
-# Avoids flaky "legacy" branch builds that were leaving the site on stale Packages.
-name: Deploy Sileo repo to Pages
+name: Deploy repo to Pages
 
 on:
   push:
@@ -28,6 +26,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify package index
+        run: |
+          set -euo pipefail
+          test -f repo/Packages
+          grep -q '^Package: com.chasedavis.lumen$' repo/Packages
+          test "$(grep -c '^Package:' repo/Packages)" = "1"
+          for deb in repo/debs/*.deb; do
+            test -f "$deb"
+          done
+          echo "Index and package present"
+
       - name: Prepare site root
         run: |
           mkdir -p _site
@@ -43,5 +52,16 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify published Axon package and all indexes
-        run: python3 tweaks/AxonReborn/scripts/verify-public-release.py
+      - name: Verify published index
+        run: |
+          set -euo pipefail
+          url="${{ steps.deployment.outputs.page_url }}Packages"
+          for attempt in 1 2 3 4 5; do
+            if curl -fsS "$url" | grep -q '^Package: com.chasedavis.lumen$'; then
+              echo "Published index verified"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Published index missing Lumen" >&2
+          exit 1

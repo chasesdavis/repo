@@ -1,9 +1,0 @@
-Package: com.chasedavis.islandhub
-Name: IslandHub
-Depends: mobilesubstrate, preferenceloader
-Version: 1.1.1-1
-Architecture: iphoneos-arm64
-Description: Dynamic Island command center, priority stack, module dashboard, and theme engine for SpringBoard.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

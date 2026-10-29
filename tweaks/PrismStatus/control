@@ -1,9 +1,0 @@
-Package: com.chasedavis.prismstatus
-Name: PrismStatus
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Gives SpringBoard status bar text and glyphs a subtle prismatic tint and shadow.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

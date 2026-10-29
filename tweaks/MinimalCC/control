@@ -1,9 +1,0 @@
-Package: com.chasedavis.minimalcc
-Name: MinimalCC
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Tightens Control Center module surfaces with calmer translucent styling.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

@@ -1,9 +1,0 @@
-{
-    entry = {
-        bundle = IslandInboxPrefs;
-        cell = PSLinkCell;
-        detail = IslandInboxPrefsListController;
-        isController = 1;
-        label = "Island Inbox";
-    };
-}

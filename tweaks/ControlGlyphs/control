@@ -1,9 +1,0 @@
-Package: com.chasedavis.controlglyphs
-Name: ControlGlyphs
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds polish, tint, and pop motion to Control Center glyph images.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

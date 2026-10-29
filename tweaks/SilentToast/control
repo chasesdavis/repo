@@ -1,9 +1,0 @@
-Package: com.chasedavis.silenttoast
-Name: SilentToast
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Shows a small SpringBoard toast when the hardware silent state changes.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

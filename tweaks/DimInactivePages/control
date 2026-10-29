@@ -1,9 +1,0 @@
-Package: com.chasedavis.diminactivepages
-Name: DimInactivePages
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Subtly fades off-center SpringBoard page views for a calmer home screen.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

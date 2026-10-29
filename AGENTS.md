@@ -1,37 +1,49 @@
-# Workspace Instructions
+# Lumen
 
-This workspace contains iOS 17 Bootstrap / roothide / rootless Theos tweaks and a local static Sileo repo.
+Single-tweak Theos repo: a free status bar pill for iOS 15 - 17 (roothide and rootful), published as a static Sileo/APT repo on GitHub Pages.
 
-## Roughdraft
+## Commands
 
-Use Roughdraft when reviewing or commenting on Markdown files. Treat `rd` in user messages as shorthand for Roughdraft, but do not create a shell alias or command named `rd`.
+    export THEOS=~/theos
+    ./scripts/build.sh       # builds repo/debs/com.chasedavis.lumen_*.deb
+    ./scripts/index-repo.sh  # regenerates Packages, Release and dists
+    make -C tweaks/Lumen clean
 
-When asking the user to review Markdown, open one file at a time with:
+Index before committing any repo change; Pages deploys from repo/ only.
 
-```bash
-roughdraft open "/absolute/path/to/file.md"
-```
+## Conventions
 
-Leave the Roughdraft process running until the user clicks Done Reviewing.
+Hooks live in one %hook block per class, gated by LumenEnabled(). All mutable prefs read through LumenPrefs.h so the domain and notify name stay in one place.
 
-## Theos
+    static void LumenStyleClock(id target) {
+        UIView *view = (UIView *)target;
+        BOOL hide = LumenEnabled() && LumenHideClock();
+        view.alpha = hide ? 0.0 : 1.0;
+    }
 
-Use the local Theos install at `/Users/chase/theos`.
+## Boundaries
 
-All tweaks in this workspace target:
+- **NEVER** touch files outside the jailbreak prefix.
+- **NEVER** commit a device IP, Apple ID or signing identity.
+- **ALWAYS** keep the repo to Lumen alone; no other packages in repo/debs.
+- **ALWAYS** rebuild and reindex before pushing, so Packages matches debs.
+- **IMPORTANT** the package must stay free; donations only.
 
-```make
-THEOS_PACKAGE_SCHEME = roothide
-TARGET = iphone:clang:latest:15.0
-ARCHS = arm64 arm64e
-```
+## Dependencies
 
-Build from a tweak directory with:
+ElleKit (Logos hooks), PreferenceLoader (Settings bundle), PrivateFrameworks/Preferences (settings controller). MediaRemote is dlsym-resolved and needs no link dependency.
 
-```bash
-THEOS=/Users/chase/theos make clean package THEOS_PACKAGE_SCHEME=roothide
-```
+## Config
 
-## Safety Boundary
+Prefs domain com.chasedavis.lumen, Darwin notification com.chasedavis.lumen/prefschanged, stored at /var/mobile/Library/Preferences/com.chasedavis.lumen.plist.
 
-The first tranche is UI/UX-only. Do not add credential collection, DRM bypass, payment bypass, hidden data exfiltration, destructive filesystem changes, or privacy bypass behavior.
+## Error Handling
+
+Hooks pass through when the master switch is off. Missing providers render -- rather than blanking the pill. If the status bar window is not up yet, attach retries 40 times at 250 ms.
+
+## Troubleshooting
+
+- Nothing appears: confirm the package is enabled and respring once after install.
+- Pill moves or clips: the clock must stay in the layout; keep hideClock on rather than removing the time item.
+- No now playing text: MediaRemote only answers while a media session exists.
+- Sileo shows a stale list: re-run ./scripts/index-repo.sh and refresh sources.

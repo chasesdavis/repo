@@ -1,9 +1,0 @@
-Package: com.chasedavis.islandinbox
-Name: Island Inbox
-Depends: mobilesubstrate, preferenceloader
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Dynamic Island notification queue with app chips, a compact inbox panel, swipe archiving, swipe-to-open, and quick reply controls.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

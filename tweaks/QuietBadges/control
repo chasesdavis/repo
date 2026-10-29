@@ -1,9 +1,0 @@
-Package: com.chasedavis.quietbadges
-Name: QuietBadges
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Dims SpringBoard notification badges at night while preserving badge visibility.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

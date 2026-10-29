@@ -1,9 +1,0 @@
-Package: com.chasedavis.kineticbadges
-Name: KineticBadges
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds subtle pop and pulse animations to SpringBoard notification badges.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

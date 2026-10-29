@@ -1,9 +1,0 @@
-Package: com.chasedavis.homescreenzenpro
-Name: HomeScreenZen Pro
-Depends: mobilesubstrate, preferenceloader
-Version: 1.0.4-1
-Architecture: iphoneos-arm64
-Description: Premium home screen declutter mode with label hiding, badge softening, page dimming, and Zen presets.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

@@ -1,0 +1,12 @@
+Package: com.chasedavis.lumen
+Name: Lumen
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Free smart status bar pill - time, battery, now playing, timers, network and a quick message composer, all from the clock.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Depends: firmware (>= 15.0), ellekit, preferenceloader
+Tag: role::tweak, compatible_min::ios15.0
+Icon: https://chasesdavis.github.io/repo/assets/lumen/icon.png
+Depiction: https://chasesdavis.github.io/repo/depiction/lumen/

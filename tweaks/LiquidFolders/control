@@ -1,9 +1,0 @@
-Package: com.chasedavis.liquidfolders
-Name: LiquidFolders
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Gives SpringBoard folder surfaces a softer liquid-glass look.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

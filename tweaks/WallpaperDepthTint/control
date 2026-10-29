@@ -1,9 +1,0 @@
-Package: com.chasedavis.wallpaperdepthtint
-Name: WallpaperDepthTint
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Tints SpringBoard icon labels using a brightness-aware wallpaper-style palette.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

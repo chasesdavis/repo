@@ -1,9 +1,0 @@
-Package: com.chasedavis.sleepyspringboard
-Name: SleepySpringBoard
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds a slow, subtle breathing animation to SpringBoard icon surfaces.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

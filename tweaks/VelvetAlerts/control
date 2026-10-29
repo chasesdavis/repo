@@ -1,9 +1,0 @@
-Package: com.chasedavis.velvetalerts
-Name: VelvetAlerts
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Softens SpringBoard notification and banner surfaces with calmer animation and shadow treatment.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

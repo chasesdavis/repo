@@ -1,9 +1,0 @@
-Package: com.chasedavis.springboardautomations
-Name: SpringBoard Automations
-Depends: mobilesubstrate, preferenceloader
-Version: 1.0.4-1
-Architecture: iphoneos-arm64
-Description: Premium local trigger/action engine for SpringBoard visual profiles, charging states, ringer events, and time modes.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

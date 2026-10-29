@@ -1,9 +1,0 @@
-Package: com.chasedavis.springtrails
-Name: SpringTrails
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds tiny fading trails behind dragged SpringBoard icon surfaces.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

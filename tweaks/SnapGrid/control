@@ -1,9 +1,0 @@
-Package: com.chasedavis.snapgrid
-Name: SnapGrid
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Shows a temporary alignment grid while SpringBoard icon surfaces are touched.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

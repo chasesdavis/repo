@@ -1,9 +1,0 @@
-Package: com.chasedavis.dockshelfpro
-Name: DockShelf Pro
-Depends: mobilesubstrate, preferenceloader
-Version: 1.0.4-1
-Architecture: iphoneos-arm64
-Description: Premium expanding dock shelf with gesture reveal, quick lanes, dock glow, and productivity presets.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

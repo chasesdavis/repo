@@ -1,0 +1,9 @@
+{
+    entry = {
+        bundle = "LumenPrefs";
+        cell = PSLinkCell;
+        detail = "LumenPrefsController";
+        icon = "icon.png";
+        label = "Lumen";
+    };
+}

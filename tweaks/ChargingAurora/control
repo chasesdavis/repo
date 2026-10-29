@@ -1,9 +1,0 @@
-Package: com.chasedavis.chargingaurora
-Name: ChargingAurora
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds an animated aurora edge glow while the device is charging on SpringBoard.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

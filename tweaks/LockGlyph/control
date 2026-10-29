@@ -1,9 +1,0 @@
-Package: com.chasedavis.lockglyph
-Name: LockGlyph
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds glow and gentle motion to SpringBoard lock glyph surfaces.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks

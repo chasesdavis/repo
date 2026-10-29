@@ -1,9 +1,0 @@
-Package: com.chasedavis.auradock
-Name: AuraDock
-Depends: mobilesubstrate
-Version: 1.0.0-1
-Architecture: iphoneos-arm64
-Description: Adds a soft animated glow behind the SpringBoard dock for iOS 17 Bootstrap.
-Maintainer: Chase Davis
-Author: Chase Davis
-Section: Tweaks
