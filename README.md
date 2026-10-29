@@ -46,7 +46,8 @@ build.sh builds with THEOS_PACKAGE_SCHEME=roothide for arm64 and arm64e.
 
 ## Donate
 
-paypal.me/chasesdavis
+PayPal: chasesdavis97@gmail.com (paypal.me/chasesdavis97)
+Cash App: $driipbiz
 
 ## License
 

@@ -2,7 +2,9 @@
 #import <Preferences/PSSpecifier.h>
 #import "../LumenPrefs.h"
 
-static NSString *const kLumenDonateURL = @"https://paypal.me/chasesdavis";
+static NSString *const kLumenPayPalURL = @"https://paypal.me/chasesdavis97";
+static NSString *const kLumenCashAppURL = @"https://cash.app/$driipbiz";
+static NSString *const kLumenDonateEmail = @"chasesdavis97@gmail.com";
 
 @interface LumenPrefsController : PSListController
 @end
@@ -106,20 +108,26 @@ static NSString *const kLumenDonateURL = @"https://paypal.me/chasesdavis";
     [specs addObject:scale];
 
     PSSpecifier *support = [PSSpecifier groupSpecifierWithName:@"Support"];
-    [support setProperty:@"Lumen is free. If it earns a place on your status bar, a donation keeps it maintained." forKey:@"footerText"];
+    [support setProperty:[NSString stringWithFormat:@"Lumen is free and stays free. If it earns a place on your status bar, a donation keeps it maintained.\nPayPal: %@  -  Cash App: $driipbiz", kLumenDonateEmail]
+                  forKey:@"footerText"];
     [specs addObject:support];
 
-    PSSpecifier *donate = [PSSpecifier preferenceSpecifierNamed:@"Donate"
-                                                         target:self
-                                                            set:nil
-                                                            get:nil
-                                                         detail:nil
-                                                           cell:PSButtonCell
-                                                           edit:nil];
-    donate->action = @selector(openDonation);
-    [specs addObject:donate];
+    [specs addObject:[self buttonSpecifier:@"Donate with PayPal" action:@selector(openPayPal)]];
+    [specs addObject:[self buttonSpecifier:@"Donate with Cash App" action:@selector(openCashApp)]];
 
     return specs;
+}
+
+- (PSSpecifier *)buttonSpecifier:(NSString *)name action:(SEL)action {
+    PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:name
+                                                            target:self
+                                                               set:nil
+                                                               get:nil
+                                                            detail:nil
+                                                              cell:PSButtonCell
+                                                              edit:nil];
+    specifier->action = action;
+    return specifier;
 }
 
 - (PSSpecifier *)switchSpecifier:(NSString *)name key:(NSString *)key fallback:(BOOL)fallback {
@@ -178,8 +186,16 @@ static NSString *const kLumenDonateURL = @"https://paypal.me/chasesdavis";
     LumenSetPref(@"countdownDate", date ? @([date timeIntervalSince1970]) : nil);
 }
 
-- (void)openDonation {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:kLumenDonateURL]
+- (void)openPayPal {
+    [self open:kLumenPayPalURL];
+}
+
+- (void)openCashApp {
+    [self open:kLumenCashAppURL];
+}
+
+- (void)open:(NSString *)url {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]
                                        options:@{}
                              completionHandler:nil];
 }

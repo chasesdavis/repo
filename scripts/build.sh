@@ -15,7 +15,8 @@ make clean >/dev/null 2>&1 || true
 make package FINALPACKAGE=1 DEBUG=0 THEOS_PACKAGE_SCHEME=roothide
 
 mkdir -p "$ROOT/repo/debs"
-command rm -f "$ROOT"/repo/debs/*.deb
+# Only Lumen is rebuilt here; other packages in debs must survive.
+command rm -f "$ROOT"/repo/debs/com.chasedavis.lumen_*.deb
 cp "$BUILD_DIR"/Lumen/packages/*.deb "$ROOT/repo/debs/"
 
-echo "Built $(basename "$ROOT"/repo/debs/*.deb)"
+echo "Built $(cd "$ROOT/repo/debs" && ls com.chasedavis.lumen_*.deb)"
