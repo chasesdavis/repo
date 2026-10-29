@@ -1,5 +1,4 @@
 #import "LumenPill.h"
-#import <notify.h>
 #import "LumenCard.h"
 #import "LumenPrefs.h"
 #import "LumenProviders.h"
@@ -126,6 +125,8 @@ static const NSTimeInterval kLumenSlowTick = 10.0;
     self.host = nil;
 }
 
+/// Stops rendering without clearing prefs state; used when SpringBoard hides
+/// the status bar window entirely.
 /// Cards belong on the app's window, not the short status bar strip.
 - (UIView *)cardContainer {
     for (UIWindow *window in [self allWindows]) {
@@ -263,6 +264,12 @@ static const NSTimeInterval kLumenSlowTick = 10.0;
 }
 
 - (void)tick {
+    // The status bar window is recreated across app switches and resprings;
+    // re-attach instead of staying detached once the weak host clears.
+    if (!self.host || self.pill.superview != self.host) {
+        [self attach];
+        return;
+    }
     if ([self.activePill isEqualToString:@"playing"]) {
         LumenRefreshNowPlaying();
     }
