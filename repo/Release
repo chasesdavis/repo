@@ -5,25 +5,25 @@ Codename: ios17
 Architectures: iphoneos-arm64 iphoneos-arm64e
 Components: main
 Description: Lumen - free status bar pill
-Date: Thu, 29 Oct 2026 19:01:11 UTC
+Date: Thu, 29 Oct 2026 19:04:27 UTC
 MD5Sum:
- a7df70925704445bf76983eeaaa4a998              762 Packages
- d77ca9c3bff6698c9a41e8eebfafa722              512 Packages.gz
- 0efe065b2919affec7e033bc432c4a28              592 Packages.xz
- a1a6c18fbb5cf99efbffbc345a2673b2              507 Packages.zst
- 803443743e98457f72c29774fb9c98cf              567 Packages.bz2
- 9dfc63c57ba019afe9a8df4aa5de7e8b              537 Packages.lzma
+ 0991005ba1ee4b55785b832c366028db              762 Packages
+ 6ed6fb99f56a75eb04ed54e95154e0d2              516 Packages.gz
+ fabb6334ef90effb6957543650083276              592 Packages.xz
+ 0bf06bbf4450cbf5cf0ae0ecb623b3de              508 Packages.zst
+ c5d86890008349b390e0584e90a5d137              564 Packages.bz2
+ 10c01cebd56d61bbb6ca54a9bcc09c8c              536 Packages.lzma
 SHA1:
- cd7aafea04204853a9ddc8523fd6d87be227b0db              762 Packages
- db5065afb662e75e0523e3faab3affea11ff201a              512 Packages.gz
- db9aeb6707d8591d180c665f22f3b80c4df823df              592 Packages.xz
- bfa20644b01826fb8d4866bc037ad4d43f1ca62a              507 Packages.zst
- f36ddc89860a71465a8d11e2559a4bc9a5c8d734              567 Packages.bz2
- b398e64f2f7d79c162ff8f2127d2f74195962b5b              537 Packages.lzma
+ 4c5edd3d50968b131939353aa900ce85ed6a9b9a              762 Packages
+ 0349604987c24ac2d475e2c15e58909c35da4f06              516 Packages.gz
+ 8e760a180d5065c33c01c4ebfb5edfccce32720e              592 Packages.xz
+ 8d3573f4b74bb471bc76b3095a8c8010593098b2              508 Packages.zst
+ cc2b3b2bbff7d93548a3203e694e8d043f27cb66              564 Packages.bz2
+ 774644f51d0dc50adeda096034f6f09a50cbacd5              536 Packages.lzma
 SHA256:
- 39098fde2343b664de697ff98f77c62d18ca2b1145983eeb1a7b00ddd9e2fcb9              762 Packages
- 4b9895989e6b6af38d64657c71ea21f16f5eef7310ebbf76d4b240a491ab997f              512 Packages.gz
- a2f778b01f7913e16cfb63ad8cea2fa583f951fcabaf0e4d901e0edca00ae43a              592 Packages.xz
- 71ed6c3596b65ffd5a149c90fad2c9317c6b4fd1693c208491cbb5caeb65fca3              507 Packages.zst
- f33a5c17ccb277cbd36a4c58e606a99681229279e33c26a4b59dd2598aac8e0f              567 Packages.bz2
- 5cf451902a603f82366ce75fc91d34c24e79bbcff6b79ec09373b14d72e72340              537 Packages.lzma
+ c0753a37a06452c5f9088a5effa027b552cc86728736544edaeb5181d7f43401              762 Packages
+ 58cde667a1d025e9a48d158ef2e2c73f0c5f3071c71fa1b028d9e33a8bdfa815              516 Packages.gz
+ 3d2df9a2bf453fd53a76db20c93fad900a6c585654a5af3a36130bc081b9f467              592 Packages.xz
+ 2ab6e93268eeb48477e32241811126250938f9874e539830be5f9cf15017ca5d              508 Packages.zst
+ 18c8799246765c7addea934a2e9701284a6f89006dbdb619a4313defd1976f8b              564 Packages.bz2
+ a8b7eb2103ec765b4987a0b3521516d0e33b2ba151326965738d12b91e363987              536 Packages.lzma
