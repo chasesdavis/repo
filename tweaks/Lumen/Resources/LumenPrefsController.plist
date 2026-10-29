@@ -212,6 +212,76 @@
 			<key>defaults</key>
 			<string>com.chasedavis.lumen</string>
 			<key>key</key>
+			<string>pill.cpu</string>
+			<key>label</key>
+			<string>CPU Usage</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.chasedavis.lumen/prefschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.chasedavis.lumen</string>
+			<key>key</key>
+			<string>pill.uptime</string>
+			<key>label</key>
+			<string>Uptime</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.chasedavis.lumen/prefschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.chasedavis.lumen</string>
+			<key>key</key>
+			<string>pill.data</string>
+			<key>label</key>
+			<string>Cellular Data</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.chasedavis.lumen/prefschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.chasedavis.lumen</string>
+			<key>key</key>
+			<string>pill.volume</string>
+			<key>label</key>
+			<string>Volume</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.chasedavis.lumen/prefschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.chasedavis.lumen</string>
+			<key>key</key>
+			<string>pill.brightness</string>
+			<key>label</key>
+			<string>Brightness</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.chasedavis.lumen/prefschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.chasedavis.lumen</string>
+			<key>key</key>
 			<string>pill.countdown</string>
 			<key>label</key>
 			<string>Countdown</string>
