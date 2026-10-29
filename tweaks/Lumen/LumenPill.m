@@ -108,6 +108,7 @@ static const NSTimeInterval kLumenSlowTick = 10.0;
         [self buildPill];
     }
     [host bringSubviewToFront:self.pill];
+    [self suppressFocusIndicatorIn:host];
     [self layoutPill];
     if ([self.activePill isEqualToString:@"playing"]) {
         LumenRefreshNowPlaying();
@@ -120,6 +121,7 @@ static const NSTimeInterval kLumenSlowTick = 10.0;
     [self.timer invalidate];
     self.timer = nil;
     [LumenCard dismissVisible];
+    [self restoreFocusIndicator];
     [self.pill removeFromSuperview];
     self.pill = nil;
     self.host = nil;
@@ -135,6 +137,39 @@ static const NSTimeInterval kLumenSlowTick = 10.0;
         }
     }
     return self.host;
+}
+
+/// Hide the Focus/DND moon icon that peeks out beside the pill. The icon
+/// lives in the status bar window as a sibling of the time item. We walk
+/// the host subviews and hide any whose class name references focus, quiet
+/// mode, or DND. A tag marks hidden views so teardown can restore them.
+static const NSInteger kLumenFocusHideTag = 91743;
+
+- (void)suppressFocusIndicatorIn:(UIView *)host {
+    if (!LumenEnabled() || !LumenHideClock()) {
+        return;
+    }
+    for (UIView *view in host.subviews) {
+        NSString *cls = NSStringFromClass(view.class);
+        if ([cls containsString:@"Focus"] || [cls containsString:@"Quiet"] || [cls containsString:@"DND"] || [cls containsString:@"DoNotDisturb"]) {
+            if (view.tag != kLumenFocusHideTag && view.alpha > 0.01) {
+                view.tag = kLumenFocusHideTag;
+                view.alpha = 0.0;
+            }
+        }
+    }
+}
+
+- (void)restoreFocusIndicator {
+    for (UIWindow *window in [self allWindows]) {
+        if (![NSStringFromClass(window.class) containsString:@"StatusBar"]) continue;
+        for (UIView *view in window.subviews) {
+            if (view.tag == kLumenFocusHideTag) {
+                view.tag = 0;
+                view.alpha = 1.0;
+            }
+        }
+    }
 }
 
 #pragma mark - Pill

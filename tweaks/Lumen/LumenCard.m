@@ -66,24 +66,33 @@ static LumenCard *gLumenVisibleCard = nil;
     }
     [panel addSubview:actions];
 
-    [NSLayoutConstraint activateConstraints:@[
-        [panel.centerXAnchor constraintEqualToAnchor:container.centerXAnchor],
-        [panel.centerYAnchor constraintEqualToAnchor:container.centerYAnchor],
-        [panel.widthAnchor constraintEqualToConstant:300.0],
-        [panel.leadingAnchor constraintGreaterThanOrEqualToAnchor:container.leadingAnchor constant:16.0],
-        [title.topAnchor constraintEqualToAnchor:panel.topAnchor constant:20.0],
-        [title.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:18.0],
-        [title.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-18.0],
-        [body.topAnchor constraintEqualToAnchor:title.bottomAnchor constant:10.0],
-        [body.leadingAnchor constraintEqualToAnchor:title.leadingAnchor],
-        [body.trailingAnchor constraintEqualToAnchor:title.trailingAnchor],
-        [actions.topAnchor constraintEqualToAnchor:body.bottomAnchor constant:18.0],
-        [actions.leadingAnchor constraintEqualToAnchor:title.leadingAnchor],
-        [actions.trailingAnchor constraintEqualToAnchor:title.trailingAnchor],
-        [actions.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-20.0],
-    ]];
-
+    // Overlay must be in the container hierarchy BEFORE constraints activate,
+    // otherwise the layout engine has no common ancestor and throws an
+    // exception that aborts SpringBoard (safe mode).
     [container addSubview:self.overlay];
+
+    @try {
+        [NSLayoutConstraint activateConstraints:@[
+            [panel.centerXAnchor constraintEqualToAnchor:container.centerXAnchor],
+            [panel.centerYAnchor constraintEqualToAnchor:container.centerYAnchor],
+            [panel.widthAnchor constraintEqualToConstant:300.0],
+            [panel.leadingAnchor constraintGreaterThanOrEqualToAnchor:container.leadingAnchor constant:16.0],
+            [title.topAnchor constraintEqualToAnchor:panel.topAnchor constant:20.0],
+            [title.leadingAnchor constraintEqualToAnchor:panel.leadingAnchor constant:18.0],
+            [title.trailingAnchor constraintEqualToAnchor:panel.trailingAnchor constant:-18.0],
+            [body.topAnchor constraintEqualToAnchor:title.bottomAnchor constant:10.0],
+            [body.leadingAnchor constraintEqualToAnchor:title.leadingAnchor],
+            [body.trailingAnchor constraintEqualToAnchor:title.trailingAnchor],
+            [actions.topAnchor constraintEqualToAnchor:body.bottomAnchor constant:18.0],
+            [actions.leadingAnchor constraintEqualToAnchor:title.leadingAnchor],
+            [actions.trailingAnchor constraintEqualToAnchor:title.trailingAnchor],
+            [actions.bottomAnchor constraintEqualToAnchor:panel.bottomAnchor constant:-20.0],
+        ]];
+    } @catch (NSException *e) {
+        panel.frame = CGRectMake((container.bounds.size.width - 300.0) / 2.0,
+                                 (container.bounds.size.height - 240.0) / 2.0, 300.0, 240.0);
+    }
+
     self.overlay.alpha = 0.0;
     [UIView animateWithDuration:0.18 animations:^{
         self.overlay.alpha = 1.0;
@@ -149,8 +158,8 @@ static LumenCard *gLumenVisibleCard = nil;
     button.layer.cornerRadius = 12.0;
     button.titleLabel.font = [UIFont systemFontOfSize:15.0 weight:UIFontWeightSemibold];
     [button setTitle:title forState:UIControlStateNormal];
-    [button.heightAnchor constraintEqualToConstant:44.0].active = YES;
     [button addTarget:self action:@selector(handleAction:) forControlEvents:UIControlEventTouchUpInside];
+    button.translatesAutoresizingMaskIntoConstraints = NO;
     return button;
 }
 

@@ -44,8 +44,8 @@ Architecture: iphoneos-arm64e
 Version: 1.0.1
 Installed-Size: 424
 Filename: debs/com.chasedavis.lumen_1.0.1_iphoneos-arm64e.deb
-Size: 36798
-MD5sum: 8112e38aafc4a545619af3ffa97bb15f
-SHA1: 7cd348187a6af97e64cd84a102acede6cad1f66a
-SHA256: dcf8db1c3bcba96bba320540110cca9ea78789bd484ccee64e547d668aca0c4f
+Size: 37908
+MD5sum: f65cbbcebb89584b4b75fce8be65bf7b
+SHA1: 21a7dfedfdd036309265a8b8ec351bc1357285aa
+SHA256: 70b67c19e47c2b00d0305dd77dc0e3a60abe5d7dcf89ef2d4200055bcf2643fd
 
