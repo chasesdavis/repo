@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
           test -f repo/Packages
           grep -q '^Package: com.chasedavis.lumen$' repo/Packages
-          test "$(grep -c '^Package:' repo/Packages)" = "1"
+          test "$(grep -c '^Package:' repo/Packages)" = "3"
           for deb in repo/debs/*.deb; do
             test -f "$deb"
           done

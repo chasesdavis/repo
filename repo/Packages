@@ -1,3 +1,35 @@
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.4.0
+Architecture: iphoneos-arm64
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Fetches real repo indexes including dist-layout sources, queues installs, and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.4.0_iphoneos-arm64.deb
+Size: 10990446
+MD5sum: f008f0887faa60fb44424ec2c63e2b32
+SHA1: 17e22c448f2b05056502ad406dbb2efdb5766c05
+SHA256: cbb0f7446f096860252c5090c1f79b0ec332fdaf649b58fe5e293ed03223e9dc
+
+Package: com.aurora.packagemanager
+Name: Aurora
+Version: 1.4.0
+Architecture: iphoneos-arm64e
+Section: Packaging
+Maintainer: Chase Davis
+Author: Chase Davis
+Depends: firmware (>= 15.0)
+Description: Native APT package manager for already-jailbroken iOS. Fetches real repo indexes including dist-layout sources, queues installs, and runs dpkg when available. Does not ship jailbreaks or tweaks.
+Homepage: https://chasesdavis.github.io/repo/
+Filename: debs/com.aurora.packagemanager_1.4.0_iphoneos-arm64e.deb
+Size: 10990446
+MD5sum: f819774eaa3a18dcdbd82dd9e8e9a5ad
+SHA1: 11f33276f12e76396a8da5cf207b5334325a175a
+SHA256: 17748be70ce5abe68e9e9a3676e96cfa3a8a7ac944c76e631200719026b92c42
+
 Package: com.chasedavis.lumen
 Name: Lumen
 Description: Free smart status bar pill - time, battery, now playing, timers, network and a quick message composer, all from the clock.

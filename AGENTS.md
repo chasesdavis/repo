@@ -1,6 +1,6 @@
 # Lumen
 
-Single-tweak Theos repo: a free status bar pill for iOS 15 - 17 (roothide and rootful), published as a static Sileo/APT repo on GitHub Pages.
+Theos + app repo: a free status bar pill (Lumen) and Aurora, a prebuilt APT package manager. Published as a static Sileo/APT repo on GitHub Pages.
 
 ## Commands
 
@@ -25,7 +25,7 @@ Hooks live in one %hook block per class, gated by LumenEnabled(). All mutable pr
 
 - **NEVER** touch files outside the jailbreak prefix.
 - **NEVER** commit a device IP, Apple ID or signing identity.
-- **ALWAYS** keep the repo to Lumen alone; no other packages in repo/debs.
+- **ALWAYS** keep repo/debs to these two packages; no strays.
 - **ALWAYS** rebuild and reindex before pushing, so Packages matches debs.
 - **IMPORTANT** the package must stay free; donations only.
 

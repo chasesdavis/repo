@@ -2,6 +2,8 @@
 
 Free status bar pill for iOS 15 - 17 on roothide and rootful jailbreaks. No paid tier, no subscription, donations only.
 
+The repo also carries Aurora, a native APT package manager.
+
 Turn the status bar clock into a small capsule that shows one live value at a time. Long press cycles pills, tap opens a card. Nothing is sent anywhere; everything is read from public system APIs.
 
 ## Pills
@@ -20,7 +22,7 @@ Add to Sileo or Zebra:
 
     https://chasesdavis.github.io/repo/
 
-Package id com.chasedavis.lumen. This repo ships Lumen only.
+Packages: com.chasedavis.lumen (Lumen) and com.aurora.packagemanager (Aurora). Nothing else.
 
 ## Build
 
