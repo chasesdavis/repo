@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+# Prefs domain is com.chase.stayon17; package id is com.chasedavis.stayon17.
+rm -f /var/mobile/Library/Preferences/com.chase.stayon17.plist 2>/dev/null || true
+exit 0

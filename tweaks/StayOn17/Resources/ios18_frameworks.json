@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "description": "Heuristic iOS 18 framework signals for stayon17-scan.",
+  "frameworks": [
+    "AppleIntelligence.framework",
+    "WritingTools.framework",
+    "FoundationModels.framework",
+    "GenerativeModels.framework",
+    "VisualIntelligence.framework",
+    "ImagePlayground.framework",
+    "SwiftData.framework",
+    "LockedCameraCapture.framework",
+    "BrowserEngineKit.framework",
+    "MarketplaceKit.framework",
+    "AppStoreComponents.framework",
+    "FinanceKit.framework",
+    "FinanceKitUI.framework",
+    "ExtensionFoundation.framework",
+    "BackgroundAssets.framework"
+  ],
+  "risky_dylibs": [
+    "/System/Library/Frameworks/SwiftData.framework/SwiftData",
+    "/System/Library/Frameworks/FoundationModels.framework/FoundationModels",
+    "/System/Library/Frameworks/WritingTools.framework/WritingTools",
+    "/System/Library/Frameworks/AppleIntelligence.framework/AppleIntelligence"
+  ]
+}

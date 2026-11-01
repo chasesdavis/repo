@@ -1,0 +1,9 @@
+{
+	entry = {
+		bundle = StayOn17Prefs;
+		cell = PSLinkCell;
+		detail = StayOn17PrefsController;
+		isController = 1;
+		label = StayOn17;
+	};
+}

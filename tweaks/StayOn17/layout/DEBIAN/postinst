@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+mkdir -p /var/mobile/Library/Logs/StayOn17
+exit 0
