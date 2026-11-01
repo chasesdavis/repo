@@ -32,7 +32,7 @@ SHA256: 17748be70ce5abe68e9e9a3676e96cfa3a8a7ac944c76e631200719026b92c42
 
 Package: com.chase.aperture
 Name: Aperture
-Version: 1.0.0
+Version: 1.1.0
 Architecture: iphoneos-arm64
 Description: Pure-SwiftUI iOS package manager for jailbroken devices. Premium OLED-black UI with glassmorphism, gradient accents, animated hero carousel, and floating glass tab bar. Compatible with Dopamine (roothide), Palera1n, NekoJB, Cowabunga, Taurine, Odyssey, unc0ver, checkra1n, Electra and legacy rootful jailbreaks. iOS 15.0 through latest.
 Maintainer: Chase Davis
@@ -42,15 +42,15 @@ Depends: firmware (>= 15.0), apt, dpkg
 Tag: role::packagemanager, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
-Filename: debs/com.chase.aperture_1.0.0_iphoneos-arm64.deb
-Size: 589700
-MD5sum: 7fd1af057282da58286dac093c70f270
-SHA1: bc76cf69c366f1068cfa84fed9db7345ecbf12f5
-SHA256: be6afa76eae0a2932112ca372c04f1c2ce7ebe1af1839e81762f1b82180ecc50
+Filename: debs/com.chase.aperture_1.1.0_iphoneos-arm64.deb
+Size: 590400
+MD5sum: a2091914572097eea7f115c9ad58766f
+SHA1: ce5435cc91a1bc63d844ba4d211582a4027ecfb6
+SHA256: e42c9ceccda43878d68bd0993a412a1f5bf141cf4ed7e201beb35e8cfa507d3b
 
 Package: com.chase.aperture
 Name: Aperture
-Version: 1.0.0
+Version: 1.1.0
 Architecture: iphoneos-arm64e
 Description: Pure-SwiftUI iOS package manager for jailbroken devices. Premium OLED-black UI with glassmorphism, gradient accents, animated hero carousel, and floating glass tab bar. Compatible with Dopamine (roothide), Palera1n, NekoJB, Cowabunga, Taurine, Odyssey, unc0ver, checkra1n, Electra and legacy rootful jailbreaks. iOS 15.0 through latest.
 Maintainer: Chase Davis
@@ -60,11 +60,11 @@ Depends: firmware (>= 15.0), apt, dpkg
 Tag: role::packagemanager, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
-Filename: debs/com.chase.aperture_1.0.0_iphoneos-arm64e.deb
-Size: 604216
-MD5sum: aa3458e6e6788d3ff506bc7f41030a0b
-SHA1: 8c52c7e44163231594008e2945c8cfb18d7d75be
-SHA256: b3fe7df099e8d0132e04760fee8f71bca7ad8a23017ee8896e9239cba8955b46
+Filename: debs/com.chase.aperture_1.1.0_iphoneos-arm64e.deb
+Size: 605900
+MD5sum: 0a2badc010dbcb582162ff9c1fea0fc1
+SHA1: 491b61363aeffd29bb35e1274933a0e8a461484f
+SHA256: 76f4dea1e5b4a43399cbd978c58b20d77f4f26a3bf8c8596c2c4d04c2ac346ed
 
 Package: com.chasedavis.lumen
 Name: Lumen
