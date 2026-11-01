@@ -1,0 +1,12 @@
+Package: com.chase.aperture
+Name: Aperture
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Pure-SwiftUI iOS package manager for jailbroken devices. Repo management, FTS5 instant search, package detail, download queue, install/update/remove via apt-get/dpkg.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Package Managers
+Depends: firmware (>= 16.0), apt, dpkg
+Tag: role::packagemanager, compatible_min::ios16.0
+Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
+Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
