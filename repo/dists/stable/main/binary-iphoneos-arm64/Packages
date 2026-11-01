@@ -32,9 +32,9 @@ SHA256: 17748be70ce5abe68e9e9a3676e96cfa3a8a7ac944c76e631200719026b92c42
 
 Package: com.chase.aperture
 Name: Aperture
-Version: 1.1.0
+Version: 1.2.0
 Architecture: iphoneos-arm64
-Description: Pure-SwiftUI iOS package manager for jailbroken devices. Premium OLED-black UI with glassmorphism, gradient accents, animated hero carousel, and floating glass tab bar. Compatible with Dopamine (roothide), Palera1n, NekoJB, Cowabunga, Taurine, Odyssey, unc0ver, checkra1n, Electra and legacy rootful jailbreaks. iOS 15.0 through latest.
+Description: Pure-SwiftUI iOS package manager for jailbroken devices. Mixed Sileo + Irisin design: clean card rows with inline GET buttons, glassmorphism, gradient accents, category chips, auto-rotating hero carousel, and a sticky bottom install bar. Compatible with Dopamine (roothide), Palera1n, NekoJB, Cowabunga, Taurine, Odyssey, unc0ver, checkra1n, Electra and legacy rootful jailbreaks. iOS 15.0 through latest.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Package Managers
@@ -42,17 +42,17 @@ Depends: firmware (>= 15.0), apt, dpkg
 Tag: role::packagemanager, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
-Filename: debs/com.chase.aperture_1.1.0_iphoneos-arm64.deb
-Size: 590400
-MD5sum: a2091914572097eea7f115c9ad58766f
-SHA1: ce5435cc91a1bc63d844ba4d211582a4027ecfb6
-SHA256: e42c9ceccda43878d68bd0993a412a1f5bf141cf4ed7e201beb35e8cfa507d3b
+Filename: debs/com.chase.aperture_1.2.0_iphoneos-arm64.deb
+Size: 616988
+MD5sum: 10aab9384d08fe6b9087e85b92552445
+SHA1: 463c501f4bd7a410b073a9a8bf2675b3c5fe21d1
+SHA256: 5483693e2844249be302e10f0213c301924e3cafdcabc9ffabcd31d7cb8512bf
 
 Package: com.chase.aperture
 Name: Aperture
-Version: 1.1.0
+Version: 1.2.0
 Architecture: iphoneos-arm64e
-Description: Pure-SwiftUI iOS package manager for jailbroken devices. Premium OLED-black UI with glassmorphism, gradient accents, animated hero carousel, and floating glass tab bar. Compatible with Dopamine (roothide), Palera1n, NekoJB, Cowabunga, Taurine, Odyssey, unc0ver, checkra1n, Electra and legacy rootful jailbreaks. iOS 15.0 through latest.
+Description: Pure-SwiftUI iOS package manager for jailbroken devices. Mixed Sileo + Irisin design: clean card rows with inline GET buttons, glassmorphism, gradient accents, category chips, auto-rotating hero carousel, and a sticky bottom install bar. Compatible with Dopamine (roothide), Palera1n, NekoJB, Cowabunga, Taurine, Odyssey, unc0ver, checkra1n, Electra and legacy rootful jailbreaks. iOS 15.0 through latest.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Package Managers
@@ -60,11 +60,11 @@ Depends: firmware (>= 15.0), apt, dpkg
 Tag: role::packagemanager, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
-Filename: debs/com.chase.aperture_1.1.0_iphoneos-arm64e.deb
-Size: 605900
-MD5sum: 0a2badc010dbcb582162ff9c1fea0fc1
-SHA1: 491b61363aeffd29bb35e1274933a0e8a461484f
-SHA256: 76f4dea1e5b4a43399cbd978c58b20d77f4f26a3bf8c8596c2c4d04c2ac346ed
+Filename: debs/com.chase.aperture_1.2.0_iphoneos-arm64e.deb
+Size: 632320
+MD5sum: 72b4f023a3f15832a9879345e6346e6a
+SHA1: 2f6b3c754f02d069fe2e36aabe6ab71da79704d1
+SHA256: 8920b75fd93d4965c384142a96c7ce8956d292419d28f25400d3638400579d8d
 
 Package: com.chasedavis.lumen
 Name: Lumen
