@@ -32,7 +32,7 @@ jobs:
           test -f repo/Packages
           grep -q '^Package: com.chasedavis.lumen$' repo/Packages
           grep -q '^Package: com.chase.aperture$' repo/Packages
-          test "$(grep -c '^Package:' repo/Packages)" = "4"
+          test "$(grep -c '^Package:' repo/Packages)" = "5"
           for deb in repo/debs/*.deb; do
             test -f "$deb"
           done

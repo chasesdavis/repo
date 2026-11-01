@@ -48,6 +48,24 @@ MD5sum: d8329b7974d2c236d29fc20c74054752
 SHA1: b5751df4f48c9b29db5366663755c479793f1e5f
 SHA256: 7f33b0300fb508fab50dfd31ca9cb665c1aef7100b4d2656b45d4c5f76310425
 
+Package: com.chase.aperture
+Name: Aperture
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Description: Pure-SwiftUI iOS package manager for jailbroken devices. Repo management, FTS5 instant search, package detail, download queue, install/update/remove via apt-get/dpkg.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Package Managers
+Depends: firmware (>= 16.0), apt, dpkg
+Tag: role::packagemanager, compatible_min::ios16.0
+Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
+Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
+Filename: debs/com.chase.aperture_1.0.0_iphoneos-arm64e.deb
+Size: 541516
+MD5sum: 359cfdc479a4f7cb373e86b76b75944c
+SHA1: 36c6d31bb203e211f417e6445bc193dfc1897f90
+SHA256: 353d7b9fe0c3e103c26e4ac245bc815fd7c065500a93325dc6d55153f55f3089
+
 Package: com.chasedavis.lumen
 Name: Lumen
 Description: Free smart status bar pill - time, battery, now playing, timers, network and a quick message composer, all from the clock.
