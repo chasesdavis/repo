@@ -31,7 +31,8 @@ jobs:
           set -euo pipefail
           test -f repo/Packages
           grep -q '^Package: com.chasedavis.lumen$' repo/Packages
-          test "$(grep -c '^Package:' repo/Packages)" = "3"
+          grep -q '^Package: com.chase.aperture$' repo/Packages
+          test "$(grep -c '^Package:' repo/Packages)" = "4"
           for deb in repo/debs/*.deb; do
             test -f "$deb"
           done
@@ -65,3 +66,4 @@ jobs:
           done
           echo "Published index missing Lumen" >&2
           exit 1
+
