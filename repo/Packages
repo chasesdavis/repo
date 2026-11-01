@@ -32,9 +32,9 @@ SHA256: 17748be70ce5abe68e9e9a3676e96cfa3a8a7ac944c76e631200719026b92c42
 
 Package: com.chase.aperture
 Name: Aperture
-Version: 1.5.0
+Version: 1.6.0
 Architecture: iphoneos-arm64
-Description: Pure-SwiftUI iOS package manager. M1 Install & Queue: Update All, cancel in-progress, retry with backoff, queue reorder, batch install, reinstall/downgrade, install local deb, install from URL, resumable queue. iOS 15.0+.
+Description: Pure-SwiftUI iOS package manager. M2 Repo Management: pause/pin, health status, refresh all, import/export, default repos bootstrap, friendly errors. iOS 15.0+.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Package Managers
@@ -42,17 +42,17 @@ Depends: firmware (>= 15.0), apt, dpkg
 Tag: role::packagemanager, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
-Filename: debs/com.chase.aperture_1.5.0_iphoneos-arm64.deb
-Size: 706816
-MD5sum: d98573a83b292adef74fa1667b1515d6
-SHA1: a73c6c61e3ad7e3ff7057b826e54ef875e79ed25
-SHA256: 538c297f5fa52156fd30e08fcd3f5c20183a946cc2861950a2f75277f1440094
+Filename: debs/com.chase.aperture_1.6.0_iphoneos-arm64.deb
+Size: 749052
+MD5sum: 1727b53381f1009ec9f71ca50ef61230
+SHA1: 71f51354abafebc3fd39c3285a407847910ef36b
+SHA256: 0ea0e70247f3b882701c2efbbd70b01210612aa4640f789d36c7f5581a1946e1
 
 Package: com.chase.aperture
 Name: Aperture
-Version: 1.5.0
+Version: 1.6.0
 Architecture: iphoneos-arm64e
-Description: Pure-SwiftUI iOS package manager. M1 Install & Queue: Update All, cancel in-progress, retry with backoff, queue reorder, batch install, reinstall/downgrade, install local deb, install from URL, resumable queue. iOS 15.0+.
+Description: Pure-SwiftUI iOS package manager. M2 Repo Management: pause/pin, health status, refresh all, import/export, default repos bootstrap, friendly errors. iOS 15.0+.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Package Managers
@@ -60,11 +60,11 @@ Depends: firmware (>= 15.0), apt, dpkg
 Tag: role::packagemanager, compatible_min::ios15.0
 Icon: https://chasesdavis.github.io/repo/assets/aperture/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/aperture/
-Filename: debs/com.chase.aperture_1.5.0_iphoneos-arm64e.deb
-Size: 722564
-MD5sum: 6f1e454fdb67b1b4575ac44495d3862d
-SHA1: ce5d25633d49a583ed64e14bb173e7bda5ebbdab
-SHA256: 2befb57a7fa7a0fb00ac1876f9701bcc7b25a8976a1bc1d9f3a9e1a60f439df7
+Filename: debs/com.chase.aperture_1.6.0_iphoneos-arm64e.deb
+Size: 767688
+MD5sum: 127940ee7122142e5067ca824a643399
+SHA1: 84164b4e46fc4171e95bde952dc035650579134c
+SHA256: 470b20d8c23cbb3d40b97da88a9fa98c40b194dabc568ea0131f3cef080a6ebd
 
 Package: com.chasedavis.lumen
 Name: Lumen
