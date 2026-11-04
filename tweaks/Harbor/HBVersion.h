@@ -1,1 +1,1 @@
-#define HARBOR_VERSION "0.1.0~beta2"
+#define HARBOR_VERSION "0.1.0~beta3"

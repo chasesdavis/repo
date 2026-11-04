@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 sdk="$(xcrun --sdk iphonesimulator --show-sdk-path)"
-app="$PWD/.build/HarborPreview.app"
+app="${HARBOR_PREVIEW_APP:-$PWD/.build/HarborPreview.app}"
 mkdir -p "$app" .build/SimulatorModules
 xcrun clang -target arm64-apple-ios17.0-simulator -isysroot "$sdk" -fobjc-arc -fmodules \
     -fmodules-cache-path="$PWD/.build/SimulatorModules" -Wall -Wextra -Wno-unused-parameter \

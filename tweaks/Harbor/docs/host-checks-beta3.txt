@@ -1,0 +1,7 @@
+PASS: 20 presentation, numeric-boundary, and command-policy assertions
+PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults
+PASS: all Logos host classes are exported by the installed iOS 17.0 ControlCenterUI SDK
+./Prefs/Resources/Root.plist: OK
+./Prefs/Resources/Info.plist: OK
+./Prefs/entry.plist: OK
+./Harbor.plist: OK

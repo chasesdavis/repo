@@ -2,11 +2,11 @@
 
 A quiet place for the controls you reach for most. An original, free Control Center dashboard for Chase's iPhone, inspired by the cohesive feel of Prysm and Jade. No code, artwork, or assets from either project are used.
 
-**0.1.0~beta2 fixes beta1's activation and Settings registration defects; physical-device testing remains pending.** See [BETA2-FIXES.md](docs/BETA2-FIXES.md). The package targets iOS **17.0** with RootHide and working SpringBoard injection. The native UI and restoration logic have been tested in an iOS 17.5 simulator harness; that is not a claim of jailbreak support for 17.5 or proof of device compatibility.
+**0.1.0~beta3 corrects the full-screen layout; physical-device testing remains pending.** See [BETA3-FULLSCREEN.md](docs/BETA3-FULLSCREEN.md) for the screenshot investigation, reproduced defect, and current limitations. The package targets iOS **17.0** with RootHide and working SpringBoard injection. Simulator checks do not establish physical-device compatibility or jailbreak support for iOS 17.5.
 
-![Harbor's shipping UIKit view, rendered in the simulator with sample media](docs/preview-iphone15pro.png)
+![Harbor beta3 in the simulator with a synthetic native status header and pinned All controls](docs/preview-beta3-inset-fixture.png)
 
-The screenshot uses explicitly labeled sample media and original programmatic artwork. Simulator has no hardware volume route, so the volume card shows its fallback.
+The screenshot shows the synthetic native-host fixture, with its system header explicitly labeled. It is not a physical-device screenshot. Simulator has no hardware volume route, so the volume card shows its fallback.
 
 ## This version
 
@@ -14,7 +14,8 @@ The screenshot uses explicitly labeled sample media and original programmatic ar
 - Live now-playing title, artist, bounded artwork thumbnails, play/pause, previous, and next. Empty and unavailable states disable transport. Skip respects MediaRemote's prohibition flag.
 - Brightness control with a live percentage and a 2% minimum. Native `MPVolumeView` for volume; a system-controls shortcut appears if its slider is unavailable. Native AirPlay route picker.
 - Connections and Focus shortcuts restore Apple's Control Center and request the matching installed module. These are panel shortcuts, **not fake connectivity toggles**. If a module cannot be identified, the native controls remain visible.
-- **All controls** restores Apple's complete Control Center for the current visit. Close and reopen to return to Harbor. Native modules and their controllers are never moved, replaced, or destroyed.
+- **All controls** stays pinned above the home-indicator area and restores Apple's complete Control Center for the current visit. Close and reopen to return to Harbor. Cards scroll independently when space is limited. Native modules and their controllers are never moved, replaced, or destroyed.
+- The backdrop fills the native Control Center background. Content uses the full-window native scroll surface, with space reserved for Apple's status/privacy header and safe areas; it is no longer sized to the inset module panel.
 - An in-panel appearance menu and a Settings → Harbor page with a live master switch, palette, haptics, and the last diagnostic report from SpringBoard.
 - VoiceOver labels, Dynamic Type with a single-column accessibility layout, scrollable compact layouts, Reduce Transparency, and Reduce Motion. Press feedback is an interruptible 120 ms opacity change; there is no extra entrance bounce layered onto the system gesture.
 
@@ -35,16 +36,16 @@ Requires Xcode, RootHide-capable Theos at `$THEOS` (defaults to `/Users/chase/th
 The build runs in a temporary directory because Theos does not reliably handle the spaces in `Jailbreak Tweak Repo`. It copies only Harbor's resulting package back to:
 
 ```text
-packages/com.chasedavis.harbor_0.1.0~beta2_iphoneos-arm64e.deb
+packages/com.chasedavis.harbor_0.1.0~beta3_iphoneos-arm64e.deb
 ```
 
 Both the tweak and preferences binary contain **arm64 and arm64e** slices. The Debian architecture is `iphoneos-arm64e`, as required by this RootHide packaging scheme. The dylib uses relocatable `.jbroot` library paths. There are no hardcoded `/var/jb` paths or install/respring scripts.
 
-The authorized beta2 publication uses the existing `scripts/build-harbor.sh`, `scripts/index-repo.sh`, and Pages pipeline. Only the current Harbor package is indexed; unrelated package binaries are preserved. See [PUBLICATION.md](docs/PUBLICATION.md) for artifact details and the Actions deployment verification.
+The authorized beta3 publication uses the established Harbor build/index/Pages pipeline, replacing only Harbor's package and related release assets. The other five packages are preserved. [PUBLICATION.md](docs/PUBLICATION.md) records the release artifact and deployment-verification process.
 
 ## Installation requirements and first device test
 
-This repair and publication workflow has not installed anything on Chase's phone. Beta1 cannot be made functional just by finding a hidden switch: its hook target is wrong. The following applies to the corrected beta2 package.
+This repair workflow has not installed anything on Chase's phone. The following applies to beta3 after an authorized installation. The version installed when the supplied screenshot was captured has not yet been confirmed; it is not inferred from the timing of beta2's publication.
 
 1. Verify the phone's exact iOS version and that its RootHide environment can already inject tweaks into **SpringBoard**. TrollStore alone cannot load this dylib. The official [Bootstrap release notes](https://github.com/roothide/Bootstrap/releases/tag/2.0-public-beta2) document SpringBoard injection for iOS 16.0–17.0; do not infer support for other firmware or bootstrap configurations.
 2. The package requires a `mobilesubstrate`-compatible injection runtime and PreferenceLoader. Install the `.deb` using the package manager inside that RootHide environment, not TrollStore's IPA installer. Enable Settings injection if required by that environment for preference bundles.
@@ -59,7 +60,7 @@ To disable, turn off Settings → Harbor → Enable Harbor. To remove, uninstall
 | File | Responsibility |
 | --- | --- |
 | `Tweak.xm` | iOS 17 overlay-controller hooks, runtime ABI checks, coalesced main-queue registration after dyld image loading |
-| `HBSession.m` | Host ABI/hierarchy validation, dashboard containment, exact native hidden-state restoration, native module handoff |
+| `HBSession.m` | Host/viewport validation, full-screen backdrop and scroll-surface containment, native header safe areas, exact hidden-state restoration, native handoff |
 | `HBDashboardController.m` | Shipping UIKit interface, public brightness/volume/routing controls, accessibility, appearance menu |
 | `HBMediaProvider.m` | Dynamically resolved MediaRemote, asynchronous visible-only polling, bounded thumbnail decode, timeout/stale-callback guard |
 | `HBPreferences.m` | One preference domain and change notification; defaults, type validation, timestamped runtime diagnostics |
@@ -80,13 +81,14 @@ Real SpringBoard injection, host-controller dimensions and callbacks on the exac
 ## Simulator preview
 
 ```sh
-bash scripts/build-preview.sh
+# Use /tmp for signing if an iCloud/FileProvider folder re-adds FinderInfo.
+HARBOR_PREVIEW_APP=/tmp/harbor-preview/HarborPreview.app bash scripts/build-preview.sh
 # Choose an installed iOS 17 simulator; the following only targets a simulator UUID.
-xcrun simctl install SIMULATOR_UUID .build/HarborPreview.app
+xcrun simctl install SIMULATOR_UUID /tmp/harbor-preview/HarborPreview.app
 xcrun simctl launch SIMULATOR_UUID com.chasedavis.harbor.preview
 ```
 
-The harness runs its checks and saves `Documents/test-results.json` in its own simulator app container. Optional launch arguments `--large` and `--empty` show the accessibility and empty-media states. The preview is a standalone app; it does not inject into Simulator SpringBoard and is not an IPA/device installer.
+The harness runs its checks and saves `Documents/test-results.json` in its own simulator app container. Optional launch arguments `--large` and `--empty` show the accessibility and empty-media states; `--inset-host` shows the synthetic native-host fixture used to reproduce the clipped panel. The preview is a standalone app; it does not inject into Simulator SpringBoard and is not an IPA/device installer.
 
 ## API references
 

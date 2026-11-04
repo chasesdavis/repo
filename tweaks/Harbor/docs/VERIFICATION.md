@@ -1,5 +1,9 @@
 # Verification — 2026-11-04
 
+## Beta3 full-screen correction and authorized publication
+
+See [BETA3-FULLSCREEN.md](BETA3-FULLSCREEN.md). The actual submitted JPEG was materialized and visually inspected on the Mac. Its installed Harbor version remains unconfirmed. Independently, published beta2 reproduced the inset/cut-off layout and failed nine assertions in a 43-check screenshot-shaped fixture. The corrected source passes all 47 checks in the expanded fixture, including native transform inheritance, scroll offsets, safe areas, pinned native escape, landscape return, and detached-host cleanup. Both architectures and package/schema checks pass. Publication was subsequently authorized; [PUBLICATION.md](PUBLICATION.md) records its checks. Device gesture arbitration and lock-screen behavior remain unverified, and no phone installation was performed.
+
 ## Beta2 repair and authorized publication
 
 The results below describe the initial beta1 work. They did not validate the real host class or the Preferences schema and missed three shipping integration defects. Read [BETA2-FIXES.md](BETA2-FIXES.md) for the correction and current evidence. Beta2 has 20 passing host policy assertions and 33 passing UIKit/mock-host assertions; semantic metadata and iOS 17 SDK class checks now also pass. No physical-device validation has been performed by this workflow.

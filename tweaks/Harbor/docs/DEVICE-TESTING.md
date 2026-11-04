@@ -1,11 +1,13 @@
-# Harbor 0.1.0~beta2 device acceptance
+# Harbor 0.1.0~beta3 device acceptance
 
 Not executed on a physical phone. Record exact firmware, phone model, Bootstrap/RootHide version, injection runtime, and any other Control Center tweaks before testing. Start with other Control Center replacements disabled to isolate compatibility.
 
 | Check | Expected result | Status |
 | --- | --- | --- |
 | Install and restart SpringBoard | SpringBoard launches normally; Settings shows Harbor | Pending |
-| Settings → Harbor → Refresh status | Shows a current beta2 SpringBoard report; master switch defaults on | Pending |
+| Settings → Harbor → Refresh status | Shows a current beta3 report with viewport/panel dimensions; master switch defaults on | Pending |
+| Full-screen surface | Backdrop reaches the screen edges; content reserves native status/privacy and home-indicator areas | Pending |
+| Short screen and largest text | Connections/Focus scroll fully into view; All controls remains pinned and tappable | Pending |
 | Open Control Center, portrait | Harbor appears without clipping status/privacy indicators | Pending |
 | All controls | Original controls reappear immediately and remain interactive | Pending |
 | Close and reopen 20 times; interrupt swipes | No accumulating views, stuck hidden modules, or animation jumps | Pending |
@@ -26,6 +28,6 @@ Not executed on a physical phone. Record exact firmware, phone model, Bootstrap/
 | Observe CPU/memory while CC is closed | No Harbor timers/polling; repeated presentation does not grow memory | Pending |
 | Disable/uninstall | Original Control Center restored | Pending |
 
-Beta1 has confirmed integration defects; use the corrected beta2 candidate for this checklist. If Harbor never appears, inspect **Settings → Harbor → Refresh status** and the `[Harbor 0.1.0~beta2]` log lines. Confirm actual SpringBoard injection, not merely TrollStore installation. Unsupported class, ABI, view size, or hierarchy retain native Control Center with a diagnostic. Record the exact firmware and Bootstrap version. If the pane is absent, check PreferenceLoader and Settings injection, restart Settings, and verify that the installed package version is beta2. A successful static package inspection does not establish on-device PreferenceLoader behavior.
+Use beta3 for this checklist only after an authorized installation. If Harbor never appears, inspect **Settings → Harbor → Refresh status** and the `[Harbor 0.1.0~beta3]` log lines. Confirm actual SpringBoard injection, not merely TrollStore installation. Unsupported class, ABI, viewport, or hierarchy retain native Control Center with a diagnostic. Record the exact installed package version, firmware, and Bootstrap version. If the pane is absent, check PreferenceLoader and Settings injection and restart Settings. The screenshot that prompted this change did not show the installed package version; that fact remains unconfirmed.
 
 Connections/Focus are shortcuts into the native interface. Harbor does not implement independent radio, Focus, flashlight, or screen-recording toggles in this version. All native controls remain available through All controls. Returning from native mode currently requires closing and reopening Control Center.

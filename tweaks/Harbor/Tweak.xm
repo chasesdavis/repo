@@ -31,6 +31,15 @@
 %end
 %end
 
+%group HarborScrollUpdates
+%hook CCUIModularControlCenterOverlayViewController
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    %orig;
+    [[HBSession sessionForHost:self create:NO] layout];
+}
+%end
+%end
+
 %group HarborActivation
 %hook CCUIModularControlCenterOverlayViewController
 - (void)_reparentAndBecomeActive {
@@ -63,11 +72,22 @@ static void HBTryInstallHooks(void) {
     if (!host) return;
     if (![host isSubclassOfClass:UIViewController.class] ||
         !HBHasMethod(host, @"moduleCollectionViewController", '@') ||
-        !HBHasMethod(host, @"overlayContainerView", '@')) {
+        !HBHasMethod(host, @"overlayContainerView", '@') ||
+        !HBHasMethod(host, @"overlayScrollView", '@') ||
+        !HBHasMethod(host, @"overlayBackgroundView", '@')) {
         HBReportRuntimeStatus(@"Apple controls retained: the Control Center host interface is incompatible.");
         return;
     }
     %init(HarborControlCenter, CCUIModularControlCenterOverlayViewController=host);
+    Method scroll = class_getInstanceMethod(host, NSSelectorFromString(@"scrollViewDidScroll:"));
+    char scrollReturn[16] = {0}, scrollArgument[16] = {0};
+    if (scroll && method_getNumberOfArguments(scroll) == 3) {
+        method_getReturnType(scroll, scrollReturn, sizeof(scrollReturn));
+        method_getArgumentType(scroll, 2, scrollArgument, sizeof(scrollArgument));
+        if (scrollReturn[0] == 'v' && scrollArgument[0] == '@') {
+            %init(HarborScrollUpdates, CCUIModularControlCenterOverlayViewController=host);
+        }
+    }
     Method activate = class_getInstanceMethod(host, NSSelectorFromString(@"_reparentAndBecomeActive"));
     Method resign = class_getInstanceMethod(host, NSSelectorFromString(@"_resignActive"));
     char activeReturn[8] = {0}, resignReturn[8] = {0};

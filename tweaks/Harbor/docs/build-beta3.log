@@ -1,0 +1,94 @@
+PASS: 20 presentation, numeric-boundary, and command-policy assertions
+PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults
+PASS: all Logos host classes are exported by the installed iOS 17.0 ControlCenterUI SDK
+./Prefs/Resources/Root.plist: OK
+./Prefs/Resources/Info.plist: OK
+./Prefs/entry.plist: OK
+./Harbor.plist: OK
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+[0;36m==> [1;36mNotice:[m Build may be slow as Theos isn’t using all available CPU cores on this computer. Consider upgrading GNU Make: https://theos.dev/docs/parallel-building
+[1;31m> [1;3;39mMaking all for tweak Harbor…[m
+[0;31m==> [1;39mPreprocessing Tweak.xm…[m
+[0;32m==> [1;39mCompiling Tweak.xm (arm64)…[m
+[0;32m==> [1;39mCompiling HBSession.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBDashboardController.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBMediaProvider.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBPreferences.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBPolicy.c (arm64)…[m
+[0;33m==> [1;39mLinking tweak Harbor (arm64)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for Harbor…[m
+[0;34m==> [1;39mStripping Harbor (arm64)…[m
+[0;31m==> [1;39mPreprocessing Tweak.xm…[m
+[0;32m==> [1;39mCompiling Tweak.xm (arm64e)…[m
+[0;32m==> [1;39mCompiling HBSession.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBDashboardController.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBMediaProvider.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBPreferences.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBPolicy.c (arm64e)…[m
+[0;33m==> [1;39mLinking tweak Harbor (arm64e)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for Harbor…[m
+[0;34m==> [1;39mStripping Harbor (arm64e)…[m
+[0;34m==> [1;39mMerging tweak Harbor…[m
+[0;34m==> [1;39mSigning Harbor…[m
+[1;31m> [1;3;39mMaking all in Prefs…[m
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+[0;36m==> [1;36mNotice:[m Build may be slow as Theos isn’t using all available CPU cores on this computer. Consider upgrading GNU Make: https://theos.dev/docs/parallel-building
+[1;31m> [1;3;39mMaking all for bundle HarborPrefs…[m
+[0;35m==> [1;39mCopying resource directories into the bundle wrapper…[m
+[0;32m==> [1;39mCompiling HBPreferencesController.m (arm64)…[m
+[0;32m==> [1;39mCompiling ../HBPreferences.m (arm64)…[m
+[0;33m==> [1;39mLinking bundle HarborPrefs (arm64)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for HarborPrefs…[m
+[0;34m==> [1;39mStripping HarborPrefs (arm64)…[m
+[0;32m==> [1;39mCompiling HBPreferencesController.m (arm64e)…[m
+[0;32m==> [1;39mCompiling ../HBPreferences.m (arm64e)…[m
+[0;33m==> [1;39mLinking bundle HarborPrefs (arm64e)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for HarborPrefs…[m
+[0;34m==> [1;39mStripping HarborPrefs (arm64e)…[m
+[0;34m==> [1;39mMerging bundle HarborPrefs…[m
+[0;34m==> [1;39mSigning HarborPrefs…[m
+[1;31m> [1;3;39mMaking stage for tweak Harbor…[m
+[1;31m> [1;3;39mMaking stage in Prefs…[m
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+[1;31m> [1;3;39mMaking stage for bundle HarborPrefs…[m
+dm.pl: building package `com.chasedavis.harbor:iphoneos-arm64e' in `./packages/com.chasedavis.harbor_0.1.0~beta3_iphoneos-arm64e.deb'
+ new Debian package, version 2.0.
+ size 49628 bytes: control archive=512 bytes.
+     630 bytes,    14 lines      control
+ Package: com.chasedavis.harbor
+ Name: Harbor (Beta)
+ Description: A calm, original Control Center dashboard with live media and native system controls. iOS 17.0 beta; physical-device testing is pending.
+ Maintainer: Chase Davis
+ Author: Chase Davis
+ Section: Tweaks
+ Depends: firmware (>= 17.0), firmware (<< 17.1), mobilesubstrate, preferenceloader
+ Tag: role::tweak
+ Icon: https://chasesdavis.github.io/repo/assets/harbor/icon.png
+ Depiction: https://chasesdavis.github.io/repo/depiction/harbor/
+ Homepage: https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor
+ Architecture: iphoneos-arm64e
+ Version: 0.1.0~beta3
+ Installed-Size: 508
+PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults
+PASS: exact package manifest and SpringBoard-only injection filter
+/tmp/harbor-verify.HMMF6E/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib:
+	@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib (compatibility version 0.0.0, current version 0.0.0)
+	/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)
+	/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 2048.1.101)
+	/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 2048.1.101)
+	/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 7082.1.111)
+	/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1.11.0)
+	/System/Library/Frameworks/MediaPlayer.framework/MediaPlayer (compatibility version 1.0.0, current version 1.0.0)
+	/System/Library/Frameworks/ImageIO.framework/ImageIO (compatibility version 1.0.0, current version 1.0.0)
+	/System/Library/Frameworks/AVKit.framework/AVKit (compatibility version 1.0.0, current version 1.0.0)
+	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 1600.151.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.0.0)
+	/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics (compatibility version 64.0.0, current version 1774.0.1)
+	@loader_path/.jbroot/usr/lib/libsubstrate.dylib (compatibility version 0.0.0, current version 0.0.0)
+dab1172f7602259fc749e5710f30cba376bc6c631184f0124f24074f1a0749fe  /Users/chase/Documents/Codex/2026-11-04/task/harbor-publish/tweaks/Harbor/packages/com.chasedavis.harbor_0.1.0~beta3_iphoneos-arm64e.deb
+Built repo/debs/com.chasedavis.harbor_0.1.0~beta3_iphoneos-arm64e.deb
+Run scripts/index-repo.sh before committing.

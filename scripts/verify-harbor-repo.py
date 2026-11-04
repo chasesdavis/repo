@@ -28,7 +28,7 @@ entry = harbor[0]
 source = fields((ROOT / "tweaks/Harbor/control").read_text())
 for key, value in source.items():
     assert entry.get(key) == value, f"Harbor {key} differs from its source control file"
-assert entry["Version"] == "0.1.0~beta2"
+assert entry["Version"] == "0.1.0~beta3"
 assert entry["Architecture"] == "iphoneos-arm64e"
 assert "Beta" in entry["Name"] and "physical-device testing is pending" in entry["Description"]
 assert "firmware (>= 17.0)" in entry["Depends"] and "firmware (<< 17.1)" in entry["Depends"]

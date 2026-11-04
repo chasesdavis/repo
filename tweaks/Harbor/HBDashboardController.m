@@ -64,7 +64,18 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
 - (void)setEnabled:(BOOL)enabled { [super setEnabled:enabled]; self.alpha = enabled ? 1 : 0.35; }
 @end
 
+// Empty safe-area regions must still reach Apple's status/header and edge gestures.
+@interface HBPassthroughView : UIView
+@end
+@implementation HBPassthroughView
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    UIView *hit = [super hitTest:point withEvent:event];
+    return hit == self ? nil : hit;
+}
+@end
+
 @interface HBDashboardController ()
+@property (nonatomic, strong) UIView *backdrop;
 @property (nonatomic, strong) UIVisualEffectView *blur;
 @property (nonatomic, strong) UIScrollView *scroll;
 @property (nonatomic, strong) UIStackView *stack;
@@ -82,6 +93,7 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
 @property (nonatomic, strong) UIButton *previous;
 @property (nonatomic, strong) UIButton *next;
 @property (nonatomic, strong) UIButton *appearance;
+@property (nonatomic, strong) UIButton *allControlsButton;
 @property (nonatomic, strong) UISlider *brightness;
 @property (nonatomic, strong) MPVolumeView *volume;
 @property (nonatomic, strong) UIButton *volumeFallback;
@@ -94,31 +106,49 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
 
 @implementation HBDashboardController
 - (void)loadView {
-    self.view = [UIView new];
+    self.view = [HBPassthroughView new];
     self.view.overrideUserInterfaceStyle = UIUserInterfaceStyleDark;
+    self.view.backgroundColor = UIColor.clearColor;
     self.accentViews = [NSMutableArray array];
+    self.backdrop = [UIView new];
+    self.backdrop.userInteractionEnabled = NO;
+    self.backdrop.accessibilityIdentifier = @"harbor.backdrop";
+    self.backdrop.accessibilityElementsHidden = YES;
+    self.backdrop.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.backdrop.frame = self.view.bounds;
+    [self.view addSubview:self.backdrop];
     self.blur = [[UIVisualEffectView alloc] initWithEffect:nil];
     self.blur.userInteractionEnabled = NO;
-    [self.view addSubview:self.blur];
-    HBPin(self.blur, self.view, UIEdgeInsetsZero);
+    [self.backdrop addSubview:self.blur];
+    HBPin(self.blur, self.backdrop, UIEdgeInsetsZero);
+
+    // Native escape stays visible even when large text or a short viewport scrolls.
+    self.allControlsButton = [self buildAllControls];
+    [self.view addSubview:self.allControlsButton];
+    self.allControlsButton.translatesAutoresizingMaskIntoConstraints = NO;
 
     self.scroll = [UIScrollView new];
     self.scroll.alwaysBounceVertical = NO;
-    self.scroll.showsVerticalScrollIndicator = NO;
+    self.scroll.showsVerticalScrollIndicator = YES;
+    self.scroll.indicatorStyle = UIScrollViewIndicatorStyleWhite;
+    self.scroll.accessibilityIdentifier = @"harbor.scroll";
     self.scroll.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     [self.view addSubview:self.scroll];
     self.scroll.translatesAutoresizingMaskIntoConstraints = NO;
     [NSLayoutConstraint activateConstraints:@[
         [self.scroll.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],
-        [self.scroll.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-8],
+        [self.scroll.bottomAnchor constraintEqualToAnchor:self.allControlsButton.topAnchor constant:-12],
         [self.scroll.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
         [self.scroll.widthAnchor constraintLessThanOrEqualToConstant:440],
-        [self.scroll.widthAnchor constraintLessThanOrEqualToAnchor:self.view.widthAnchor]]];
-    NSLayoutConstraint *width = [self.scroll.widthAnchor constraintEqualToAnchor:self.view.widthAnchor];
+        [self.scroll.widthAnchor constraintLessThanOrEqualToAnchor:self.view.safeAreaLayoutGuide.widthAnchor],
+        [self.allControlsButton.leadingAnchor constraintEqualToAnchor:self.scroll.leadingAnchor constant:20],
+        [self.allControlsButton.trailingAnchor constraintEqualToAnchor:self.scroll.trailingAnchor constant:-20],
+        [self.allControlsButton.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-8]]];
+    NSLayoutConstraint *width = [self.scroll.widthAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.widthAnchor];
     width.priority = UILayoutPriorityDefaultHigh;
     width.active = YES;
 
-    self.stack = HBStack(@[[self buildHeader], [self buildMedia], [self buildLevels], [self buildShortcuts], [self buildAllControls]], UILayoutConstraintAxisVertical, 12);
+    self.stack = HBStack(@[[self buildHeader], [self buildMedia], [self buildLevels], [self buildShortcuts]], UILayoutConstraintAxisVertical, 12);
     [self.scroll addSubview:self.stack];
     self.stack.translatesAutoresizingMaskIntoConstraints = NO;
     [NSLayoutConstraint activateConstraints:@[
@@ -139,6 +169,16 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
     [nc addObserver:self selector:@selector(contentSizeChanged) name:UIContentSizeCategoryDidChangeNotification object:nil];
     [nc addObserver:self selector:@selector(localeChanged) name:NSCurrentLocaleDidChangeNotification object:nil];
     [self applyAppearance];
+}
+- (void)useBackdropHost:(UIView *)host {
+    [self loadViewIfNeeded];
+    UIView *destination = host ?: self.view;
+    if (self.backdrop.superview != destination) {
+        [self.backdrop removeFromSuperview];
+        if (destination == self.view) [destination insertSubview:self.backdrop atIndex:0];
+        else [destination addSubview:self.backdrop];
+    }
+    self.backdrop.frame = destination.bounds;
 }
 - (UIView *)buildHeader {
     UILabel *brand = HBLabel(@"H A R B O R", 11, UIFontWeightBold, HBMuted());
@@ -308,7 +348,7 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
     self.shortcuts.distribution = UIStackViewDistributionFillEqually;
     return self.shortcuts;
 }
-- (UIView *)buildAllControls {
+- (UIButton *)buildAllControls {
     UIButton *button = [HBPressButton buttonWithType:UIButtonTypeCustom];
     UIButtonConfiguration *configuration = [UIButtonConfiguration plainButtonConfiguration];
     configuration.title = @"All controls";
@@ -334,7 +374,10 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
     CGFloat inset = MAX(0, self.scroll.bounds.size.height - self.stack.bounds.size.height - 24);
     if (fabs(self.scroll.contentInset.top - inset) > 0.5) {
         self.scroll.contentInset = UIEdgeInsetsMake(inset, 0, 0, 0);
-        if (!self.scroll.dragging && !self.scroll.decelerating) self.scroll.contentOffset = CGPointMake(0, -inset);
+        if (!self.scroll.dragging && !self.scroll.decelerating) {
+            CGFloat bottom = MAX(-inset, self.scroll.contentSize.height - self.scroll.bounds.size.height);
+            self.scroll.contentOffset = CGPointMake(0, MIN(bottom, MAX(-inset, self.scroll.contentOffset.y)));
+        }
     }
     [self updateVolumeAvailability];
 }
@@ -352,7 +395,7 @@ static void HBPin(UIView *child, UIView *parent, UIEdgeInsets insets) {
 - (void)applyAppearance {
     if (!self.isViewLoaded) return;
     UIColor *accent = HBAccentColor();
-    self.view.backgroundColor = [UIColor colorWithRed:0.035 green:0.07 blue:0.09 alpha:UIAccessibilityIsReduceTransparencyEnabled() ? 1 : 0.94];
+    self.backdrop.backgroundColor = [UIColor colorWithRed:0.035 green:0.07 blue:0.09 alpha:UIAccessibilityIsReduceTransparencyEnabled() ? 1 : 0.94];
     self.blur.effect = UIAccessibilityIsReduceTransparencyEnabled() ? nil : [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark];
     self.blur.contentView.backgroundColor = [UIColor colorWithRed:0.035 green:0.07 blue:0.09 alpha:UIAccessibilityIsReduceTransparencyEnabled() ? 1 : 0.45];
     self.play.backgroundColor = accent;
