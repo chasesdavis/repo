@@ -32,7 +32,9 @@ jobs:
           test -f repo/Packages
           grep -q '^Package: com.chasedavis.lumen$' repo/Packages
           grep -q '^Package: com.chase.aperture$' repo/Packages
-          test "$(grep -c '^Package:' repo/Packages)" = "5"
+          grep -q '^Package: com.chasedavis.harbor$' repo/Packages
+          test "$(grep -c '^Package:' repo/Packages)" = "6"
+          python3 scripts/verify-harbor-repo.py
           for deb in repo/debs/*.deb; do
             test -f "$deb"
           done
@@ -56,14 +58,18 @@ jobs:
       - name: Verify published index
         run: |
           set -euo pipefail
-          url="${{ steps.deployment.outputs.page_url }}Packages"
-          for attempt in 1 2 3 4 5; do
-            if curl -fsS "$url" | grep -q '^Package: com.chasedavis.lumen$'; then
-              echo "Published index verified"
+          base="${{ steps.deployment.outputs.page_url }}"
+          package="$(python3 -c 'from pathlib import Path; s=next(s for s in Path("repo/Packages").read_text().split("\n\n") if s.startswith("Package: com.chasedavis.harbor\n")); print(next(l.removeprefix("Filename: ") for l in s.splitlines() if l.startswith("Filename: ")))')"
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if curl -fsS "${base}Packages?commit=${GITHUB_SHA}" -o /tmp/published-Packages &&
+               cmp -s repo/Packages /tmp/published-Packages &&
+               curl -fsS "${base}${package}?commit=${GITHUB_SHA}" -o /tmp/published-Harbor.deb &&
+               cmp -s "repo/${package}" /tmp/published-Harbor.deb; then
+              echo "Exact commit index and Harbor package verified: ${GITHUB_SHA}"
               exit 0
             fi
             sleep 5
           done
-          echo "Published index missing Lumen" >&2
+          echo "Published index or Harbor package differs from this commit" >&2
           exit 1
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array>
+<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Harbor</string><key>footerText</key><string>A little room to breathe. An original Control Center for iPhone, built around your media and everyday controls. Free, always.</string></dict>
+<dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Enable Harbor</string><key>key</key><string>enabled</string><key>default</key><true/><key>defaults</key><string>com.chasedavis.harbor</string></dict>
+<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Make it yours</string><key>footerText</key><string>Changes apply immediately. Harbor follows Reduce Motion, Reduce Transparency, and larger text settings.</string></dict>
+<dict><key>cell</key><string>PSLinkListCell</string><key>detail</key><string>PSListItemsController</string><key>label</key><string>Palette</string><key>key</key><string>palette</string><key>default</key><string>sea</string><key>defaults</key><string>com.chasedavis.harbor</string><key>validValues</key><array><string>sea</string><string>ember</string><string>iris</string></array><key>validTitles</key><array><string>Sea Glass</string><string>Ember</string><string>Iris</string></array></dict>
+<dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Gentle haptics</string><key>key</key><string>haptics</string><key>default</key><true/><key>defaults</key><string>com.chasedavis.harbor</string></dict>
+<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Native when you need it</string><key>footerText</key><string>All controls shows Apple's Control Center for the current visit. Close and reopen to return to Harbor. Connections and Focus open the corresponding native panels when available. Landscape and iPad keep the system layout.</string></dict>
+<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Initial beta · 0.1.0~beta1</string><key>footerText</key><string>Targets iOS 17 with a RootHide environment capable of SpringBoard injection. TrollStore alone does not load this tweak. Device validation is required before relying on this preview.</string></dict>
+</array></plist>

@@ -1,0 +1,26 @@
+# Verification — 2026-11-04
+
+## Completed
+
+- RootHide Theos release package built against the locally installed iPhoneOS 17.0 SDK. Both tweak and Settings bundle compiled and linked for arm64 and arm64e.
+- Twenty host policy assertions passed with AddressSanitizer and UndefinedBehaviorSanitizer. Covers supported/unsupported OS, master switch, iPad/landscape, narrow/invalid dimensions, changed hierarchy, native-mode persistence, expanded modules, invalid brightness values, and allowed media command IDs.
+- Twenty-nine UIKit/mock-host checks passed on the **iOS 17.5 iPhone 15 Pro Simulator**. Covers parent/child containment, original hidden-state restoration, missing native hierarchy, expanded modules, enable/disable, native handoff and reopening, actual discovered fixture module identifiers, stopping timers, empty/playing media states, invalid palettes, and geometry.
+- Long-title layouts tested at 300, 320, 375, and 430 point widths. No ambiguous layout found; All controls remains scroll-reachable. Accessibility text changes level cards to a vertical arrangement.
+- The screenshot renders the shipping UIKit view controller, not an HTML approximation. The music and artwork are explicitly labeled fixtures. Simulator hardware volume is unavailable, so the fallback is shown.
+- Package manifest, bundle/filter plists, both Mach-O architectures, and RootHide loader paths inspected. MediaRemote is dynamically resolved and is not a hard link dependency. No install scripts or unrelated payload files.
+
+Evidence: `simulator-results.json`, `build.log`, `package-verification.txt`, `preview-iphone15pro.png`, and `preview-accessibility-empty.png` in this directory.
+
+The build emits the existing Theos/Apple-linker warning `-multiply_defined is obsolete`. Restricted-shell builds also report an unavailable CPU-count `sysctl`; compilation and packaging still succeed. No source compilation errors remain.
+
+## Not established by these tests
+
+The simulator harness supplies an explicit mock of the private Control Center host. It does **not** execute Logos hooks against real SpringBoard. Passing mock tests establishes Harbor's own UI and restoration logic, not the availability or semantics of Apple's private APIs on the phone.
+
+The original implementation did not install anything on the phone. The subsequently authorized 0.1.0~beta1 publication adds a Sileo package and regenerates the repo indexes; it does not establish device compatibility. Exact iOS 17.0 hardware compatibility, injection environment, native presentation gestures, system brightness/volume changes, live media and AirPlay, lock-screen behavior, preference injection, and interaction with existing tweaks remain pending in `DEVICE-TESTING.md`.
+
+## Repository context
+
+Read the repository `AGENTS.md`, existing Lumen/StayOn17 packaging, and the local Theos/iOS17 RootHide skill and robust-coding/verification protocols. The local Codex memory search found no matching Axon/jailbreak memory records. Motion follows the supplied Axon preference: short, restrained, interruptible, no overshoot.
+
+The pre-existing untracked `tweaks/StayOn17/.stamp` is preserved. Implementation deliverables live under `tweaks/Harbor`. The authorized beta publication additionally adds only Harbor's package, depiction/assets, build/validation scripts, and the necessary index/Pages updates. See `PUBLICATION.md` for the publication validation scope.

@@ -66,6 +66,26 @@ MD5sum: bab5a9f0b6c5047d0a6f1397974e930c
 SHA1: 1f8e56eed229031939dfa6ff1fc6475f21240af2
 SHA256: a76a04a4e43b566a99ab57d0301a2c8c84fd0a6b55c4730825d1db3486afaf45
 
+Package: com.chasedavis.harbor
+Name: Harbor (Beta)
+Description: A calm, original Control Center dashboard with live media and native system controls. Initial iOS 17.0 beta; physical-device testing is pending.
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Depends: firmware (>= 17.0), firmware (<< 17.1), mobilesubstrate, preferenceloader
+Tag: role::tweak
+Icon: https://chasesdavis.github.io/repo/assets/harbor/icon.png
+Depiction: https://chasesdavis.github.io/repo/depiction/harbor/
+Homepage: https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor
+Architecture: iphoneos-arm64e
+Version: 0.1.0~beta1
+Installed-Size: 456
+Filename: debs/com.chasedavis.harbor_0.1.0~beta1_iphoneos-arm64e.deb
+Size: 43540
+MD5sum: 0a525308c33d1b941cde26577ea64647
+SHA1: ce3d9542e6a6ca626aff3069c1650ab60807d34a
+SHA256: d6e40609bb341db11ec706b267862e17146433b22da80982083bfbcb5bea7d4b
+
 Package: com.chasedavis.lumen
 Name: Lumen
 Description: Free smart status bar pill - time, battery, now playing, timers, network and a quick message composer, all from the clock.

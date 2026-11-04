@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Harbor: an original Control Center dashboard. Initial beta for iOS 17.0 RootHide; physical-device testing pending.">
+  <title>Harbor — Initial beta</title>
+  <style>
+    :root { color-scheme: dark; --bg:#111a1e; --card:#202b30; --text:#f4f7f6; --muted:#bcc9c7; --accent:#a3e8d6; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:640px; margin:auto; padding:28px 20px 56px; }
+    header { display:flex; gap:16px; align-items:center; }
+    header img { width:72px; height:72px; border-radius:18px; }
+    h1 { margin:0; font-size:32px; letter-spacing:-.04em; }
+    h2 { margin-top:0; font-size:18px; }
+    p { margin:0 0 16px; color:var(--muted); }
+    section { margin-top:20px; padding:22px; border:1px solid #34444a; border-radius:24px; background:var(--card); }
+    .beta { border-color:#89704b; background:#2b271f; }
+    .tag { color:var(--accent); font-size:13px; font-weight:600; }
+    ul { padding-left:20px; margin-bottom:0; color:var(--muted); }
+    li { margin:8px 0; }
+    a { color:var(--accent); text-underline-offset:4px; }
+    .preview { display:block; width:min(100%,300px); height:auto; border-radius:24px; margin:20px auto 0; }
+    figcaption { text-align:center; font-size:13px; color:var(--muted); margin-top:14px; }
+    figure { margin:24px 0; }
+    code { overflow-wrap:anywhere; }
+    footer { margin-top:28px; font-size:13px; color:var(--muted); }
+  </style>
+</head>
+<body><main>
+  <header><img src="../../assets/harbor/icon.png" alt="Harbor icon"><div><h1>Harbor</h1><div class="tag">0.1.0~beta1 · Free · RootHide</div></div></header>
+  <p style="margin-top:22px;font-size:22px;letter-spacing:-.02em">A little room to breathe.</p>
+  <section class="beta"><h2>Initial beta — device validation pending</h2><p>Physical-device testing is pending. This is a development build, not a release-ready or compatibility-certified tweak. It has compiled for arm64/arm64e and passed policy and simulator/mock-host checks. Those checks do not prove that its private Control Center hooks work on your phone.</p><p>Targets <strong>iOS 17.0</strong> in a RootHide environment with working <strong>SpringBoard injection</strong>, a compatible injection runtime, and PreferenceLoader. TrollStore alone is not sufficient. No support for iOS 17.1 or later is claimed.</p></section>
+  <section><h2>Your everyday controls, together.</h2><ul>
+    <li>Live media, artwork, and playback controls with honest empty states.</li>
+    <li>Brightness, native volume, and AirPlay routing.</li>
+    <li>Connections and Focus shortcuts into Apple's native panels.</li>
+    <li>Sea Glass, Ember, and Iris palettes, with optional gentle haptics.</li>
+    <li>Accessible labels, larger-text layouts, and reduced-motion support.</li>
+  </ul></section>
+  <figure><img class="preview" src="../../assets/harbor/preview.png" alt="Harbor's native UIKit dashboard with Sea Glass accents and labeled sample media"><figcaption>Simulator UI preview with sample media. The volume fallback appears because Simulator has no hardware volume route.</figcaption></figure>
+  <section><h2>Native when you need it.</h2><p><strong>All controls</strong> restores Apple's full Control Center for the current visit. Close and reopen to return to Harbor. Connections and Focus are native-panel shortcuts, not independent radio toggles. Landscape and iPad retain the native layout.</p><p>Settings → Harbor includes a master switch. For this first device test, confirm All controls and the master switch work before relying on the dashboard.</p></section>
+  <section><h2>Before using it daily</h2><p>SpringBoard injection, gestures, lock-screen access, hardware brightness/volume, live media, AirPlay, and interactions with other tweaks remain unverified on a physical phone.</p><p>Disable Harbor in Settings, or uninstall it through your RootHide package manager and restart SpringBoard using that environment's supported UI. If needed, use your environment's established safe-mode/disable-tweak recovery procedure.</p><p><a href="https://github.com/chasesdavis/repo/blob/main/tweaks/Harbor/docs/DEVICE-TESTING.md">Device-testing checklist</a> · <a href="https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor">Source and build instructions</a></p></section>
+  <footer>Package: <code>com.chasedavis.harbor</code><br>Debian architecture: iphoneos-arm64e (RootHide). Binary slices: arm64 and arm64e.<br>Original design and implementation by Chase Davis. No Prysm or Jade assets/code.<br><a href="../../">Back to the Sileo source</a></footer>
+</main></body></html>
