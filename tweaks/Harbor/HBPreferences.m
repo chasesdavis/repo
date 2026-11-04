@@ -1,4 +1,5 @@
 #import "HBPreferences.h"
+#import "HBVersion.h"
 
 NSString *const HBPreferencesDomain = @"com.chasedavis.harbor";
 NSString *const HBPreferencesChanged = @"com.chasedavis.harbor/preferences-changed";
@@ -32,4 +33,30 @@ void HBSetPreference(NSString *key, id value) {
     HBReloadPreferences();
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),
         (__bridge CFStringRef)HBPreferencesChanged, NULL, NULL, true);
+}
+void HBReportRuntimeStatus(NSString *status) {
+    // UI sessions and hook discovery run on the main queue. Only persist changes;
+    // do not emit the user-preference notification and recursively relayout CC.
+    static NSString *lastStatus;
+    if ([lastStatus isEqualToString:status]) return;
+    lastStatus = [status copy];
+    NSDictionary *report = @{ @"message": status, @"version": @HARBOR_VERSION, @"date": NSDate.date };
+    CFPreferencesSetAppValue(CFSTR("runtimeReport"), (__bridge CFPropertyListRef)report,
+                            (__bridge CFStringRef)HBPreferencesDomain);
+    CFPreferencesAppSynchronize((__bridge CFStringRef)HBPreferencesDomain);
+    NSLog(@"[Harbor %s] %@", HARBOR_VERSION, status);
+}
+NSString *HBRuntimeStatusSummary(void) {
+    CFPreferencesAppSynchronize((__bridge CFStringRef)HBPreferencesDomain);
+    id value = HBRead(@"runtimeReport");
+    if (![value isKindOfClass:NSDictionary.class] ||
+        ![value[@"message"] isKindOfClass:NSString.class] ||
+        ![value[@"version"] isKindOfClass:NSString.class] ||
+        ![value[@"date"] isKindOfClass:NSDate.class]) {
+        return @"No report from SpringBoard. After installing this build, restart SpringBoard through Bootstrap. Check that SpringBoard injection is enabled; TrollStore alone cannot load Harbor.";
+    }
+    NSString *date = [NSDateFormatter localizedStringFromDate:value[@"date"]
+        dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterMediumStyle];
+    return [NSString stringWithFormat:@"Last report · %@ · Harbor %@\n%@\nRefresh after opening Control Center. This is the last recorded event, not a live connection check.",
+        date, value[@"version"], value[@"message"]];
 }

@@ -1,4 +1,25 @@
-# Initial beta publication
+# Beta2 publication
+
+- Version: `0.1.0~beta2`
+- Display name: `Harbor (Beta)`
+- Package: `com.chasedavis.harbor`
+- Debian architecture: `iphoneos-arm64e` (RootHide)
+- Mach-O slices: `arm64`, `arm64e`
+- Firmware dependency: `>= 17.0`, `< 17.1`
+- Size: `46100` bytes
+- SHA-256: `57012100fd2f1b853a68a1ca3363fa64a520c9cbf365d1feed94a8cc192e3c2e`
+
+Artifact: `repo/debs/com.chasedavis.harbor_0.1.0~beta2_iphoneos-arm64e.deb`.
+
+This publication was explicitly authorized after the local repair. It replaces the broken beta1 package in the current index and leaves all five unrelated package stanzas and binary hashes unchanged. The isolated `main` checkout starts at beta1 commit `d2137f515c757e07d837c11d4435f8e9bc6fe252`; the original `stayon17` branch and its work are not merged.
+
+Beta2 corrects the iOS 17 host class, delayed registration, and PreferenceLoader/Preferences metadata, adds runtime diagnostics, and uses the native presentation container. See [BETA2-FIXES.md](BETA2-FIXES.md). The runtime sources are those covered by the recorded 33 UIKit/mock-host checks; publishing changes only release documentation, packaging/index validation, and repository artifacts. The package was rebuilt for both architectures, with 20 sanitizer-backed policy assertions and SDK/schema checks rerun. Package inspection verifies the six-file payload, controller registration, bundle identity, preference defaults, architectures, and RootHide dependencies.
+
+The existing Pages workflow validates the repository before upload, then compares the deployed index and downloadable Harbor package against the exact commit. Read deployment success and the exact published commit from the [Actions workflow](https://github.com/chasesdavis/repo/actions/workflows/deploy-pages.yml); this source record documents pre-push checks and does not infer success from a pending deployment.
+
+Physical-device behavior is still unverified. Publication does not install anything on the phone or certify compatibility. After upgrading, restart SpringBoard through Bootstrap and reopen Settings; see [the activation instructions](../README.md#installation-requirements-and-first-device-test).
+
+## Historical beta1 publication
 
 Version: `0.1.0~beta1`
 Display name: `Harbor (Beta)`

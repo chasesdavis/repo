@@ -91,19 +91,34 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
     if (self.layingOut) return;
     self.layingOut = YES;
     @try {
+        if (!self.active) { [self restoreNative]; return; }
         UIViewController *host = self.host;
         id object = HBGetObject(host, @"moduleCollectionViewController");
         UIViewController *collection = [object isKindOfClass:UIViewController.class] ? object : nil;
         UIView *native = collection.isViewLoaded ? collection.view : nil;
+        id containerObject = HBGetObject(host, @"overlayContainerView");
+        UIView *container = [containerObject isKindOfClass:UIView.class] ? containerObject : nil;
         NSUInteger expanded = 0;
-        BOOL valid = native && native != host.view && [native isDescendantOfView:host.view] && HBExpandedCount(collection, &expanded);
-        CGSize size = host.view.bounds.size;
-        BOOL allowed = self.active && HBShouldPresent((int)NSProcessInfo.processInfo.operatingSystemVersion.majorVersion,
+        BOOL hasCount = HBExpandedCount(collection, &expanded);
+        BOOL valid = host.isViewLoaded && container && [container isDescendantOfView:host.view] &&
+            native && native != container && [native isDescendantOfView:container] && hasCount;
+        CGSize size = container.bounds.size;
+        BOOL allowed = HBShouldPresent((int)NSProcessInfo.processInfo.operatingSystemVersion.majorVersion,
             HBEnabled(), UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone,
             size.width, size.height, valid, self.nativeRequested, expanded > 0);
-        if (!allowed) { [self restoreNative]; return; }
+        if (!allowed) {
+            [self restoreNative];
+            NSString *reason;
+            if (!HBEnabled()) reason = @"Harbor is disabled. Enable Harbor in Settings.";
+            else if (self.nativeRequested) reason = @"Native controls requested for this visit. Close and reopen Control Center to return to Harbor.";
+            else if (!valid) reason = @"Apple controls retained: the native collection, presentation container, or expanded-module interface is unavailable.";
+            else if (expanded > 0) reason = @"Apple controls retained while a native module is expanded.";
+            else reason = @"Apple controls retained: Harbor needs an iPhone in portrait with a presentation area of at least 300 × 480 points.";
+            HBReportRuntimeStatus(reason);
+            return;
+        }
         // Reparenting by the system invalidates our old snapshot.
-        if (self.nativeView != native && self.ownsHiddenState) [self restoreNative];
+        if (self.ownsHiddenState && (self.nativeView != native || self.dashboard.view.superview != container)) [self restoreNative];
         if (!self.dashboard) {
             self.dashboard = [HBDashboardController new];
             __weak typeof(self) weakSelf = self;
@@ -111,12 +126,14 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
         }
         if (!self.dashboard.parentViewController) {
             [host addChildViewController:self.dashboard];
-            self.dashboard.view.frame = host.view.bounds;
+            self.dashboard.view.frame = container.bounds;
             self.dashboard.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            [host.view addSubview:self.dashboard.view];
+            // Stay inside Apple's presentation container so its transition transforms
+            // and dismissal gestures also apply to Harbor. Never move native modules.
+            [container addSubview:self.dashboard.view];
             [self.dashboard didMoveToParentViewController:host];
         }
-        self.dashboard.view.frame = host.view.bounds;
+        self.dashboard.view.frame = container.bounds;
         [self.dashboard setDashboardActive:YES];
         if (!self.ownsHiddenState) {
             self.nativeView = native;
@@ -125,15 +142,17 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
         }
         // Do this last, after the replacement is successfully constructed.
         native.hidden = YES;
+        HBReportRuntimeStatus(@"Dashboard displayed. All controls restores Apple's controls for the current visit.");
     } @catch (NSException *exception) {
         self.nativeRequested = YES;
         [self restoreNative];
-        NSLog(@"[Harbor] Native Control Center retained: %@", exception.name);
+        HBReportRuntimeStatus([NSString stringWithFormat:@"Apple controls retained after an exception: %@.", exception.name]);
     } @finally { self.layingOut = NO; }
 }
 - (void)openSystem:(HBSystemDestination)destination {
     self.nativeRequested = YES;
     [self restoreNative];
+    HBReportRuntimeStatus(@"Native controls requested for this visit. Close and reopen Control Center to return to Harbor.");
     UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, self.nativeView);
     if (destination == HBSystemDestinationAll) return;
     @try {

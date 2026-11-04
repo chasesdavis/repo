@@ -1,5 +1,9 @@
 # Verification — 2026-11-04
 
+## Beta2 repair and authorized publication
+
+The results below describe the initial beta1 work. They did not validate the real host class or the Preferences schema and missed three shipping integration defects. Read [BETA2-FIXES.md](BETA2-FIXES.md) for the correction and current evidence. Beta2 has 20 passing host policy assertions and 33 passing UIKit/mock-host assertions; semantic metadata and iOS 17 SDK class checks now also pass. No physical-device validation has been performed by this workflow.
+
 ## Completed
 
 - RootHide Theos release package built against the locally installed iPhoneOS 17.0 SDK. Both tweak and Settings bundle compiled and linked for arm64 and arm64e.

@@ -1,0 +1,2 @@
+PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults
+PASS: all Logos host classes are exported by the installed iOS 17.0 ControlCenterUI SDK

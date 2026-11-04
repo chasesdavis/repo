@@ -18,16 +18,20 @@
 @end
 @interface HBTestHost : UIViewController
 @property (nonatomic, strong) HBTestCollection *moduleCollectionViewController;
+@property (nonatomic, strong) UIView *overlayContainerView;
 @end
 @implementation HBTestHost
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.overlayContainerView = [[UIView alloc] initWithFrame:self.view.bounds];
+    self.overlayContainerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:self.overlayContainerView];
     self.moduleCollectionViewController = [HBTestCollection new];
     [self addChildViewController:self.moduleCollectionViewController];
     self.moduleCollectionViewController.view.frame = self.view.bounds;
     self.moduleCollectionViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.moduleCollectionViewController.view.backgroundColor = UIColor.systemBlueColor;
-    [self.view addSubview:self.moduleCollectionViewController.view];
+    [self.overlayContainerView addSubview:self.moduleCollectionViewController.view];
     [self.moduleCollectionViewController didMoveToParentViewController:self];
     for (NSString *name in @[@"com.apple.control-center.ConnectivityModule", @"com.apple.donotdisturb.control-center.module"]) {
         HBTestModule *module = [HBTestModule new]; module.moduleIdentifier = name;
@@ -96,6 +100,8 @@ static UIImage *HBTestArtwork(void) {
     [host.view layoutIfNeeded];
     [self check:host.moduleCollectionViewController.view.hidden && HBDashboard(host) != nil name:@"Valid host displays Harbor and hides only the native collection"];
     HBDashboardController *dashboard = HBDashboard(host);
+    [self check:dashboard.view.superview == host.overlayContainerView && dashboard.view.superview != host.view
+        name:@"Dashboard shares Apple's presentation container rather than covering its transitions"];
     [dashboard.view layoutIfNeeded];
     [self check:!HBHasAmbiguity(dashboard.view) name:@"Dashboard has no ambiguous Auto Layout geometry"];
     [(UIControl *)HBFind(dashboard.view, @"harbor.connections") sendActionsForControlEvents:UIControlEventTouchUpInside];
@@ -111,6 +117,7 @@ static UIImage *HBTestArtwork(void) {
     [session end]; [session begin];
     HBSetPreference(@"enabled", @NO); [HBSession preferencesChanged];
     [self check:!host.moduleCollectionViewController.view.hidden && HBDashboard(host) == nil name:@"Master switch immediately restores native controls"];
+    [self check:[HBRuntimeStatusSummary() containsString:@"Harbor is disabled"] name:@"Settings diagnostics preserve the reason native controls were retained"];
     HBSetPreference(@"enabled", @YES); [HBSession preferencesChanged];
     [self check:HBDashboard(host) != nil name:@"Master switch re-enables the active portrait dashboard"];
     host.moduleCollectionViewController.expandedModuleCount = 1; [session layout];
@@ -126,6 +133,12 @@ static UIImage *HBTestArtwork(void) {
     [native removeFromSuperview]; [session begin];
     [self check:HBDashboard(host) == nil name:@"Unexpected native hierarchy fails open"];
     [host.view addSubview:native]; [session layout];
+    [self check:HBDashboard(host) == nil && !native.hidden name:@"A collection outside the presentation container remains visible"];
+    [host.overlayContainerView addSubview:native]; [session layout];
+    UIView *originalContainer = host.overlayContainerView;
+    host.overlayContainerView = nil; [session layout];
+    [self check:HBDashboard(host) == nil && !native.hidden name:@"A missing presentation container restores the native collection"];
+    host.overlayContainerView = originalContainer; [session layout];
     dashboard = HBDashboard(host);
     HBMediaSnapshot *empty = [HBMediaSnapshot new]; empty.title = @"Nothing playing"; empty.artist = @"Your next moment of calm.";
     [dashboard displayMedia:empty];

@@ -1,1 +1,1 @@
-{ entry = { bundle = HarborPrefs; cell = PSLinkCell; detail = HBPreferencesController; label = Harbor; }; }
+{ entry = { bundle = HarborPrefs; cell = PSLinkCell; detail = HBPreferencesController; isController = 1; label = Harbor; }; }

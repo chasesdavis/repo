@@ -1,0 +1,3 @@
+FAIL: PreferenceLoader entry needs isController=true to load the custom controller
+FAIL: Root.plist must be a dictionary containing the Preferences items array
+FAIL: Hook target CCUIModularControlCenterViewController is absent from the iOS 17.0 ControlCenterUI exports

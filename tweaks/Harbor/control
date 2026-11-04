@@ -1,8 +1,8 @@
 Package: com.chasedavis.harbor
 Name: Harbor (Beta)
-Version: 0.1.0~beta1
+Version: 0.1.0~beta2
 Architecture: iphoneos-arm64e
-Description: A calm, original Control Center dashboard with live media and native system controls. Initial iOS 17.0 beta; physical-device testing is pending.
+Description: A calm, original Control Center dashboard with live media and native system controls. iOS 17.0 beta; physical-device testing is pending.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Tweaks

@@ -1,11 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-package="$PWD/packages/com.chasedavis.harbor_0.1.0~beta1_iphoneos-arm64e.deb"
+version="$(awk -F': ' '$1 == "Version" { print $2 }' control)"
+package="$PWD/packages/com.chasedavis.harbor_${version}_iphoneos-arm64e.deb"
 stage="$(mktemp -d /tmp/harbor-verify.XXXXXX)"
 trap 'rm -rf "$stage"' EXIT
 dpkg-deb -x "$package" "$stage"
 dpkg-deb -I "$package"
+test "$(dpkg-deb -f "$package" Package)" = com.chasedavis.harbor
+test "$(dpkg-deb -f "$package" Version)" = "$version"
+test "$(dpkg-deb -f "$package" Architecture)" = iphoneos-arm64e
+python3 tests/integration_contract_test.py --package-root "$stage"
 python3 - "$stage" <<'PY'
 import pathlib, plistlib, sys
 root = pathlib.Path(sys.argv[1])

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Harbor: an original Control Center dashboard. Initial beta for iOS 17.0 RootHide; physical-device testing pending.">
-  <title>Harbor — Initial beta</title>
+  <meta name="description" content="Harbor: an original Control Center dashboard. Beta 2 fixes activation and Settings for iOS 17.0 RootHide; physical-device testing pending.">
+  <title>Harbor — Beta 2</title>
   <style>
     :root { color-scheme: dark; --bg:#111a1e; --card:#202b30; --text:#f4f7f6; --muted:#bcc9c7; --accent:#a3e8d6; }
     * { box-sizing:border-box; }
@@ -29,9 +29,10 @@
   </style>
 </head>
 <body><main>
-  <header><img src="../../assets/harbor/icon.png" alt="Harbor icon"><div><h1>Harbor</h1><div class="tag">0.1.0~beta1 · Free · RootHide</div></div></header>
+  <header><img src="../../assets/harbor/icon.png" alt="Harbor icon"><div><h1>Harbor</h1><div class="tag">0.1.0~beta2 · Free · RootHide</div></div></header>
   <p style="margin-top:22px;font-size:22px;letter-spacing:-.02em">A little room to breathe.</p>
-  <section class="beta"><h2>Initial beta — device validation pending</h2><p>Physical-device testing is pending. This is a development build, not a release-ready or compatibility-certified tweak. It has compiled for arm64/arm64e and passed policy and simulator/mock-host checks. Those checks do not prove that its private Control Center hooks work on your phone.</p><p>Targets <strong>iOS 17.0</strong> in a RootHide environment with working <strong>SpringBoard injection</strong>, a compatible injection runtime, and PreferenceLoader. TrollStore alone is not sufficient. No support for iOS 17.1 or later is claimed.</p></section>
+  <section class="beta"><h2>Beta 2 — device validation pending</h2><p>Physical-device testing is pending. This is a development build, not a release-ready or compatibility-certified tweak. It has compiled for arm64/arm64e and passed policy, package integration, and simulator/mock-host checks. Those checks do not prove that its private Control Center hooks work on your phone.</p><p>Targets <strong>iOS 17.0</strong> in a RootHide environment with working <strong>SpringBoard injection</strong>, a compatible injection runtime, and PreferenceLoader. TrollStore alone is not sufficient. No support for iOS 17.1 or later is claimed.</p></section>
+  <section><h2>Fixed in beta 2</h2><p>Corrects the activation and Settings registration defects in beta 1. Adds a timestamped SpringBoard status report in Settings to explain why Harbor has kept Apple's controls visible.</p><p>After updating, restart SpringBoard through Bootstrap's supported UI and reopen Settings. Enable Settings injection if your environment requires it for PreferenceLoader. <strong>Settings → Harbor → Enable Harbor</strong> defaults on. Open Control Center with the usual downward swipe from the top-right, in portrait.</p><p>If the dashboard is absent, open <strong>Settings → Harbor → Refresh status</strong>. The report includes its build version and time; it describes the last recorded event.</p></section>
   <section><h2>Your everyday controls, together.</h2><ul>
     <li>Live media, artwork, and playback controls with honest empty states.</li>
     <li>Brightness, native volume, and AirPlay routing.</li>
@@ -40,7 +41,7 @@
     <li>Accessible labels, larger-text layouts, and reduced-motion support.</li>
   </ul></section>
   <figure><img class="preview" src="../../assets/harbor/preview.png" alt="Harbor's native UIKit dashboard with Sea Glass accents and labeled sample media"><figcaption>Simulator UI preview with sample media. The volume fallback appears because Simulator has no hardware volume route.</figcaption></figure>
-  <section><h2>Native when you need it.</h2><p><strong>All controls</strong> restores Apple's full Control Center for the current visit. Close and reopen to return to Harbor. Connections and Focus are native-panel shortcuts, not independent radio toggles. Landscape and iPad retain the native layout.</p><p>Settings → Harbor includes a master switch. For this first device test, confirm All controls and the master switch work before relying on the dashboard.</p></section>
+  <section><h2>Native when you need it.</h2><p><strong>All controls</strong> restores Apple's full Control Center for the current visit. Close and reopen to return to Harbor. Connections and Focus are native-panel shortcuts, not independent radio toggles. Landscape and iPad retain the native layout.</p><p>Settings → Harbor includes a master switch. Confirm All controls and the master switch work before relying on the dashboard.</p></section>
   <section><h2>Before using it daily</h2><p>SpringBoard injection, gestures, lock-screen access, hardware brightness/volume, live media, AirPlay, and interactions with other tweaks remain unverified on a physical phone.</p><p>Disable Harbor in Settings, or uninstall it through your RootHide package manager and restart SpringBoard using that environment's supported UI. If needed, use your environment's established safe-mode/disable-tweak recovery procedure.</p><p><a href="https://github.com/chasesdavis/repo/blob/main/tweaks/Harbor/docs/DEVICE-TESTING.md">Device-testing checklist</a> · <a href="https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor">Source and build instructions</a></p></section>
   <footer>Package: <code>com.chasedavis.harbor</code><br>Debian architecture: iphoneos-arm64e (RootHide). Binary slices: arm64 and arm64e.<br>Original design and implementation by Chase Davis. No Prysm or Jade assets/code.<br><a href="../../">Back to the Sileo source</a></footer>
 </main></body></html>
