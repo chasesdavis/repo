@@ -1,4 +1,8 @@
-# Verification — 2026-11-04
+# Verification — 2026-11-05
+
+## Latest validated beta: beta7
+
+See [BETA7-FOCUS-OPT-IN.md](BETA7-FOCUS-OPT-IN.md). The beta6 audit found the automatic matching flag did not stop the reader. Beta7 requires fresh saved opt-in, creates no reader while off, cancels pending work on disable, and retains manual profiles. The package/source audit found no Focus-setting writes or activation calls; native Focus presentation remains separate and device behavior is unverified. Host checks (20 policy, 32 model, 35 coordinator), 141 UIKit checks and 21 recorded HID assertions passed. The totals overlap. Actual-touch tests substituted counted readers and did not call real Focus services. The local package built and validated; no publication, phone installation or real Focus status changes were performed during that audit. The subsequently authorized publication is recorded in [PUBLICATION.md](PUBLICATION.md).
 
 ## Beta3 full-screen correction and authorized publication
 
@@ -32,3 +36,11 @@ The original implementation did not install anything on the phone. The subsequen
 Read the repository `AGENTS.md`, existing Lumen/StayOn17 packaging, and the local Theos/iOS17 RootHide skill and robust-coding/verification protocols. The local Codex memory search found no matching Axon/jailbreak memory records. Motion follows the supplied Axon preference: short, restrained, interruptible, no overshoot.
 
 The pre-existing untracked `tweaks/StayOn17/.stamp` is preserved. Implementation deliverables live under `tweaks/Harbor`. The authorized beta publication additionally adds only Harbor's package, depiction/assets, build/validation scripts, and the necessary index/Pages updates. See `PUBLICATION.md` for the publication validation scope.
+
+## Beta4 compact sheet candidate
+
+See [BETA4-COMPACT.md](BETA4-COMPACT.md) and [simulator-results-beta4.json](simulator-results-beta4.json). Earlier programmatic scroll reachability did not test real gesture arbitration. Beta4 adds a competing-pan fixture driven by actual HID swipes, native-button action forwarding checks and compact/expanded layout tests. Physical-device behavior remains unverified; beta4 has not been published or installed on a phone.
+
+## Beta5 profiles, editor and themes
+
+See [BETA5-PROFILES.md](BETA5-PROFILES.md) and [beta5 evidence](beta5/interaction-validation.json). Final run: 93 UIKit checks, 20 C policy checks, 23 Foundation profile checks, and 14 assertions against captured actual input results passed. RootHide package builds and validates. Real simulator Focus service reports BSServiceConnectionErrorDomain (3); real SpringBoard Focus and phone behavior remain unverified. No publication or device installation.

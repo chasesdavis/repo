@@ -1,29 +1,33 @@
 # Harbor
 
-A quiet place for the controls you reach for most. An original, free Control Center dashboard for Chase's iPhone, inspired by the cohesive feel of Prysm and Jade. No code, artwork, or assets from either project are used.
+An original, free Control Center sheet for Chase’s iPhone. **0.1.0~beta7 is a development beta. Physical-device behavior remains unverified.** See the [publication record](docs/PUBLICATION.md) for package and deployment checks.
 
-**0.1.0~beta3 corrects the full-screen layout; physical-device testing remains pending.** See [BETA3-FULLSCREEN.md](docs/BETA3-FULLSCREEN.md) for the screenshot investigation, reproduced defect, and current limitations. The package targets iOS **17.0** with RootHide and working SpringBoard injection. Simulator checks do not establish physical-device compatibility or jailbreak support for iOS 17.5.
+The design follows the compact organization in Chase’s supplied Prysm screenshots and the official [Prysm](https://havoc.app/package/prysm) and [Jade](https://chariz.com/buy/jade) references: controls first, horizontal sliders, a narrow music strip, and an expandable bottom sheet. No proprietary code, graphics, or screenshots are included in the package.
 
-![Harbor beta3 in the simulator with a synthetic native status header and pinned All controls](docs/preview-beta3-inset-fixture.png)
+![Compact Harbor with simulator-only native control fixtures](docs/preview-beta4-compact-fixture.png)
 
-The screenshot shows the synthetic native-host fixture, with its system header explicitly labeled. It is not a physical-device screenshot. Simulator has no hardware volume route, so the volume card shows its fallback.
+This is a **simulator fixture**, with a labeled synthetic status header and simulated native buttons. Its colored states do not represent a phone’s radio state. The simulator has no usable hardware volume route, so its volume pill opens the native panel.
 
 ## This version
 
-- A bottom-weighted portrait dashboard with soft dark surfaces, generous touch targets, and Sea Glass, Ember, or Iris accents.
-- Live now-playing title, artist, bounded artwork thumbnails, play/pause, previous, and next. Empty and unavailable states disable transport. Skip respects MediaRemote's prohibition flag.
-- Brightness control with a live percentage and a 2% minimum. Native `MPVolumeView` for volume; a system-controls shortcut appears if its slider is unavailable. Native AirPlay route picker.
-- Connections and Focus shortcuts restore Apple's Control Center and request the matching installed module. These are panel shortcuts, **not fake connectivity toggles**. If a module cannot be identified, the native controls remain visible.
-- **All controls** stays pinned above the home-indicator area and restores Apple's complete Control Center for the current visit. Close and reopen to return to Harbor. Cards scroll independently when space is limited. Native modules and their controllers are never moved, replaced, or destroyed.
-- The backdrop fills the native Control Center background. Content uses the full-window native scroll surface, with space reserved for Apple's status/privacy header and safe areas; it is no longer sized to the inset module panel.
-- An in-panel appearance menu and a Settings → Harbor page with a live master switch, palette, haptics, and the last diagnostic report from SpringBoard.
-- VoiceOver labels, Dynamic Type with a single-column accessibility layout, scrollable compact layouts, Reduce Transparency, and Reduce Motion. Press feedback is an interruptible 120 ms opacity change; there is no extra entrance bounce layered onto the system gesture.
+- A live editor with independent compact/expanded arrangements, a pinned preview, drag handles and group visibility. Save commits a draft; Cancel preserves the saved profile. Native recovery controls remain available.
+- Up to 12 named profiles, four theme presets, custom accent/surface colors, materials, button shapes, opacity, sheet radius and spacing. Saved profiles can be copied, switched, reset or deleted.
+- Focus matching is **off by default**. Turn on Match Focus automatically and Save to opt into Harbor's read-only matching. Old enabled flags and backup recovery cannot grant access. While off, Harbor creates no reader; manual profiles remain usable. Turning off pauses immediately; Save keeps it off, while Cancel restores the saved choice. [Beta7 audit and evidence](docs/BETA7-FOCUS-OPT-IN.md) explain the beta6 access-gate bug, fix and residual risks.
+- Optional Focus matching uses exact returned identifiers and safe default fallback. **The real simulator app service rejects access; actual SpringBoard Focus integration remains unverified.** Labeled fixture events validate transitions and interruption behavior. The native Focus shortcut is separate: it opens Apple's controls, where the user can deliberately change Focus.
+- Focus reads have independent request deadlines, stale-response rejection and bounded retries. Optional mode discovery cannot delay publishing a valid state. The editor's Focus tab includes a scrolling diagnostics report, Copy and manual Refresh. The simulator daemon's explicit entitlement rejection and recovery checks are recorded in the [beta6 investigation](docs/BETA6-FOCUS.md).
 
-Landscape, iPad, unexpected hierarchies, and expanded native modules retain the native layout. No new activation gesture, lock-screen access override, radios implementation, or network service is installed.
+- A rounded translucent sheet anchored above the home indicator. Normal compact controls fit without scrolling. Tap the chevron, or drag it upward, to reveal more shortcuts; short screens and larger text can scroll inside the sheet. All controls remains outside that scroll area.
+- Wi-Fi, Bluetooth, Airplane Mode, Cellular Data, Rotation Lock and Low Power Mode forward the existing Apple UIControl actions and read their state. No invented radio state, private radio setters, or moved native views. If the loaded controls cannot be resolved, Connections or the native control list is offered instead. **Real device resolution and effects remain unverified.**
+- Horizontal brightness and native MPVolumeView controls, native AirPlay picker, and MediaRemote artwork/title/play/pause/skip. Empty media disables transport. Narrow layouts expose previous/next through the track’s VoiceOver actions.
+- Focus, Connections, and expanded shortcuts for flashlight, timer, calculator, camera, recording, remote, hearing and display use the native module presentation path. These shortcuts open the existing system controls; they do not start recording or launch protected functions themselves.
+- 120 ms press feedback, a restrained 200 ms expansion, Reduce Motion/Transparency, Dynamic Type and VoiceOver. The native opening animation remains owned by Control Center.
+- Settings → Harbor: enable, gentle haptics, and a versioned last-event report from SpringBoard. Open the in-sheet ellipsis → Edit layout & theme for layout, theme, profiles and Focus links.
 
-## Build
+The full-window native scroll ancestry and background remain intact. ABI-checked Control Center gesture delegate hooks reject native scroll/dismiss recognizers only for Harbor’s interactive sheet. Header, blank-area and screen-edge gestures stay on Apple’s path. No gesture delegate is replaced, no recognizer is disabled, and no window or lock-screen policy is created or changed.
 
-From this directory:
+The per-frame native scroll hook now only synchronizes the dashboard frame. It does not rebuild layout, rescan modules or format status reports. Media and state timers pause during tracking and stop on dismissal/handoff; artwork is decoded on a background queue.
+
+## Build and inspect
 
 ```sh
 bash scripts/check.sh
@@ -31,67 +35,51 @@ bash scripts/build.sh
 bash scripts/verify-package.sh
 ```
 
-Requires Xcode, RootHide-capable Theos at `$THEOS` (defaults to `/Users/chase/theos`), an `iPhoneOS17.0.sdk`, `ldid`, and Theos's normal packaging tools. `verify-package.sh` also uses Python 3 and `dpkg-deb`.
+Requires Xcode, RootHide-capable Theos (`$THEOS`, default `/Users/chase/theos`), the iPhoneOS17.0 SDK, ldid and dpkg-deb. The package build runs in /tmp to avoid Theos’s path-with-spaces limitation.
 
-The build runs in a temporary directory because Theos does not reliably handle the spaces in `Jailbreak Tweak Repo`. It copies only Harbor's resulting package back to:
+Output: `packages/com.chasedavis.harbor_0.1.0~beta7_iphoneos-arm64e.deb`. Debian architecture is iphoneos-arm64e; both binaries contain arm64 and arm64e slices. The package uses the RootHide layout and relocatable .jbroot library paths, with no install/respring scripts.
 
-```text
-packages/com.chasedavis.harbor_0.1.0~beta3_iphoneos-arm64e.deb
+## Device requirements and operation
+
+Target firmware remains **iOS 17.0** with a RootHide environment that already supports SpringBoard injection, a mobilesubstrate-compatible injection runtime, and PreferenceLoader. TrollStore alone cannot inject this tweak. Enable Settings injection if that environment requires it for preference bundles. A successful iOS 17.5 simulator run does not establish jailbreak/device support for 17.5.
+
+After an authorized package installation and a restart of SpringBoard through the environment’s normal UI, enable Settings → Harbor and swipe down from the top-right in portrait. There is no separate app or activation gesture. Tap the top chevron for expanded shortcuts. Tap All controls to restore native Control Center for that visit; close and reopen to return to Harbor. Landscape, iPad, unavailable interfaces and expanded native modules retain the system layout.
+
+If absent, Settings → Harbor → Refresh status reports the last load/activation result, timestamp and build version. It is not a live heartbeat. The installed version in the supplied device screenshot was not independently confirmed.
+
+Disable with the Settings switch. Uninstall through the same package manager and restart SpringBoard through the environment’s normal UI. Use the environment’s established safe-mode/disable-tweak recovery if needed.
+
+## Verification
+
+[Beta7 Focus audit](docs/BETA7-FOCUS-OPT-IN.md) records the default-off access gate, package audit, 141 simulator checks and 21 actual-touch interaction assertions with a counted, simulated reader. [Beta6 Focus investigation](docs/BETA6-FOCUS.md) records the confirmed simulator access restriction and lifecycle fixes. The [beta5 feature guide](docs/BETA5-PROFILES.md) covers the editor, themes, persistence and earlier input tests. The [beta4 investigation](docs/BETA4-COMPACT.md) records the compact sheet and gesture fixes. [Device checklist](docs/DEVICE-TESTING.md) covers remaining phone validation. These tests use UIKit fixtures, not Simulator SpringBoard injection.
+
+```sh
+HARBOR_PREVIEW_APP=/tmp/harbor-preview/HarborPreview.app bash scripts/build-preview.sh
+# Alternative: actual touch arbitration fixture, with simulated system controls
+HARBOR_PREVIEW_MAIN=tests/GestureMain.m HARBOR_PREVIEW_APP=/tmp/harbor-gestures/HarborPreview.app bash scripts/build-preview.sh
 ```
 
-Both the tweak and preferences binary contain **arm64 and arm64e** slices. The Debian architecture is `iphoneos-arm64e`, as required by this RootHide packaging scheme. The dylib uses relocatable `.jbroot` library paths. There are no hardcoded `/var/jb` paths or install/respring scripts.
+The normal harness saves Documents/test-results.json. The gesture harness saves Documents/gesture-results.json and supports --expanded, --large and --short. Run it with simulated HID swipes; setting contentOffset is not a gesture test.
 
-The authorized beta3 publication uses the established Harbor build/index/Pages pipeline, replacing only Harbor's package and related release assets. The other five packages are preserved. [PUBLICATION.md](docs/PUBLICATION.md) records the release artifact and deployment-verification process.
-
-## Installation requirements and first device test
-
-This repair workflow has not installed anything on Chase's phone. The following applies to beta3 after an authorized installation. The version installed when the supplied screenshot was captured has not yet been confirmed; it is not inferred from the timing of beta2's publication.
-
-1. Verify the phone's exact iOS version and that its RootHide environment can already inject tweaks into **SpringBoard**. TrollStore alone cannot load this dylib. The official [Bootstrap release notes](https://github.com/roothide/Bootstrap/releases/tag/2.0-public-beta2) document SpringBoard injection for iOS 16.0–17.0; do not infer support for other firmware or bootstrap configurations.
-2. The package requires a `mobilesubstrate`-compatible injection runtime and PreferenceLoader. Install the `.deb` using the package manager inside that RootHide environment, not TrollStore's IPA installer. Enable Settings injection if required by that environment for preference bundles.
-3. Restart SpringBoard through the environment's supported UI, and fully close/reopen Settings. Look for **Settings → Harbor → Enable Harbor** (on by default). On environments that group tweak panes, check the PreferenceLoader tweaks section.
-4. Swipe down from the top-right in portrait to open Control Center normally. There is no Home Screen app or separate activation gesture. Test **All controls first**, then close/reopen, then the master switch in Settings.
-5. If the dashboard is absent, return to **Settings → Harbor → Refresh status**. The last report distinguishes missing SpringBoard injection, waiting for the framework, installed hooks, disabled Harbor, and rejected hierarchy/geometry. It records a timestamp and build version; it is not a live heartbeat. Complete [DEVICE-TESTING.md](docs/DEVICE-TESTING.md) before daily use.
-
-To disable, turn off Settings → Harbor → Enable Harbor. To remove, uninstall `com.chasedavis.harbor` with the same package manager and restart SpringBoard through the normal supported UI. If SpringBoard cannot launch normally, use the environment's established disable-tweak/safe-mode recovery path; no device-specific recovery commands have been assumed.
-
-## Implementation map
+## Implementation
 
 | File | Responsibility |
 | --- | --- |
-| `Tweak.xm` | iOS 17 overlay-controller hooks, runtime ABI checks, coalesced main-queue registration after dyld image loading |
-| `HBSession.m` | Host/viewport validation, full-screen backdrop and scroll-surface containment, native header safe areas, exact hidden-state restoration, native handoff |
-| `HBDashboardController.m` | Shipping UIKit interface, public brightness/volume/routing controls, accessibility, appearance menu |
-| `HBMediaProvider.m` | Dynamically resolved MediaRemote, asynchronous visible-only polling, bounded thumbnail decode, timeout/stale-callback guard |
-| `HBPreferences.m` | One preference domain and change notification; defaults, type validation, timestamped runtime diagnostics |
-| `HBPolicy.c` | Host-tested presentation eligibility, numeric clamping, command allowlist |
-| `Prefs/` | PreferenceLoader registration and Settings bundle |
-| `tests/PreviewMain.m` | Standalone simulator host, lifecycle/UI tests, sample-media preview; not packaged |
-| `tests/integration_contract_test.py` | Semantic PreferenceLoader/Preferences checks and hook-class validation against the actual iOS 17.0 SDK exports |
-| `scripts/` | Local build, checks, package inspection, and simulator preview build |
+| Tweak.xm | iOS 17 activation, validated gesture delegate hooks, late framework loading |
+| HBSession.m | Hierarchy/safe-area checks, gesture ownership, native handoff, exact hidden-state restoration |
+| HBDashboardController.m | Compact/expanded UIKit sheet, brightness, native volume/routing, media and accessibility |
+| HBNativeControls.m | Runtime-checked forwarding to existing native buttons, without reparenting or synthetic state |
+| HBMediaProvider.m | Weak MediaRemote binding, bounded background thumbnail decode, visible-only polling and timeout |
+| HBPreferences.m / Prefs | Settings integration, preferences, versioned runtime report |
+| HBProfileModel.m / HBProfileStore.m | Validated profile schema, draft commits, revision checks and backup recovery |
+| HBProfileEditorController.m / HBTheme.m | Live preview, arrangement editor, profiles and custom themes |
+| HBFocusMonitor.m | Optional guarded Focus reads, observer lifecycle, timeout and fallback |
+| tests/FocusPrivacyMain.m | Actual-touch privacy harness with counted reader substitutes; never calls real Focus services |
+| tests/FocusAccessChecks.h | Default-off, migration, disable, stale callback and backup recovery checks |
+| tests/ProfilesMain.m | Interactive editor harness and explicitly simulated Focus events |
+| tests/PreviewMain.m | Geometry, lifecycle, action forwarding and restoration checks |
+| tests/GestureMain.m | Real-input fixture with competing ancestor pans and event metrics |
 
-Preferences use `com.chasedavis.harbor` through CFPreferences. Polling runs every two seconds for media and every 15 seconds for date/status only while Harbor is active. Artwork decode runs on a serial background queue, accepts at most 8 MiB, and creates thumbnails no larger than 320 pixels. Battery is shown only if the host already provides a valid reading; Harbor does not toggle the process-wide monitoring setting.
+Private interfaces were checked against the [iOS 17 overlay headers](https://github.com/MTACS/iOS-17-Runtime-Headers/blob/main/PrivateFrameworks/ControlCenterUI.framework/CCUIModularControlCenterOverlayViewController.h), [module collection](https://github.com/MTACS/iOS-17-Runtime-Headers/blob/main/PrivateFrameworks/ControlCenterUI.framework/CCUIModuleCollectionViewController.h), SDK exports, and local iOS 17.5 simulator ConnectivityModule metadata. Those establish interface evidence, not physical-device behavior.
 
-## Verification and limits
-
-See [VERIFICATION.md](docs/VERIFICATION.md), [the machine-readable simulator results](docs/simulator-results.json), and [the build log](docs/build.log).
-
-Real SpringBoard injection, host-controller dimensions and callbacks on the exact phone, authenticated/locked presentation, private MediaRemote responses, actual volume/brightness persistence, AirPlay, and conflicts with other Control Center tweaks still require device testing. The runtime guards retain native Control Center when assumptions do not hold. A successful build and mock-host test cannot prove those private APIs work on the phone.
-
-## Simulator preview
-
-```sh
-# Use /tmp for signing if an iCloud/FileProvider folder re-adds FinderInfo.
-HARBOR_PREVIEW_APP=/tmp/harbor-preview/HarborPreview.app bash scripts/build-preview.sh
-# Choose an installed iOS 17 simulator; the following only targets a simulator UUID.
-xcrun simctl install SIMULATOR_UUID /tmp/harbor-preview/HarborPreview.app
-xcrun simctl launch SIMULATOR_UUID com.chasedavis.harbor.preview
-```
-
-The harness runs its checks and saves `Documents/test-results.json` in its own simulator app container. Optional launch arguments `--large` and `--empty` show the accessibility and empty-media states; `--inset-host` shows the synthetic native-host fixture used to reproduce the clipped panel. The preview is a standalone app; it does not inject into Simulator SpringBoard and is not an IPA/device installer.
-
-## API references
-
-The public UIKit/MediaPlayer/AVKit controls are compiled against the installed SDK. Beta2's integration targets the [iOS 17 overlay controller](https://github.com/MTACS/iOS-17-Runtime-Headers/blob/main/PrivateFrameworks/ControlCenterUI.framework/CCUIModularControlCenterOverlayViewController.h) and [iOS 17 module collection](https://github.com/MTACS/iOS-17-Runtime-Headers/blob/main/PrivateFrameworks/ControlCenterUI.framework/CCUIModuleCollectionViewController.h), with class exports checked against the installed iPhoneOS17.0.sdk. Beta1 incorrectly relied on an older superclass declaration. Media uses [Theos MediaRemote declarations](https://github.com/theos/headers/blob/master/MediaRemote/MediaRemote.h). Headers establish names and interfaces, not physical-device behavior; runtime checks and device validation remain necessary.
-
-Free, with no paid tier. Uses the repository's MIT license.
+Free, with no paid tier. Uses the repository’s MIT license.

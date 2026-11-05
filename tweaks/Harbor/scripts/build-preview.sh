@@ -7,7 +7,7 @@ app="${HARBOR_PREVIEW_APP:-$PWD/.build/HarborPreview.app}"
 mkdir -p "$app" .build/SimulatorModules
 xcrun clang -target arm64-apple-ios17.0-simulator -isysroot "$sdk" -fobjc-arc -fmodules \
     -fmodules-cache-path="$PWD/.build/SimulatorModules" -Wall -Wextra -Wno-unused-parameter \
-    tests/PreviewMain.m HBSession.m HBDashboardController.m HBMediaProvider.m HBPreferences.m HBPolicy.c \
+    -I. "${HARBOR_PREVIEW_MAIN:-tests/PreviewMain.m}" HBSession.m HBNativeControls.m HBDashboardController.m HBMediaProvider.m HBPreferences.m HBProfileModel.m HBProfileStore.m HBTheme.m HBFocusMonitor.m HBProfileEditorController.m HBPolicy.c \
     -framework UIKit -framework Foundation -framework QuartzCore -framework MediaPlayer -framework ImageIO -framework AVKit \
     -o "$app/HarborPreview"
 cat > "$app/Info.plist" <<'PLIST'
@@ -16,6 +16,7 @@ cat > "$app/Info.plist" <<'PLIST'
 <key>CFBundleIdentifier</key><string>com.chasedavis.harbor.preview</string>
 <key>CFBundleExecutable</key><string>HarborPreview</string>
 <key>CFBundleName</key><string>Harbor Preview</string>
+<key>CFBundleDevelopmentRegion</key><string>en</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.1</string>

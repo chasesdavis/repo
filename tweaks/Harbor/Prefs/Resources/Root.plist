@@ -1,15 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-<key>title</key><string>Harbor</string>
-<key>items</key><array>
-<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Harbor</string><key>footerText</key><string>A little room to breathe. An original Control Center for iPhone, built around your media and everyday controls. Free, always.</string></dict>
-<dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Enable Harbor</string><key>key</key><string>enabled</string><key>default</key><true/><key>defaults</key><string>com.chasedavis.harbor</string></dict>
-<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>SpringBoard status</string><key>id</key><string>runtimeStatus</string></dict>
-<dict><key>cell</key><string>PSButtonCell</string><key>label</key><string>Refresh status</string><key>action</key><string>refreshRuntimeStatus</string></dict>
-<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Make it yours</string><key>footerText</key><string>Changes apply immediately. Harbor follows Reduce Motion, Reduce Transparency, and larger text settings.</string></dict>
-<dict><key>cell</key><string>PSLinkListCell</string><key>detail</key><string>PSListItemsController</string><key>label</key><string>Palette</string><key>key</key><string>palette</string><key>default</key><string>sea</string><key>defaults</key><string>com.chasedavis.harbor</string><key>validValues</key><array><string>sea</string><string>ember</string><string>iris</string></array><key>validTitles</key><array><string>Sea Glass</string><string>Ember</string><string>Iris</string></array></dict>
-<dict><key>cell</key><string>PSSwitchCell</string><key>label</key><string>Gentle haptics</string><key>key</key><string>haptics</string><key>default</key><true/><key>defaults</key><string>com.chasedavis.harbor</string></dict>
-<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Native when you need it</string><key>footerText</key><string>All controls shows Apple's Control Center for the current visit. Close and reopen to return to Harbor. Connections and Focus open the corresponding native panels when available. Landscape and iPad keep the system layout.</string></dict>
-<dict><key>cell</key><string>PSGroupCell</string><key>label</key><string>Beta · 0.1.0~beta3</string><key>footerText</key><string>Enable Harbor, then open Control Center in portrait using the normal swipe. Requires iOS 17.0, RootHide SpringBoard injection, and PreferenceLoader with injection enabled for Settings. TrollStore alone does not load this tweak. Physical-device validation remains pending.</string></dict>
-</array></dict></plist>
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>Harbor</string>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Harbor</string>
+			<key>footerText</key>
+			<string>Your everyday controls, within reach. A compact, expandable Control Center for iPhone. Free, always.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Enable Harbor</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.chasedavis.harbor</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>SpringBoard status</string>
+			<key>id</key>
+			<string>runtimeStatus</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Refresh status</string>
+			<key>action</key>
+			<string>refreshRuntimeStatus</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Make it yours</string>
+			<key>footerText</key>
+			<string>Open Harbor’s ellipsis menu, then Edit layout &amp; theme to arrange compact/expanded controls, customize colors and materials, and save profiles or Focus links. Save applies a draft; Cancel keeps your current profile.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Gentle haptics</string>
+			<key>key</key>
+			<string>haptics</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.chasedavis.harbor</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Native when you need it</string>
+			<key>footerText</key>
+			<string>All controls shows Apple's Control Center for the current visit. Close and reopen to return to Harbor. Tap the chevron for more shortcuts. Connections and Focus open native panels when available. Landscape and iPad keep the system layout.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Beta · 0.1.0~beta7</string>
+			<key>footerText</key>
+			<string>Enable Harbor, then open Control Center in portrait using the normal swipe. Requires iOS 17.0, RootHide SpringBoard injection, and PreferenceLoader with injection enabled for Settings. TrollStore alone does not load this tweak. Physical-device validation remains pending.</string>
+		</dict>
+	</array>
+</dict>
+</plist>

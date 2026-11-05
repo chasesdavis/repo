@@ -1,0 +1,2 @@
+2026-11-04 21:03:02.613 Df donotdisturbd[11231:1831540] [com.apple.xpc:connection] [0x106105650] activating connection: mach=false listener=false peer=true name=com.apple.donotdisturb.service.peer[11606].0x106105650
+2026-11-04 21:03:02.614 E  donotdisturbd[11231:1831540] [com.apple.donotdisturb:ServiceProvider] XPC connection without any valid entitlements tried to connect, will reject: connection=<(null):0x60000210ca50>

@@ -35,7 +35,25 @@
 %hook CCUIModularControlCenterOverlayViewController
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     %orig;
-    [[HBSession sessionForHost:self create:NO] layout];
+    [[HBSession sessionForHost:self create:NO] scrollPositionChanged];
+}
+%end
+%end
+
+%group HarborGestureRouting
+%hook CCUIModularControlCenterOverlayViewController
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)recognizer shouldReceiveTouch:(UITouch *)touch {
+    if ([[HBSession sessionForHost:self create:NO] ownsTouchView:touch.view recognizer:recognizer]) return NO;
+    return %orig;
+}
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)recognizer {
+    if ([[HBSession sessionForHost:self create:NO] ownsGestureStart:recognizer]) return NO;
+    return %orig;
+}
+- (BOOL)scrollView:(UIScrollView *)scrollView gestureRecognizerShouldBegin:(UIGestureRecognizer *)recognizer {
+    // CCUIScrollView forwards this delegate method for its own pan recognizer.
+    if ([[HBSession sessionForHost:self create:NO] ownsGestureStart:recognizer]) return NO;
+    return %orig;
 }
 %end
 %end
@@ -65,6 +83,14 @@ static BOOL HBHasMethod(Class host, NSString *name, char returnType) {
     method_getReturnType(method, type, sizeof(type));
     return type[0] == returnType;
 }
+static BOOL HBGestureMethod(Class host, NSString *name, unsigned arguments) {
+    Method method = class_getInstanceMethod(host, NSSelectorFromString(name));
+    if (!method || method_getNumberOfArguments(method) != arguments) return NO;
+    char type[16] = {0}; method_getReturnType(method, type, sizeof(type));
+    if (type[0] != 'B' && type[0] != 'c') return NO;
+    for (unsigned i = 2; i < arguments; i++) { method_getArgumentType(method, i, type, sizeof(type)); if (type[0] != '@') return NO; }
+    return YES;
+}
 static void HBTryInstallHooks(void) {
     // Only called on the main queue, after dyld has finished adding the image.
     if (hooksInstalled.load() || NSProcessInfo.processInfo.operatingSystemVersion.majorVersion != 17) return;
@@ -74,11 +100,15 @@ static void HBTryInstallHooks(void) {
         !HBHasMethod(host, @"moduleCollectionViewController", '@') ||
         !HBHasMethod(host, @"overlayContainerView", '@') ||
         !HBHasMethod(host, @"overlayScrollView", '@') ||
-        !HBHasMethod(host, @"overlayBackgroundView", '@')) {
+        !HBHasMethod(host, @"overlayBackgroundView", '@') ||
+        !HBGestureMethod(host, @"gestureRecognizer:shouldReceiveTouch:", 4) ||
+        !HBGestureMethod(host, @"gestureRecognizerShouldBegin:", 3) ||
+        !HBGestureMethod(host, @"scrollView:gestureRecognizerShouldBegin:", 4)) {
         HBReportRuntimeStatus(@"Apple controls retained: the Control Center host interface is incompatible.");
         return;
     }
     %init(HarborControlCenter, CCUIModularControlCenterOverlayViewController=host);
+    %init(HarborGestureRouting, CCUIModularControlCenterOverlayViewController=host);
     Method scroll = class_getInstanceMethod(host, NSSelectorFromString(@"scrollViewDidScroll:"));
     char scrollReturn[16] = {0}, scrollArgument[16] = {0};
     if (scroll && method_getNumberOfArguments(scroll) == 3) {

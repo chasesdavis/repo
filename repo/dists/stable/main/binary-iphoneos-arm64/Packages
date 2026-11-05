@@ -68,7 +68,7 @@ SHA256: a76a04a4e43b566a99ab57d0301a2c8c84fd0a6b55c4730825d1db3486afaf45
 
 Package: com.chasedavis.harbor
 Name: Harbor (Beta)
-Description: A calm, original Control Center dashboard with live media and native system controls. iOS 17.0 beta; physical-device testing is pending.
+Description: A compact Control Center with a live layout editor, custom themes and saved profiles. Experimental Focus matching is off until explicitly enabled and saved. iOS 17.0 beta; physical-device testing is pending.
 Maintainer: Chase Davis
 Author: Chase Davis
 Section: Tweaks
@@ -78,13 +78,13 @@ Icon: https://chasesdavis.github.io/repo/assets/harbor/icon.png
 Depiction: https://chasesdavis.github.io/repo/depiction/harbor/
 Homepage: https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor
 Architecture: iphoneos-arm64e
-Version: 0.1.0~beta3
-Installed-Size: 508
-Filename: debs/com.chasedavis.harbor_0.1.0~beta3_iphoneos-arm64e.deb
-Size: 49628
-MD5sum: e6b4e0fd4c2a4069c70aaa5c9339d1e9
-SHA1: 1ee7bc58777d8284c40ac20bd9d0d61c39b94127
-SHA256: dab1172f7602259fc749e5710f30cba376bc6c631184f0124f24074f1a0749fe
+Version: 0.1.0~beta7
+Installed-Size: 804
+Filename: debs/com.chasedavis.harbor_0.1.0~beta7_iphoneos-arm64e.deb
+Size: 117100
+MD5sum: 4e2801bfad8ac26440a5cf275295be51
+SHA1: dc0e4ec091c0f384d2ad26723dda01951e35308d
+SHA256: b50e8e050c1f103227af8eb8bdcfae0249c8b44a99de7423118b8cdbe053682b
 
 Package: com.chasedavis.lumen
 Name: Lumen

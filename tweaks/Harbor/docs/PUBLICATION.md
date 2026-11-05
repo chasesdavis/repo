@@ -1,4 +1,36 @@
-# Beta3 publication
+# Beta7 full-beta publication
+
+Publication was explicitly authorized after the Focus opt-in audit. This release includes the complete compact/expanded sheet, real-control bridge, live editor, themes, saved profiles, and optional Focus matching. **Physical-device behavior remains unverified. Automatic Focus matching is off until explicitly enabled and saved.**
+
+- Version: `0.1.0~beta7`
+- Package: `com.chasedavis.harbor` — Harbor (Beta), free
+- Debian architecture: `iphoneos-arm64e`; both binaries include `arm64` and `arm64e`
+- Firmware: `>=17.0`, `<17.1`; working RootHide SpringBoard injection, compatible injection runtime and PreferenceLoader required
+- Artifact: `repo/debs/com.chasedavis.harbor_0.1.0~beta7_iphoneos-arm64e.deb`
+- Size: **117100 bytes**
+- SHA-256: `b50e8e050c1f103227af8eb8bdcfae0249c8b44a99de7423118b8cdbe053682b`
+
+Prepared in an isolated checkout of `main` at `231e473e2f3565c9d381e1fab820662d3c8cf8c2`. The original `stayon17` checkout and unrelated stamp are preserved. Only Harbor source/tests/evidence, its package/depiction/previews/catalog entry, Harbor validation and the established generated indexes change. All five unrelated package stanzas and binary hashes remain identical. Beta7 sorts after published beta3; intermediate local betas are included in this complete release.
+
+## Rebuild and package checks
+
+The runtime source files are hash-identical to the candidate covered by 141 UIKit checks and 21 recorded actual-touch assertions. Those tests use fixtures and simulated Focus readers; they are not phone integration tests. The publication rebuild reran the host sanitizer checks: 20 policy, 32 model and 35 Focus coordinator checks passed.
+
+The first rebuild compiled but the local `fakeroot` daemon could not allocate IPC channels. Read-only inspection found the message queue table full; no system queues or other projects were changed. A temporary adapter used the inspected `dm.pl` non-root packaging path. Both binaries rebuilt successfully; each of their four total Mach-O slices matches the tested candidate after ignoring only `LC_UUID` and code-signature blobs. See [binary comparison](beta7/publication/mach-o-comparison.json).
+
+Archive inspection also found the macOS packer retained the builder's numeric uid/gid despite root/wheel names. The release normalizes archive ownership to **uid/gid 0** with `dpkg-deb --root-owner-group` and xz compression. Harbor's build script now performs that normalization, and package validation rejects non-root archive entries. This only changes packaging; the normalized archive preserves the freshly rebuilt binary bytes and all configuration content. This explains why the published checksum differs from the earlier audit candidate's `70d55b6e…` checksum.
+
+[Rebuild log](beta7/publication/release-rebuild.log), [package validation](beta7/publication/package-verification.log), and [pre-push checks](beta7/publication/prepush-validation.json) record the exact release. All six payload files, filter, PreferenceLoader registration, versions, RootHide links and binary architectures pass. No maintainer scripts or added entitlements. Flat and both suites/two architectures retain the established index layout; every compressed format decompresses correctly and all Release checksums validate.
+
+## Deployment and use
+
+The existing [Pages workflow](https://github.com/chasesdavis/repo/actions/workflows/deploy-pages.yml) validates before deployment and compares the public index and Harbor package to its exact commit afterward. This committed record documents preparation; it does not infer deployment success while a run is pending. The final publication report additionally verifies all public index variants, Release files, package and Harbor assets against the exact pushed commit.
+
+Refresh the Sileo source and confirm `0.1.0~beta7`. After an installation chosen by the user, restart SpringBoard through the environment's supported UI and reopen Settings. Edit Harbor through its ellipsis menu. Manual profiles remain available without Focus reads. The separate native Focus shortcut opens Apple's chooser; choosing a mode there can change Focus.
+
+No phone installation, restart or real Focus setting change is part of this publication. Private API behavior, actual system controls, lock-screen behavior and physical-device smoothness remain unverified. See the [Focus audit](BETA7-FOCUS-OPT-IN.md) and [device checklist](DEVICE-TESTING.md).
+
+## Historical beta3 publication
 
 - Version: `0.1.0~beta3`
 - Display name: `Harbor (Beta)`

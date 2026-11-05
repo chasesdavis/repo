@@ -1,0 +1,34 @@
+ new Debian package, version 2.0.
+ size 116682 bytes: control archive=554 bytes.
+     701 bytes,    14 lines      control
+ Package: com.chasedavis.harbor
+ Name: Harbor (Beta)
+ Description: A compact Control Center with a live layout editor, custom themes and saved profiles. Experimental Focus matching is off until explicitly enabled and saved. iOS 17.0 beta; physical-device testing is pending.
+ Maintainer: Chase Davis
+ Author: Chase Davis
+ Section: Tweaks
+ Depends: firmware (>= 17.0), firmware (<< 17.1), mobilesubstrate, preferenceloader
+ Tag: role::tweak
+ Icon: https://chasesdavis.github.io/repo/assets/harbor/icon.png
+ Depiction: https://chasesdavis.github.io/repo/depiction/harbor/
+ Homepage: https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor
+ Architecture: iphoneos-arm64e
+ Version: 0.1.0~beta7
+ Installed-Size: 804
+PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults
+PASS: exact package manifest and SpringBoard-only injection filter
+/tmp/harbor-verify.WQmz1N/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib:
+	@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib (compatibility version 0.0.0, current version 0.0.0)
+	/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)
+	/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 2048.1.101)
+	/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 2048.1.101)
+	/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 7082.1.111)
+	/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1.11.0)
+	/System/Library/Frameworks/MediaPlayer.framework/MediaPlayer (compatibility version 1.0.0, current version 1.0.0)
+	/System/Library/Frameworks/ImageIO.framework/ImageIO (compatibility version 1.0.0, current version 1.0.0)
+	/System/Library/Frameworks/AVKit.framework/AVKit (compatibility version 1.0.0, current version 1.0.0)
+	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 1600.151.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.0.0)
+	/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics (compatibility version 64.0.0, current version 1774.0.1)
+	@loader_path/.jbroot/usr/lib/libsubstrate.dylib (compatibility version 0.0.0, current version 0.0.0)
+70d55b6edf6e13d258e0172b6ab5fcdd0170998058f7b24e13246bd02736d352  /Users/chase/Documents/Codex/2026-11-04/task/harbor-publish/tweaks/Harbor/packages/com.chasedavis.harbor_0.1.0~beta7_iphoneos-arm64e.deb

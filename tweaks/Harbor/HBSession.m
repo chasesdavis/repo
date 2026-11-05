@@ -71,8 +71,18 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
     if ([identifier isKindOfClass:NSString.class]) {
         NSString *name = [identifier lowercaseString];
         if (destination == HBSystemDestinationConnections && [name containsString:@"connectivity"]) return identifier;
-        if (destination == HBSystemDestinationFocus && ([name containsString:@"donotdisturb"] || [name containsString:@"focus"])) return identifier;
-        if (destination == HBSystemDestinationVolume && [name containsString:@"volume"]) return identifier;
+        // Exact Apple bundle identity observed in the iOS 17.5 runtime. Unknown
+        // identifiers leave native controls visible instead of expanding a guess.
+        if (destination == HBSystemDestinationFocus && [identifier isEqual:@"com.apple.FocusUIModule"]) return identifier;
+        if (destination == HBSystemDestinationVolume && ([name containsString:@"volume"] ||
+            [name isEqual:@"com.apple.mediaremote.controlcenter.audio"])) return identifier;
+        if (destination == HBSystemDestinationBrightness && ([name containsString:@"displaymodule"] ||
+            ([name containsString:@"brightness"] && ![name containsString:@"keyboard"]))) return identifier;
+        NSDictionary *matches = @{@(HBSystemDestinationFlashlight): @"flashlight", @(HBSystemDestinationTimer): @"timer",
+            @(HBSystemDestinationCalculator): @"calculator", @(HBSystemDestinationCamera): @"camera", @(HBSystemDestinationRecording): @"screenrecord",
+            @(HBSystemDestinationRemote): @"remote", @(HBSystemDestinationHearing): @"hearing"};
+        NSString *fragment = matches[@(destination)];
+        if (fragment && [name containsString:fragment]) return identifier;
     }
     for (UIViewController *child in controller.childViewControllers) {
         NSString *found = HBFindModule(child, destination, depth + 1);
@@ -90,6 +100,7 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
 @property (nonatomic) BOOL ownsHiddenState;
 @property (nonatomic) BOOL originalHidden;
 @property (nonatomic) BOOL layingOut;
+@property (nonatomic, weak) UIScrollView *surface;
 @end
 
 @implementation HBSession
@@ -119,6 +130,7 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
 - (void)restoreNative {
     [self.dashboard setDashboardActive:NO];
     [self.dashboard useBackdropHost:nil];
+    self.surface = nil;
     if (self.ownsHiddenState) {
         self.nativeView.hidden = self.originalHidden;
         self.ownsHiddenState = NO;
@@ -127,6 +139,28 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
         [self.dashboard willMoveToParentViewController:nil];
         [self.dashboard.view removeFromSuperview];
         [self.dashboard removeFromParentViewController];
+    }
+}
+- (BOOL)ownsTouchView:(UIView *)view recognizer:(UIGestureRecognizer *)recognizer {
+    if (!self.active || !self.dashboard.parentViewController || !view ||
+        [recognizer isKindOfClass:UIScreenEdgePanGestureRecognizer.class]) return NO;
+    // Only arbitrate recognizers owned by the native overlay/scroll surface.
+    // Harbor's buttons, slider tracking and its own UIScrollView are untouched.
+    UIView *root = self.dashboard.view;
+    return [view isDescendantOfView:root] && ![recognizer.view isDescendantOfView:root];
+}
+- (BOOL)ownsGestureStart:(UIGestureRecognizer *)recognizer {
+    if (!self.active || !self.dashboard.parentViewController ||
+        [recognizer isKindOfClass:UIScreenEdgePanGestureRecognizer.class] ||
+        [recognizer.view isDescendantOfView:self.dashboard.view]) return NO;
+    return [self.dashboard containsInteractionPoint:[recognizer locationInView:self.dashboard.view]];
+}
+- (void)scrollPositionChanged {
+    // The native scroll callback can fire every frame. Do not rescan controllers,
+    // regenerate diagnostics, touch preferences, or change Harbor's contentOffset.
+    if (self.dashboard.parentViewController && self.surface) {
+        CGRect frame = self.surface.bounds;
+        if (!CGRectEqualToRect(self.dashboard.view.frame, frame)) self.dashboard.view.frame = frame;
     }
 }
 - (void)layout {
@@ -173,6 +207,9 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
             __weak typeof(self) weakSelf = self;
             self.dashboard.openSystemControls = ^(HBSystemDestination destination) { [weakSelf openSystem:destination]; };
         }
+        if (!self.dashboard.nativeControls) self.dashboard.nativeControls = [HBNativeControls new];
+        self.dashboard.nativeControls.collection = collection;
+        self.surface = (UIScrollView *)surface;
         if (!self.dashboard.parentViewController) {
             [host addChildViewController:self.dashboard];
             // The module container is an inset rectangle, not a screen-sized viewport.
@@ -182,10 +219,11 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
             [surface addSubview:self.dashboard.view];
             [self.dashboard didMoveToParentViewController:host];
         }
-        self.dashboard.view.frame = surface.bounds;
+        if (!CGRectEqualToRect(self.dashboard.view.frame, surface.bounds)) self.dashboard.view.frame = surface.bounds;
         UIEdgeInsets protected = HBProtectedInsets(host), inherited = root.safeAreaInsets;
-        self.dashboard.additionalSafeAreaInsets = UIEdgeInsetsMake(MAX(0, protected.top - inherited.top),
-            MAX(0, protected.left - inherited.left), MAX(0, protected.bottom - inherited.bottom), MAX(0, protected.right - inherited.right));
+        UIEdgeInsets additional = UIEdgeInsetsMake(MAX(0, protected.top - inherited.top), MAX(0, protected.left - inherited.left),
+            MAX(0, protected.bottom - inherited.bottom), MAX(0, protected.right - inherited.right));
+        if (!UIEdgeInsetsEqualToEdgeInsets(self.dashboard.additionalSafeAreaInsets, additional)) self.dashboard.additionalSafeAreaInsets = additional;
         // The noninteractive backdrop follows Apple's full-screen background animation;
         // status/privacy views keep their existing z-order above that background.
         [self.dashboard useBackdropHost:background];
@@ -196,8 +234,8 @@ static NSString *HBFindModule(UIViewController *controller, HBSystemDestination 
             self.ownsHiddenState = YES;
         }
         // Do this last, after the replacement is successfully constructed.
-        native.hidden = YES;
-        HBReportRuntimeStatus([NSString stringWithFormat:@"Dashboard displayed in %.0f × %.0f viewport (module panel %.0f × %.0f). All controls stays available below the scrolling cards.",
+        if (!native.hidden) native.hidden = YES;
+        HBReportRuntimeStatus([NSString stringWithFormat:@"Compact sheet displayed in %.0f × %.0f viewport (module panel %.0f × %.0f). Use the chevron for more controls; All controls restores Apple controls.",
             size.width, size.height, container.bounds.size.width, container.bounds.size.height]);
     } @catch (NSException *exception) {
         self.nativeRequested = YES;

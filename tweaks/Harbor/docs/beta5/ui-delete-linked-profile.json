@@ -1,0 +1,116 @@
+{
+  "library": {
+    "schema": 1,
+    "revision": 15,
+    "profiles": [
+      {
+        "startExpanded": false,
+        "id": "default",
+        "name": "Everyday",
+        "layouts": {
+          "compact": {
+            "order": [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden": [
+              "extras"
+            ]
+          },
+          "expanded": {
+            "order": [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden": []
+          }
+        },
+        "theme": {
+          "accent": "#FFBA75",
+          "radius": 16.986797332763672,
+          "surface": "#291B17",
+          "spacing": 17.702970504760742,
+          "material": "glass",
+          "opacity": 0.6175742149353027,
+          "shape": "circle"
+        }
+      }
+    ],
+    "activeID": "default",
+    "automaticFocus": true,
+    "focusLabels": {},
+    "bindings": {}
+  },
+  "focus": {
+    "status": "Simulated Focus: Work",
+    "active": 1,
+    "modes": [
+      {
+        "id": "fixture.focus.work",
+        "name": "Simulated Work"
+      },
+      {
+        "id": "fixture.focus.personal",
+        "name": "Simulated Personal"
+      }
+    ],
+    "identifier": "fixture.focus.work",
+    "available": 1,
+    "name": "Simulated Work"
+  },
+  "scope": "Actual UIKit editing and HID touches; injected Focus is explicitly simulated",
+  "displayedProfile": {
+    "startExpanded": false,
+    "id": "default",
+    "name": "Everyday",
+    "layouts": {
+      "compact": {
+        "order": [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden": [
+          "extras"
+        ]
+      },
+      "expanded": {
+        "order": [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden": []
+      }
+    },
+    "theme": {
+      "accent": "#FFBA75",
+      "radius": 16.986797332763672,
+      "surface": "#291B17",
+      "spacing": 17.702970504760742,
+      "material": "glass",
+      "opacity": 0.6175742149353027,
+      "shape": "circle"
+    }
+  },
+  "realFocusProbe": {
+    "status": "Focus unavailable: BSServiceConnectionErrorDomain (3). Using your default profile.",
+    "active": false,
+    "modes": [],
+    "identifier": "",
+    "available": false,
+    "name": ""
+  },
+  "editing": 0,
+  "pendingProfile": false
+}

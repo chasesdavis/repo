@@ -28,7 +28,7 @@ entry = harbor[0]
 source = fields((ROOT / "tweaks/Harbor/control").read_text())
 for key, value in source.items():
     assert entry.get(key) == value, f"Harbor {key} differs from its source control file"
-assert entry["Version"] == "0.1.0~beta3"
+assert entry["Version"] == "0.1.0~beta7"
 assert entry["Architecture"] == "iphoneos-arm64e"
 assert "Beta" in entry["Name"] and "physical-device testing is pending" in entry["Description"]
 assert "firmware (>= 17.0)" in entry["Depends"] and "firmware (<< 17.1)" in entry["Depends"]
@@ -73,8 +73,10 @@ for release in [REPO / "Release", REPO / "dists/stable/Release", REPO / "dists/i
     assert all(count == expected for count in counts.values()), (release, counts)
 assert (REPO / "assets/harbor/icon.png").is_file()
 assert (REPO / "assets/harbor/preview.png").is_file()
+assert (REPO / "assets/harbor/focus-opt-in.jpg").is_file()
 depiction = (REPO / "depiction/harbor/index.html").read_text()
 assert "Physical-device testing is pending" in depiction
+assert "off by default" in depiction and "Save" in depiction
 assert entry["Version"] in depiction and entry["Version"] in (REPO / "index.html").read_text()
 print(f"PASS: {len(entries)} package artifacts; Harbor beta metadata/control; compressed and suite indexes; all Release checksums")
 print(f"Harbor SHA256: {entry['SHA256']}")

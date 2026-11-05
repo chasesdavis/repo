@@ -1,0 +1,160 @@
+{
+  "library": {
+    "schema": 1,
+    "revision": 2,
+    "profiles": [
+      {
+        "startExpanded": false,
+        "id": "default",
+        "name": "Everyday",
+        "layouts": {
+          "compact": {
+            "order": [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden": [
+              "extras"
+            ]
+          },
+          "expanded": {
+            "order": [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden": []
+          }
+        },
+        "theme": {
+          "accent": "#A3E8D6",
+          "radius": 36,
+          "surface": "#0E1618",
+          "spacing": 10,
+          "material": "glass",
+          "opacity": 0.72,
+          "shape": "circle"
+        }
+      },
+      {
+        "startExpanded": false,
+        "id": "FDC66600-B02B-4BF0-ACF7-1850FD665D0C",
+        "name": "Work",
+        "layouts": {
+          "compact": {
+            "order": [
+              "media",
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "extras"
+            ],
+            "hidden": [
+              "extras",
+              "connectivity"
+            ]
+          },
+          "expanded": {
+            "order": [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden": []
+          }
+        },
+        "theme": {
+          "accent": "#FFA57D",
+          "radius": 36,
+          "surface": "#1F1932",
+          "spacing": 12,
+          "material": "glass",
+          "opacity": 0.78,
+          "shape": "circle"
+        }
+      }
+    ],
+    "activeID": "default",
+    "automaticFocus": true,
+    "focusLabels": {
+      "fixture.focus.work": "Simulated Work"
+    },
+    "bindings": {
+      "fixture.focus.work": "FDC66600-B02B-4BF0-ACF7-1850FD665D0C"
+    }
+  },
+  "focus": {
+    "status": "Simulated Focus: Work",
+    "active": 1,
+    "modes": [
+      {
+        "id": "fixture.focus.work",
+        "name": "Simulated Work"
+      },
+      {
+        "id": "fixture.focus.personal",
+        "name": "Simulated Personal"
+      }
+    ],
+    "identifier": "fixture.focus.work",
+    "available": 1,
+    "name": "Simulated Work"
+  },
+  "scope": "Actual UIKit editing and HID touches; injected Focus is explicitly simulated",
+  "displayedProfile": {
+    "startExpanded": false,
+    "id": "FDC66600-B02B-4BF0-ACF7-1850FD665D0C",
+    "name": "Work",
+    "layouts": {
+      "compact": {
+        "order": [
+          "media",
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "extras"
+        ],
+        "hidden": [
+          "extras",
+          "connectivity"
+        ]
+      },
+      "expanded": {
+        "order": [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden": []
+      }
+    },
+    "theme": {
+      "accent": "#FFA57D",
+      "radius": 36,
+      "surface": "#1F1932",
+      "spacing": 12,
+      "material": "glass",
+      "opacity": 0.78,
+      "shape": "circle"
+    }
+  },
+  "realFocusProbe": {
+    "status": "Focus unavailable: BSServiceConnectionErrorDomain (3). Using your default profile.",
+    "active": false,
+    "modes": [],
+    "identifier": "",
+    "available": false,
+    "name": ""
+  },
+  "editing": 0,
+  "pendingProfile": false
+}

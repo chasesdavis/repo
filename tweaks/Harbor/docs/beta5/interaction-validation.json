@@ -1,0 +1,20 @@
+{
+  "scope": "Assertions against captured interaction results, not a replay or physical-device test",
+  "checks": [
+    "HID reorder and hide persisted in compact profile",
+    "Expanded arrangement stayed independent",
+    "Saving a new profile preserved the original",
+    "System color-picker selection persisted",
+    "Cancel discarded the Graphite draft",
+    "Actual slider releases saved opacity, radius, and spacing endpoints",
+    "Simulated exact Focus selected Work",
+    "Unavailable Focus selected default",
+    "Focus update deferred while the actual editor was open",
+    "Closing editor applied deferred Focus without modifying saved data",
+    "Confirmed deletion removed linked profile and dangling Focus link",
+    "HID scroll in short AX-largest viewport reached the final control without native-pan takeover",
+    "Real tap on final shortcut restored native fixture and requested DisplayModule",
+    "Real iOS 17.5 app probe reported service unavailable, not simulated success"
+  ],
+  "failures": 0
+}

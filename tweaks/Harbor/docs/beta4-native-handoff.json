@@ -1,0 +1,35 @@
+{
+  "nativeRequested" : 1,
+  "actions" : {
+    "com.apple.control-center.FlashlightModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.OrientationLockModule\/HBFixtureToggle" : 2,
+    "com.apple.control-center.TimerModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.ConnectivityModule\/HBFixtureBluetooth" : 1,
+    "com.apple.control-center.ConnectivityModule\/HBFixtureCellular" : 1,
+    "com.apple.control-center.ConnectivityModule\/HBFixtureWiFi" : 1,
+    "com.apple.control-center.LowPowerModeModule\/HBFixtureToggle" : 2,
+    "com.apple.control-center.CameraModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.ScreenRecordingModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.ConnectivityModule\/HBFixtureAirplane" : 2,
+    "com.apple.donotdisturb.control-center.module\/HBFixtureToggle" : 0,
+    "com.apple.control-center.HearingModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.CalculatorModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.RemoteModule\/HBFixtureToggle" : 0,
+    "com.apple.control-center.BrightnessModule\/HBFixtureToggle" : 0
+  },
+  "harborStarts" : 0,
+  "contentHeight" : 284,
+  "lastControlVisible" : 0,
+  "scope" : "Synthetic CC gesture-priority fixture driven by HID touches, not SpringBoard",
+  "nativeStarts" : 1,
+  "lastExpanded" : "",
+  "frameSamples" : 0,
+  "offset" : 0,
+  "largestFrameGapMs" : 0,
+  "maxOffset" : 0,
+  "viewportHeight" : 284,
+  "brightness" : 0.5,
+  "events" : [
+    "native pan began"
+  ]
+}

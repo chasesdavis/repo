@@ -1,0 +1,177 @@
+{
+  "library" : {
+    "schema" : 1,
+    "revision" : 35,
+    "profiles" : [
+      {
+        "startExpanded" : false,
+        "id" : "default",
+        "name" : "Everyday",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#FFBA75",
+          "radius" : 16.986797332763672,
+          "surface" : "#291B17",
+          "spacing" : 17.702970504760742,
+          "material" : "glass",
+          "opacity" : 0.61757421493530273,
+          "shape" : "circle"
+        }
+      }
+    ],
+    "activeID" : "default",
+    "automaticFocus" : true,
+    "focusLabels" : {
+
+    },
+    "bindings" : {
+
+    }
+  },
+  "focus" : {
+    "status" : "Focus could not be read. Your default profile stays selected. See Focus diagnostics for details.",
+    "active" : false,
+    "modes" : [
+
+    ],
+    "available" : false,
+    "identifier" : "",
+    "liveUpdates" : 0,
+    "name" : "",
+    "diagnostics" : {
+      "updates" : {
+        "status" : "state-unavailable",
+        "error" : {
+
+        }
+      },
+      "catalog" : {
+        "status" : "not-checked",
+        "error" : {
+
+        }
+      },
+      "checkedAt" : "2026-11-05T02:29:30Z",
+      "runtime" : "Version 17.5 (Build 21F79)",
+      "environment" : "Simulator",
+      "version" : "0.1.0~beta6",
+      "process" : "HarborPreview",
+      "state" : {
+        "status" : "query-failed",
+        "error" : {
+          "code" : 3,
+          "reason" : "XPC error received on message reply handler",
+          "description" : "The operation couldn’t be completed. XPC error received on message reply handler",
+          "domain" : "BSServiceConnectionErrorDomain"
+        }
+      }
+    }
+  },
+  "scope" : "Actual UIKit editing and HID touches; injected Focus is explicitly simulated",
+  "displayedProfile" : {
+    "startExpanded" : false,
+    "id" : "default",
+    "name" : "Everyday",
+    "layouts" : {
+      "compact" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+          "extras"
+        ]
+      },
+      "expanded" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+
+        ]
+      }
+    },
+    "theme" : {
+      "accent" : "#FFBA75",
+      "radius" : 16.986797332763672,
+      "surface" : "#291B17",
+      "spacing" : 17.702970504760742,
+      "material" : "glass",
+      "opacity" : 0.61757421493530273,
+      "shape" : "circle"
+    }
+  },
+  "realFocusProbe" : {
+    "status" : "Focus could not be read. Your default profile stays selected. See Focus diagnostics for details.",
+    "active" : false,
+    "modes" : [
+
+    ],
+    "available" : false,
+    "identifier" : "",
+    "liveUpdates" : 0,
+    "name" : "",
+    "diagnostics" : {
+      "updates" : {
+        "status" : "state-unavailable",
+        "error" : {
+
+        }
+      },
+      "catalog" : {
+        "status" : "not-checked",
+        "error" : {
+
+        }
+      },
+      "checkedAt" : "2026-11-05T02:29:30Z",
+      "runtime" : "Version 17.5 (Build 21F79)",
+      "environment" : "Simulator",
+      "version" : "0.1.0~beta6",
+      "process" : "HarborPreview",
+      "state" : {
+        "status" : "query-failed",
+        "error" : {
+          "code" : 3,
+          "reason" : "XPC error received on message reply handler",
+          "description" : "The operation couldn’t be completed. XPC error received on message reply handler",
+          "domain" : "BSServiceConnectionErrorDomain"
+        }
+      }
+    }
+  },
+  "editing" : 0,
+  "pendingProfile" : false
+}

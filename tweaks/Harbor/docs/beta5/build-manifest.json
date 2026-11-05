@@ -1,0 +1,27 @@
+{
+  "version": "0.1.0~beta5",
+  "package": "com.chasedavis.harbor_0.1.0~beta5_iphoneos-arm64e.deb",
+  "bytes": 98858,
+  "sha256": "23b316236d5d680b2fd5f697d12b0cb6ef527a8ae50de07b2d34d5a423a2a7f7",
+  "sourceSHA256": {
+    "Makefile": "14566456dc4309b8eb215560ae7a3a74b0f63ff80203f2998aee6f9cad1f13c3",
+    "Tweak.xm": "c9fc9beec0e1074c5f7a9ff52a1d54541e62b3559f5a070df293a81c32dcb275",
+    "HBSession.m": "45fdeba75c43d3725e4a63ef018c931d5e1118ad99e68e2d39ef11c1c6a78fe4",
+    "HBNativeControls.m": "6415521545e11a1766139cc4dba89c544a26119018775b7a4781d5567bd45e71",
+    "HBDashboardController.m": "9f0bcc3f4ac5b1d5c787f98c61e81a0a42fe92e3b03dfcac4346eeeca9405bb5",
+    "HBMediaProvider.m": "87c923e9ed352e879d14bfff7a05cb33d6abe639151fa683f974cc96bd57e0ec",
+    "HBPreferences.m": "87e718189904a26a19504650349a5aa06b6d381a6f2ea1931201ad09d75ff96f",
+    "HBPolicy.c": "8f401c1e98d5e6b70e3988e0638d3b8cf0c5cd93409b5181f886f1d6c7a8dd86",
+    "HBProfileModel.m": "c9f09dc3222b5d0e18de9b1d99992d3c7287e4f10751eec4735417715cebc805",
+    "HBProfileStore.m": "9289327893d757ea01791a0157f075e8753911979ef41ee7688ef307e1c035d8",
+    "HBTheme.m": "5f83fdeb26523b190a87503dc3e7344b8b22891e7ecdbd1ddac69aaf6d53e8f1",
+    "HBFocusMonitor.m": "a97257edc1333d4badf8bc1769fcd3d46c9ab967349213d8d73fe63a65ba0e4e",
+    "HBProfileEditorController.m": "11a5e40e1d922b870dab4decd8ffe873eeb1e09714fdb777bde39a2de42696fc",
+    "HBVersion.h": "7c4a18ed2399d35ac4f9cfd847f303a761b3326dba1cf36afa416f50350b047d",
+    "control": "6717624bccbce0f9bbe7839dcdfc8d935dcb0de39955e92ec58539bf5c48309d",
+    "Prefs/Resources/Root.plist": "78cddf16208090e5b21af58f2c546584c9f93161f8896fed9d7a17e7c781a22c"
+  },
+  "simulator": "iPhone 15 Pro / iOS 17.5",
+  "physicalDeviceTested": false,
+  "published": false
+}

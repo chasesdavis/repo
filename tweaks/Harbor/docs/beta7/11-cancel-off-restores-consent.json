@@ -1,0 +1,190 @@
+{
+  "library" : {
+    "schema" : 1,
+    "revision" : 2,
+    "profiles" : [
+      {
+        "startExpanded" : false,
+        "id" : "default",
+        "name" : "Everyday",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#A3E8D6",
+          "radius" : 36,
+          "surface" : "#0E1618",
+          "spacing" : 10,
+          "material" : "glass",
+          "opacity" : 0.71999999999999997,
+          "shape" : "circle"
+        }
+      },
+      {
+        "startExpanded" : false,
+        "id" : "work",
+        "name" : "Work",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#C2B8FF",
+          "radius" : 36,
+          "surface" : "#1F1932",
+          "spacing" : 12,
+          "material" : "glass",
+          "opacity" : 0.78000000000000003,
+          "shape" : "circle"
+        }
+      }
+    ],
+    "bindings" : {
+      "fixture.work" : "work"
+    },
+    "activeID" : "work",
+    "automaticFocus" : true,
+    "focusLabels" : {
+      "fixture.work" : "Simulated Work"
+    },
+    "focusOptInVersion" : 1
+  },
+  "focus" : {
+    "status" : "Current Focus: Simulated Work.",
+    "active" : true,
+    "modes" : [
+      {
+        "id" : "fixture.work",
+        "name" : "Simulated Work"
+      }
+    ],
+    "available" : true,
+    "identifier" : "fixture.work",
+    "liveUpdates" : 1,
+    "name" : "Simulated Work",
+    "diagnostics" : {
+      "updates" : {
+        "status" : "ok",
+        "error" : {
+
+        }
+      },
+      "catalog" : {
+        "status" : "ok",
+        "error" : {
+
+        }
+      },
+      "checkedAt" : "2026-11-05T02:59:10Z",
+      "runtime" : "Version 17.5 (Build 21F79)",
+      "environment" : "Simulator",
+      "version" : "0.1.0~beta7",
+      "process" : "HarborPreview",
+      "state" : {
+        "status" : "ok",
+        "error" : {
+
+        }
+      }
+    }
+  },
+  "scope" : "Actual UIKit and HID interactions with counted, replaced Harbor reader boundaries. All successful Focus values are simulated; no real Focus API is called.",
+  "monitorCreated" : 1,
+  "draft" : {
+
+  },
+  "displayedProfile" : {
+    "startExpanded" : false,
+    "id" : "work",
+    "name" : "Work",
+    "layouts" : {
+      "compact" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+          "extras"
+        ]
+      },
+      "expanded" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+
+        ]
+      }
+    },
+    "theme" : {
+      "accent" : "#C2B8FF",
+      "radius" : 36,
+      "surface" : "#1F1932",
+      "spacing" : 12,
+      "material" : "glass",
+      "opacity" : 0.78000000000000003,
+      "shape" : "circle"
+    }
+  },
+  "readerCalls" : {
+    "cancellations" : 1,
+    "state" : 4,
+    "modes" : 2,
+    "removals" : 1,
+    "registrations" : 2
+  },
+  "editing" : 0,
+  "pausedForEditor" : false
+}

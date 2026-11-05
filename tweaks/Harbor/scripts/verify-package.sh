@@ -7,6 +7,14 @@ stage="$(mktemp -d /tmp/harbor-verify.XXXXXX)"
 trap 'rm -rf "$stage"' EXIT
 dpkg-deb -x "$package" "$stage"
 dpkg-deb -I "$package"
+python3 - "$package" <<'PY'
+import io, subprocess, sys, tarfile
+for flag in ('--fsys-tarfile', '--ctrl-tarfile'):
+    with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['dpkg-deb', flag, sys.argv[1]]))) as archive:
+        for member in archive:
+            assert member.uid == member.gid == 0, (member.name, member.uid, member.gid)
+print('PASS: all archive entries have numeric root ownership')
+PY
 test "$(dpkg-deb -f "$package" Package)" = com.chasedavis.harbor
 test "$(dpkg-deb -f "$package" Version)" = "$version"
 test "$(dpkg-deb -f "$package" Architecture)" = iphoneos-arm64e

@@ -3,12 +3,24 @@
 #import "../HBDashboardController.h"
 #import "../HBSession.h"
 #import "../HBPreferences.h"
+#import "FocusChecks.h"
 
 @interface HBTestModule : UIViewController
 @property (nonatomic, copy) NSString *moduleIdentifier;
+@property (nonatomic, strong) UIViewController *contentViewController;
 @end
 @implementation HBTestModule
 @end
+
+@interface HBTestWiFiButtonController : UIViewController
+@property (nonatomic, strong) UIButton *buttonView;
+@property (nonatomic) NSUInteger actionCount;
+@end
+@implementation HBTestWiFiButtonController
+- (void)loadView { self.buttonView = [UIButton buttonWithType:UIButtonTypeCustom]; self.view = self.buttonView; [self.buttonView addTarget:self action:@selector(toggle) forControlEvents:UIControlEventTouchUpInside]; }
+- (void)toggle { self.actionCount++; self.buttonView.selected = !self.buttonView.selected; }
+@end
+
 @interface HBTestCollection : UIViewController
 @property (nonatomic) NSUInteger expandedModuleCount;
 @property (nonatomic, copy) NSString *lastExpanded;
@@ -55,7 +67,8 @@
     self.moduleCollectionViewController.view.backgroundColor = UIColor.systemBlueColor;
     [self.overlayContainerView addSubview:self.moduleCollectionViewController.view];
     [self.moduleCollectionViewController didMoveToParentViewController:self];
-    for (NSString *name in @[@"com.apple.control-center.ConnectivityModule", @"com.apple.donotdisturb.control-center.module"]) {
+    for (NSString *name in @[@"com.apple.control-center.ConnectivityModule", @"com.apple.FocusUIModule",
+        @"com.apple.mediaremote.controlcenter.audio", @"com.apple.control-center.DisplayModule"]) {
         HBTestModule *module = [HBTestModule new]; module.moduleIdentifier = name;
         [self.moduleCollectionViewController addChildViewController:module];
         [module didMoveToParentViewController:self.moduleCollectionViewController];
@@ -93,15 +106,19 @@ static UIImage *HBTestArtwork(void) {
     }];
 }
 
+#import "FocusAccessChecks.h"
+#import "ProfileChecks.h"
+
 @interface HBPreviewApp : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong) NSMutableArray<NSString *> *results;
 @property (nonatomic) NSUInteger failures;
+@property (nonatomic, copy) NSDictionary *previousLibrary;
 @end
 @implementation HBPreviewApp
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
     self.results = [NSMutableArray array];
-    HBReloadPreferences();
+    HBReloadPreferences(); self.previousLibrary = HBLoadProfileLibrary(); HBSaveProfileLibrary(HBDefaultLibrary(@"sea"), nil, nil);
     self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
     HBTestHost *host = [HBTestHost new];
     self.window.rootViewController = host;
@@ -138,6 +155,43 @@ static UIImage *HBTestArtwork(void) {
     [self check:headerHit == host.overlayHeaderView || [headerHit isDescendantOfView:host.overlayHeaderView]
         name:@"Native status/privacy header stays visible and receives touches"];
     UIScrollView *cards = [dashboard valueForKey:@"scroll"];
+
+    UIPanGestureRecognizer *nativePan = host.overlayScrollView.panGestureRecognizer;
+    UIView *brightness = HBFind(dashboard.view, @"harbor.brightness");
+    [self check:[session ownsTouchView:brightness recognizer:nativePan] name:@"Native ancestor pan excludes touches on Harbor controls"];
+    [self check:![session ownsTouchView:host.overlayHeaderView recognizer:nativePan] name:@"Native header touches retain the system gesture path"];
+    UIScreenEdgePanGestureRecognizer *edge = [UIScreenEdgePanGestureRecognizer new];
+    [host.view addGestureRecognizer:edge];
+    [self check:![session ownsTouchView:brightness recognizer:edge] name:@"System edge gestures are never filtered"];
+    [host.view removeGestureRecognizer:edge];
+    [self check:![session ownsTouchView:brightness recognizer:cards.panGestureRecognizer] name:@"Harbor's own scrolling recognizer is never filtered"];
+    [self check:![dashboard containsInteractionPoint:CGPointMake(10, 10)] name:@"Empty space above the sheet remains available for native dismissal"];
+    [dashboard setValue:@YES forKey:@"expanded"]; [dashboard.view layoutIfNeeded];
+    UIView *lastControl = HBFind(dashboard.view, @"harbor.display");
+    [self check:![(UIView *)[dashboard valueForKey:@"moreRows"] isHidden] && CGRectContainsRect(cards.bounds, [lastControl convertRect:lastControl.bounds toView:cards])
+        name:@"Expanded controls all fit on a standard portrait viewport"];
+    [dashboard setValue:@NO forKey:@"expanded"]; [dashboard.view layoutIfNeeded];
+    HBTestWiFiButtonController *wifi = [HBTestWiFiButtonController new];
+    HBTestModule *connectivity = (id)host.moduleCollectionViewController.childViewControllers.firstObject;
+    [connectivity addChildViewController:wifi]; wifi.view.frame = CGRectMake(0, 0, 50, 50); [connectivity.view addSubview:wifi.view]; [wifi didMoveToParentViewController:connectivity];
+    HBNativeControls *bridge = [HBNativeControls new]; bridge.collection = host.moduleCollectionViewController;
+    [self check:[bridge buttonForKey:@"wifi"] == wifi.buttonView name:@"Connectivity adapter resolves an existing native button"];
+    [self check:[bridge activateKey:@"wifi"] && wifi.actionCount == 1 && wifi.buttonView.selected name:@"Connectivity action reaches the underlying button once and reads its real state"];
+    [self check:wifi.view.superview == connectivity.view && wifi.parentViewController == connectivity name:@"Native controls retain their view and controller ownership"];
+    wifi.buttonView.enabled = NO;
+    [self check:![bridge activateKey:@"wifi"] && wifi.actionCount == 1 name:@"Disabled native controls cannot be activated"];
+    wifi.buttonView.enabled = YES;
+    [self check:![bridge activateKey:@"unknown"] && ![bridge activateKey:@"cellular"] name:@"Missing or unknown controls fail without invented state or actions"];
+    [wifi.buttonView removeTarget:wifi action:@selector(toggle) forControlEvents:UIControlEventTouchUpInside];
+    [self check:[bridge buttonForKey:@"wifi"] == nil name:@"A non-actionable native view is not presented as a working toggle"];
+    [wifi willMoveToParentViewController:nil]; [wifi.view removeFromSuperview]; [wifi removeFromParentViewController];
+    HBTestModule *lowPower = [HBTestModule new]; lowPower.moduleIdentifier = @"com.apple.control-center.LowPowerModule";
+    HBTestWiFiButtonController *powerButton = [HBTestWiFiButtonController new]; lowPower.contentViewController = powerButton;
+    [host.moduleCollectionViewController addChildViewController:lowPower]; [lowPower addChildViewController:powerButton];
+    [lowPower.view addSubview:powerButton.view]; [powerButton didMoveToParentViewController:lowPower]; [lowPower didMoveToParentViewController:host.moduleCollectionViewController];
+    [self check:[bridge activateKey:@"power"] && powerButton.actionCount == 1 name:@"Low Power uses the identifier in the actual iOS 17.5 system bundle"];
+    [lowPower willMoveToParentViewController:nil]; [lowPower.view removeFromSuperview]; [lowPower removeFromParentViewController];
+
     UIButton *escape = (id)HBFind(dashboard.view, @"harbor.allControls");
     CGRect escapeFrame = [escape convertRect:escape.bounds toView:host.view];
     [self check:![(UIView *)escape isDescendantOfView:cards] && CGRectContainsRect(host.view.bounds, escapeFrame) &&
@@ -167,7 +221,22 @@ static UIImage *HBTestArtwork(void) {
     [session end]; [session begin];
     [self check:HBDashboard(host) != nil name:@"Reopening starts a fresh Harbor visit"];
     [(UIControl *)HBFind(HBDashboard(host).view, @"harbor.focus") sendActionsForControlEvents:UIControlEventTouchUpInside];
-    [self check:[host.moduleCollectionViewController.lastExpanded containsString:@"donotdisturb"] name:@"Focus resolves and requests its native panel"];
+    [self check:[host.moduleCollectionViewController.lastExpanded isEqual:@"com.apple.FocusUIModule"] name:@"Focus resolves and requests its native panel"];
+    [self check:![bridge activateKey:@"focus"] name:@"Focus cannot use the native-toggle forwarding adapter"];
+    HBTestModule *focusModule=nil;
+    for (HBTestModule *module in host.moduleCollectionViewController.childViewControllers) if ([module.moduleIdentifier isEqual:@"com.apple.FocusUIModule"]) focusModule=module;
+    focusModule.moduleIdentifier=@"com.thirdparty.focus"; host.moduleCollectionViewController.lastExpanded=nil;
+    [session end]; [session begin];
+    [(UIControl *)HBFind(HBDashboard(host).view,@"harbor.focus") sendActionsForControlEvents:UIControlEventTouchUpInside];
+    [self check:host.moduleCollectionViewController.lastExpanded==nil && !host.moduleCollectionViewController.view.hidden name:@"Unknown Focus module identities fall back to native controls without expansion"];
+    focusModule.moduleIdentifier=@"com.apple.FocusUIModule";
+    [session end]; [session begin];
+    [(UIControl *)HBFind(HBDashboard(host).view, @"harbor.volumeFallback") sendActionsForControlEvents:UIControlEventTouchUpInside];
+    [self check:[host.moduleCollectionViewController.lastExpanded isEqual:@"com.apple.mediaremote.controlcenter.audio"] name:@"Volume fallback resolves the real MediaControlsAudioModule identifier"];
+    [session end]; [session begin];
+    [HBDashboard(host) setValue:@YES forKey:@"expanded"]; [HBDashboard(host).view layoutIfNeeded];
+    [(UIControl *)HBFind(HBDashboard(host).view, @"harbor.display") sendActionsForControlEvents:UIControlEventTouchUpInside];
+    [self check:[host.moduleCollectionViewController.lastExpanded isEqual:@"com.apple.control-center.DisplayModule"] name:@"Display shortcut resolves the actual DisplayModule identifier"];
     [session end]; [session begin];
     HBSetPreference(@"enabled", @NO); [HBSession preferencesChanged];
     [self check:!host.moduleCollectionViewController.view.hidden && HBDashboard(host) == nil name:@"Master switch immediately restores native controls"];
@@ -247,6 +316,14 @@ static UIImage *HBTestArtwork(void) {
         preview.view.frame = CGRectMake(0, 0, width.doubleValue, 568);
         [preview.view setNeedsLayout]; [preview.view layoutIfNeeded];
         UIScrollView *scroll = [preview valueForKey:@"scroll"];
+
+        [self check:scroll.contentSize.height <= scroll.bounds.size.height + 1 name:[NSString stringWithFormat:@"Compact controls need no scrolling at %@pt", width]];
+        [preview setValue:@YES forKey:@"expanded"]; [preview.view layoutIfNeeded];
+        [scroll setContentOffset:CGPointMake(0, MAX(0, scroll.contentSize.height - scroll.bounds.size.height)) animated:NO];
+        UIView *last = HBFind(preview.view, @"harbor.display");
+        [self check:CGRectContainsRect(scroll.bounds, [last convertRect:last.bounds toView:scroll]) name:[NSString stringWithFormat:@"Final expanded control remains within scroll reach at %@pt", width]];
+        [preview setValue:@NO forKey:@"expanded"]; [preview.view layoutIfNeeded];
+
         [self check:!HBHasAmbiguity(preview.view) && scroll.contentSize.width <= scroll.bounds.size.width + 1
             name:[NSString stringWithFormat:@"Long media stays within a %@pt viewport", width]];
         UIButton *all = (id)HBFind(preview.view, @"harbor.allControls");
@@ -283,6 +360,10 @@ static UIImage *HBTestArtwork(void) {
         [insetHost.view layoutIfNeeded];
         [HBDashboard(insetHost) displayMedia:empty];
     }
+    HBRunProfileChecks(self.window, ^(BOOL pass, NSString *name) { [self check:pass name:name]; });
+    HBRunFocusChecks(^(BOOL pass, NSString *name) { [self check:pass name:name]; });
+    HBRunFocusAccessChecks(self.window, ^(BOOL pass, NSString *name) { [self check:pass name:name]; });
+    HBSaveProfileLibrary(self.previousLibrary, nil, nil);
     NSMutableDictionary *report = [@{@"failures": @(self.failures), @"checks": self.results,
         @"runtime": UIDevice.currentDevice.systemVersion,
         @"scope": @"UIKit + simulated native host; not real SpringBoard or device media"} mutableCopy];

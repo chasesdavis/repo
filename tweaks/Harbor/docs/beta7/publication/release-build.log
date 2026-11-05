@@ -1,0 +1,142 @@
+PASS: 20 presentation, numeric-boundary, and command-policy assertions
+PASS: Existing Iris preference migrates into the default profile
+PASS: Normalization preserves a valid library
+PASS: Automatic Focus access defaults off
+PASS: Corrupt or unsupported library has a recoverable default
+PASS: Corrupt or unsupported library has a recoverable default
+PASS: Corrupt or unsupported library has a recoverable default
+PASS: Corrupt or unsupported library has a recoverable default
+PASS: Corrupt or unsupported library has a recoverable default
+PASS: Corrupt or unsupported library has a recoverable default
+PASS: Invalid colors and nonfinite opacity recover safely
+PASS: Geometry is bounded
+PASS: Duplicate and unknown sections cannot corrupt order
+PASS: A layout cannot hide every section
+PASS: Compact changes do not leak into expanded layout
+PASS: Legacy matching flags require fresh opt-in and preserve profiles and links
+PASS: Missing, corrupt or unknown opt-in versions cannot enable reads
+PASS: Missing, corrupt or unknown opt-in versions cannot enable reads
+PASS: Missing, corrupt or unknown opt-in versions cannot enable reads
+PASS: Missing, corrupt or unknown opt-in versions cannot enable reads
+PASS: Missing, corrupt or unknown opt-in versions cannot enable reads
+PASS: Missing, corrupt or unknown opt-in versions cannot enable reads
+PASS: An explicit current opt-in enables matching
+PASS: Dangling Focus links are removed
+PASS: An exact active Focus selects its linked profile
+PASS: Unknown, off, and unavailable Focus use the default
+PASS: Unknown, off, and unavailable Focus use the default
+PASS: Unknown, off, and unavailable Focus use the default
+PASS: Automatic Focus can be disabled without losing links
+PASS: Duplicate profile IDs are rejected
+PASS: Deleting the default selects a surviving profile
+PASS: Profile count is bounded
+PASS: Normalization stays idempotent across the numeric boundary matrix
+PROFILE_MODEL_TESTS: 32 checks, 0 failures
+PASS Focus starts unavailable with one read
+PASS Valid state publishes before optional services finish
+PASS Observer registration triggers a fresh read to close the initial gap
+PASS Completed query deadline cannot invalidate a newer query
+PASS Post-registration refresh selects the current mode
+PASS Catalog timeout preserves the current mode and live updates
+PASS Late catalog result is ignored while the actual current mode stays linkable
+PASS Current read deadline publishes an explicit unavailable state
+PASS One hundred refreshes cannot pile up blocked reads
+PASS Late state is discarded and coalesced refresh starts exactly once
+PASS A new successful read recovers after timeout
+PASS Late reply alone does not silently recover or retry an expired request
+PASS Explicit refresh can recover to a verified Focus-off state
+PASS Update arriving during a query suppresses that superseded reply
+PASS Newest reply clears the old identifier when Focus turns off
+PASS Stopped listener events cannot start reads
+PASS Old session deadline cannot time out a reopened session
+PASS Reopening a blocked service has its own deadline and no extra worker
+PASS Old session reply is discarded before reopened session recovers
+PASS Failed state read makes no optional service requests
+PASS Diagnostics preserve error details without equating unavailable with Focus off
+PASS Service failure selects the saved default without deleting its Focus links
+PASS An active Focus without an identifier cannot select a named profile
+PASS Optional service errors keep the exact current mode usable
+PASS A later state failure clears stale current-mode data
+PASS Late observer registration is removed and cannot emit refreshes
+PASS Reopening keeps optional requests bounded while old requests are pending
+PASS Old optional completions unlock exactly one attempt in the new session
+PASS Old observer cannot refresh a new session
+PASS Mode discovery is bounded and prioritizes the actual current mode
+PASS No pending deadline publishes after stop
+PASS Stopping a monitor cancels queued reads
+PASS Queued stateQueue is cancelled before any system service call
+PASS Queued modesQueue is cancelled before any system service call
+PASS Queued updatesQueue is cancelled before any system service call
+Focus coordinator: 35 checks, 0 failures
+PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults
+PASS: hook and optional Focus classes exist in the installed iOS 17.0 SDK exports
+./Prefs/Resources/Root.plist: OK
+./Prefs/Resources/Info.plist: OK
+./Prefs/entry.plist: OK
+./Harbor.plist: OK
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+[0;36m==> [1;36mNotice:[m Build may be slow as Theos isn’t using all available CPU cores on this computer. Consider upgrading GNU Make: https://theos.dev/docs/parallel-building
+[1;31m> [1;3;39mMaking all for tweak Harbor…[m
+[0;31m==> [1;39mPreprocessing Tweak.xm…[m
+[0;32m==> [1;39mCompiling Tweak.xm (arm64)…[m
+[0;32m==> [1;39mCompiling HBSession.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBNativeControls.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBDashboardController.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBMediaProvider.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBPreferences.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBProfileModel.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBProfileStore.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBTheme.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBFocusMonitor.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBProfileEditorController.m (arm64)…[m
+[0;32m==> [1;39mCompiling HBPolicy.c (arm64)…[m
+[0;33m==> [1;39mLinking tweak Harbor (arm64)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for Harbor…[m
+[0;34m==> [1;39mStripping Harbor (arm64)…[m
+[0;31m==> [1;39mPreprocessing Tweak.xm…[m
+[0;32m==> [1;39mCompiling Tweak.xm (arm64e)…[m
+[0;32m==> [1;39mCompiling HBSession.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBNativeControls.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBDashboardController.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBMediaProvider.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBPreferences.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBProfileModel.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBProfileStore.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBTheme.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBFocusMonitor.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBProfileEditorController.m (arm64e)…[m
+[0;32m==> [1;39mCompiling HBPolicy.c (arm64e)…[m
+[0;33m==> [1;39mLinking tweak Harbor (arm64e)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for Harbor…[m
+[0;34m==> [1;39mStripping Harbor (arm64e)…[m
+[0;34m==> [1;39mMerging tweak Harbor…[m
+[0;34m==> [1;39mSigning Harbor…[m
+[1;31m> [1;3;39mMaking all in Prefs…[m
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+[0;36m==> [1;36mNotice:[m Build may be slow as Theos isn’t using all available CPU cores on this computer. Consider upgrading GNU Make: https://theos.dev/docs/parallel-building
+[1;31m> [1;3;39mMaking all for bundle HarborPrefs…[m
+[0;35m==> [1;39mCopying resource directories into the bundle wrapper…[m
+[0;32m==> [1;39mCompiling HBPreferencesController.m (arm64)…[m
+[0;32m==> [1;39mCompiling ../HBPreferences.m (arm64)…[m
+[0;33m==> [1;39mLinking bundle HarborPrefs (arm64)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for HarborPrefs…[m
+[0;34m==> [1;39mStripping HarborPrefs (arm64)…[m
+[0;32m==> [1;39mCompiling HBPreferencesController.m (arm64e)…[m
+[0;32m==> [1;39mCompiling ../HBPreferences.m (arm64e)…[m
+[0;33m==> [1;39mLinking bundle HarborPrefs (arm64e)…[m
+ld: warning: -multiply_defined is obsolete
+[0;34m==> [1;39mGenerating debug symbols for HarborPrefs…[m
+[0;34m==> [1;39mStripping HarborPrefs (arm64e)…[m
+[0;34m==> [1;39mMerging bundle HarborPrefs…[m
+[0;34m==> [1;39mSigning HarborPrefs…[m
+[1;31m> [1;3;39mMaking stage for tweak Harbor…[m
+[1;31m> [1;3;39mMaking stage in Prefs…[m
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+[1;31m> [1;3;39mMaking stage for bundle HarborPrefs…[m
+fakeroot, while creating message channels: No space left on device
+This may be due to a lack of SYSV IPC support.
+fakeroot: error while starting the `faked' daemon.
+make: *** [internal-package] Error 1

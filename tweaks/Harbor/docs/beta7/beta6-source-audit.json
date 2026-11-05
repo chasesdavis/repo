@@ -1,0 +1,64 @@
+{
+  "scope": "Archived beta6 source hashes and focused call-path excerpts, paired with the exact beta6 package audit. Binary strings were inspected separately; this is not a proof of source-to-binary reproducibility.",
+  "files": {
+    "HBDashboardController.m": "a4ac619671d9b5bd9327894913a1894015365ac4eecf29471e343b28927cbd94",
+    "HBFocusMonitor.m": "a09191a3034b7011b2c8609c90acca93e5175581b02acecddb276769558e63cc",
+    "HBProfileModel.m": "c9f09dc3222b5d0e18de9b1d99992d3c7287e4f10751eec4735417715cebc805",
+    "HBProfileStore.m": "9289327893d757ea01791a0157f075e8753911979ef41ee7688ef307e1c035d8",
+    "HBProfileEditorController.m": "c75de70e29101c86830b39468dbbb91bc76492f4b4d0a315f1ac7f8f065d931b",
+    "HBSession.m": "45fdeba75c43d3725e4a63ef018c931d5e1118ad99e68e2d39ef11c1c6a78fe4",
+    "HBNativeControls.m": "6415521545e11a1766139cc4dba89c544a26119018775b7a4781d5567bd45e71",
+    "HBPreferences.m": "87e718189904a26a19504650349a5aa06b6d381a6f2ea1931201ad09d75ff96f",
+    "Prefs/HBPreferencesController.m": "68925ae46cc86529f18dbc30cb884b87b7a13d962041d9426ffd055dbb0bcdbd",
+    "Makefile": "14566456dc4309b8eb215560ae7a3a74b0f63ff80203f2998aee6f9cad1f13c3",
+    "Harbor.plist": "f0f5f53f83d5a79930ce9b6ee491e6674d911918564049111468f40f625d791f",
+    "control": "82ea0fe9d6d4541cb7e2407f059525719d75582fa0f0f1960ef70c24969cdd7c"
+  },
+  "excerpts": {
+    "HBDashboardController.m:402-410": [
+      "402: - (void)editProfile:(NSString *)identifier {",
+      "403:     if (self.presentedViewController || self.previewMode) return;",
+      "404:     self.editor = [[HBProfileEditorController alloc] initWithLibrary:HBLoadProfileLibrary() profileID:identifier focus:self.focusSnapshot]; self.editor.nativeControls = self.nativeControls;",
+      "405:     __weak typeof(self) weakSelf = self;",
+      "406:     self.editor.onFinish = ^(BOOL saved) { weakSelf.editor = nil; [weakSelf reloadSelectedProfile:saved]; };",
+      "407:     self.editor.onRefreshFocus = ^{ [weakSelf.focusMonitor refresh]; };",
+      "408:     UINavigationController *navigation = [[UINavigationController alloc] initWithRootViewController:self.editor];",
+      "409:     navigation.modalPresentationStyle = UIModalPresentationOverFullScreen; navigation.modalInPresentation = YES; navigation.view.accessibilityViewIsModal = YES;",
+      "410:     [self presentViewController:navigation animated:YES completion:nil]; [self.focusMonitor refresh];"
+    ],
+    "HBDashboardController.m:441-451": [
+      "441: - (void)setDashboardActive:(BOOL)active {",
+      "442:     if (self.previewMode || self.active == active) return; self.active = active;",
+      "443:     if (active) {",
+      "444:         [self loadViewIfNeeded]; [self reloadSelectedProfile:YES]; [self applyAppearance]; [self refreshStatus]; [self.media start];",
+      "445:         if (!self.focusMonitor) { self.focusMonitor = [HBFocusMonitor new]; __weak typeof(self) weakSelf = self; self.focusMonitor.onChange = ^(NSDictionary *snapshot) { [weakSelf acceptFocusSnapshot:snapshot]; }; }",
+      "446:         [self.focusMonitor start];",
+      "447:         __weak typeof(self) weakSelf = self;",
+      "448:         self.clock = [NSTimer timerWithTimeInterval:1 repeats:YES block:^(__unused NSTimer *timer) { [weakSelf refreshStatus]; }]; self.clock.tolerance = 0.2;",
+      "449:         // Default mode deliberately avoids state/label polling while the user drags.",
+      "450:         [[NSRunLoop mainRunLoop] addTimer:self.clock forMode:NSDefaultRunLoopMode];",
+      "451:     } else { [self.clock invalidate]; self.clock = nil; [self.media stop]; [self.focusMonitor stop];"
+    ],
+    "HBProfileModel.m:52-56": [
+      "52: NSDictionary *HBDefaultLibrary(NSString *legacyPalette) {",
+      "53:     NSDictionary *theme = HBThemePresets()[legacyPalette ?: @\"sea\"] ?: HBThemePresets()[@\"sea\"];",
+      "54:     return @{@\"schema\":@1, @\"revision\":@0, @\"activeID\":@\"default\", @\"automaticFocus\":@NO,",
+      "55:         @\"profiles\":@[HBNormalizeProfile(@{@\"id\":@\"default\", @\"name\":@\"Everyday\", @\"theme\":theme})], @\"bindings\":@{}, @\"focusLabels\":@{}};",
+      "56: }"
+    ],
+    "HBSession.m:67-78": [
+      "67: }",
+      "68: static NSString *HBFindModule(UIViewController *controller, HBSystemDestination destination, NSUInteger depth) {",
+      "69:     if (depth > 4) return nil;",
+      "70:     id identifier = HBGetObject(controller, @\"moduleIdentifier\");",
+      "71:     if ([identifier isKindOfClass:NSString.class]) {",
+      "72:         NSString *name = [identifier lowercaseString];",
+      "73:         if (destination == HBSystemDestinationConnections && [name containsString:@\"connectivity\"]) return identifier;",
+      "74:         if (destination == HBSystemDestinationFocus && ([name containsString:@\"donotdisturb\"] || [name containsString:@\"focus\"])) return identifier;",
+      "75:         if (destination == HBSystemDestinationVolume && ([name containsString:@\"volume\"] ||",
+      "76:             [name isEqual:@\"com.apple.mediaremote.controlcenter.audio\"])) return identifier;",
+      "77:         if (destination == HBSystemDestinationBrightness && ([name containsString:@\"displaymodule\"] ||",
+      "78:             ([name containsString:@\"brightness\"] && ![name containsString:@\"keyboard\"]))) return identifier;"
+    ]
+  }
+}

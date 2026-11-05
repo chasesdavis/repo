@@ -1,0 +1,134 @@
+{
+  "Library/MobileSubstrate/DynamicLibraries/Harbor.dylib": {
+    "100000c:0": {
+      "equalExceptUUIDAndSignature": true,
+      "tested": {
+        "sha256": "f309fe0e8b7feaeb0d2dd5701f54f20d35c5c9c380d866cdd7f2814940aac623",
+        "bytes": 303792,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "0f6ba12ea8a536ee9d9d34627ae2ad76"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 4384
+          }
+        ]
+      },
+      "rebuilt": {
+        "sha256": "f309fe0e8b7feaeb0d2dd5701f54f20d35c5c9c380d866cdd7f2814940aac623",
+        "bytes": 303792,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "c197d5cb18903d5dbb664bea8baeb338"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 4384
+          }
+        ]
+      },
+      "firstOtherDifferences": []
+    },
+    "100000c:80000002": {
+      "equalExceptUUIDAndSignature": true,
+      "tested": {
+        "sha256": "3c04ecf03d06cfd9272f9fb77128c3ad750703f4dbba5e5bb031945c2f8a8c65",
+        "bytes": 303808,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "e09e3fe9a3cf3eb1970ab0b8c889b5f6"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 4384
+          }
+        ]
+      },
+      "rebuilt": {
+        "sha256": "3c04ecf03d06cfd9272f9fb77128c3ad750703f4dbba5e5bb031945c2f8a8c65",
+        "bytes": 303808,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "47037f695a8238b3a463be7f00785bf7"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 4384
+          }
+        ]
+      },
+      "firstOtherDifferences": []
+    }
+  },
+  "Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs": {
+    "100000c:0": {
+      "equalExceptUUIDAndSignature": true,
+      "tested": {
+        "sha256": "e2d2e140aa17c5e6846557dbc792af23cf11e5cc7d0a379be1fafae1bd97fc0f",
+        "bytes": 70896,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "777cffe403593868bf9358c1bb17f8b2"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 1424
+          }
+        ]
+      },
+      "rebuilt": {
+        "sha256": "e2d2e140aa17c5e6846557dbc792af23cf11e5cc7d0a379be1fafae1bd97fc0f",
+        "bytes": 70896,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "bba9235aab77389ebbeaebbf541f9247"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 1424
+          }
+        ]
+      },
+      "firstOtherDifferences": []
+    },
+    "100000c:80000002": {
+      "equalExceptUUIDAndSignature": true,
+      "tested": {
+        "sha256": "5505dabfb6001d5ce6eb67a98283bd3771f440a4c453bef8113842bfacf99c24",
+        "bytes": 70896,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "41ff3b804bcf3657b4187f129426ecf3"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 1424
+          }
+        ]
+      },
+      "rebuilt": {
+        "sha256": "5505dabfb6001d5ce6eb67a98283bd3771f440a4c453bef8113842bfacf99c24",
+        "bytes": 70896,
+        "ignored": [
+          {
+            "kind": "LC_UUID",
+            "value": "8a483c879ab63571b1036639a4bcd84a"
+          },
+          {
+            "kind": "code signature blob",
+            "bytes": 1424
+          }
+        ]
+      },
+      "firstOtherDifferences": []
+    }
+  }
+}

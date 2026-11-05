@@ -1,0 +1,255 @@
+{
+  "library" : {
+    "schema" : 1,
+    "revision" : 3,
+    "profiles" : [
+      {
+        "startExpanded" : false,
+        "id" : "default",
+        "name" : "Everyday",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#A3E8D6",
+          "radius" : 36,
+          "surface" : "#0E1618",
+          "spacing" : 10,
+          "material" : "glass",
+          "opacity" : 0.71999999999999997,
+          "shape" : "circle"
+        }
+      },
+      {
+        "startExpanded" : false,
+        "id" : "work",
+        "name" : "Work",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#C2B8FF",
+          "radius" : 36,
+          "surface" : "#1F1932",
+          "spacing" : 12,
+          "material" : "glass",
+          "opacity" : 0.78000000000000003,
+          "shape" : "circle"
+        }
+      }
+    ],
+    "bindings" : {
+      "fixture.work" : "work"
+    },
+    "activeID" : "work",
+    "automaticFocus" : false,
+    "focusLabels" : {
+      "fixture.work" : "Simulated Work"
+    },
+    "focusOptInVersion" : 0
+  },
+  "focus" : {
+    "active" : false,
+    "available" : false,
+    "disabled" : true,
+    "identifier" : "",
+    "liveUpdates" : false,
+    "modes" : [
+
+    ],
+    "name" : "",
+    "status" : "Automatic Focus matching is off. Choose a layout manually from Saved profiles."
+  },
+  "scope" : "Actual UIKit and HID interactions with counted, replaced Harbor reader boundaries. All successful Focus values are simulated; no real Focus API is called.",
+  "monitorCreated" : 1,
+  "draft" : {
+    "schema" : 1,
+    "revision" : 3,
+    "profiles" : [
+      {
+        "startExpanded" : false,
+        "id" : "default",
+        "name" : "Everyday",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#A3E8D6",
+          "radius" : 36,
+          "surface" : "#0E1618",
+          "spacing" : 10,
+          "material" : "glass",
+          "opacity" : 0.71999999999999997,
+          "shape" : "circle"
+        }
+      },
+      {
+        "startExpanded" : false,
+        "id" : "work",
+        "name" : "Work",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#C2B8FF",
+          "radius" : 36,
+          "surface" : "#1F1932",
+          "spacing" : 12,
+          "material" : "glass",
+          "opacity" : 0.78000000000000003,
+          "shape" : "circle"
+        }
+      }
+    ],
+    "bindings" : {
+      "fixture.work" : "work"
+    },
+    "activeID" : "work",
+    "automaticFocus" : false,
+    "focusLabels" : {
+      "fixture.work" : "Simulated Work"
+    },
+    "focusOptInVersion" : 0
+  },
+  "displayedProfile" : {
+    "startExpanded" : false,
+    "id" : "work",
+    "name" : "Work",
+    "layouts" : {
+      "compact" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+          "extras"
+        ]
+      },
+      "expanded" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+
+        ]
+      }
+    },
+    "theme" : {
+      "accent" : "#C2B8FF",
+      "radius" : 36,
+      "surface" : "#1F1932",
+      "spacing" : 12,
+      "material" : "glass",
+      "opacity" : 0.78000000000000003,
+      "shape" : "circle"
+    }
+  },
+  "readerCalls" : {
+    "cancellations" : 2,
+    "state" : 4,
+    "modes" : 2,
+    "removals" : 2,
+    "registrations" : 2
+  },
+  "editing" : 1,
+  "pausedForEditor" : false
+}

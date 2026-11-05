@@ -1,0 +1,28 @@
+{
+  "bundle" : "com.chasedavis.harbor.preview",
+  "frameworkLoaded" : 1,
+  "publicAPI" : {
+    "authorizationStatus" : 0,
+    "isFocused" : false
+  },
+  "runtime" : "17.5",
+  "queryMilliseconds" : 6.3811666332185268,
+  "queryError" : {
+    "code" : 3,
+    "reason" : "XPC error received on message reply handler",
+    "description" : "The operation couldn’t be completed. XPC error received on message reply handler",
+    "domain" : "BSServiceConnectionErrorDomain"
+  },
+  "querySignature" : {
+    "return" : "@",
+    "arguments" : [
+      "@",
+      ":",
+      "^@"
+    ]
+  },
+  "returnedState" : 0,
+  "requestedAuthorization" : false,
+  "process" : "HarborPreview",
+  "classAvailable" : 1
+}

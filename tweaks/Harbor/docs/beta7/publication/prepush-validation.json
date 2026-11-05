@@ -1,0 +1,14 @@
+{
+  "base": "231e473e2f3565c9d381e1fab820662d3c8cf8c2",
+  "version": "0.1.0~beta7",
+  "package": "repo/debs/com.chasedavis.harbor_0.1.0~beta7_iphoneos-arm64e.deb",
+  "bytes": 117100,
+  "sha256": "b50e8e050c1f103227af8eb8bdcfae0249c8b44a99de7423118b8cdbe053682b",
+  "allFiveUnrelatedPackageStanzasAndBinaryHashesUnchanged": true,
+  "zstdDecompressionMatches": true,
+  "allArchiveOwnersRoot": true,
+  "noMaintainerScripts": true,
+  "versionSortsAfterPublishedBeta3": true,
+  "sourceRuntimeUnchangedFromAuditedBeta7": true,
+  "rebuildNote": "All four Mach-O slices identical to the tested candidate except LC_UUID and code-signature blobs. Release archive ownership normalized to uid/gid 0; nonbinary file contents unchanged."
+}

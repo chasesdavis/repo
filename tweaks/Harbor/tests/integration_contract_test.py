@@ -49,7 +49,7 @@ root = plist(root_path)
 check(isinstance(root, dict) and isinstance(root.get("items"), list), "Root.plist must be a dictionary containing the Preferences items array")
 if isinstance(root, dict) and isinstance(root.get("items"), list):
     switches = {item.get("key"): item for item in root["items"] if isinstance(item, dict) and item.get("key")}
-    check(set(switches) == {"enabled", "palette", "haptics"}, "Settings must contain the expected preference keys")
+    check(set(switches) == {"enabled", "haptics"}, "Settings must contain the expected preference keys")
     check(all(item.get("defaults") == "com.chasedavis.harbor" for item in switches.values()), "Settings defaults domain must match the tweak")
     check(switches.get("enabled", {}).get("default") is True, "Harbor must be enabled by default")
 
@@ -62,6 +62,9 @@ if not args.package_root:
     for host in hosts:
         check(bool(re.search(r"\b" + re.escape(host) + r"\b", exports)), f"Hook target {host} is absent from the iOS 17.0 ControlCenterUI exports")
         check(f'NSClassFromString(@"{host}")' in source, f"Hook target {host} is not resolved by name")
+    focus_exports = (args.sdk / "System/Library/PrivateFrameworks/DoNotDisturb.framework/DoNotDisturb.tbd").read_text()
+    for focus_class in ("DNDStateService", "DNDState", "DNDModeConfigurationService"):
+        check(bool(re.search(r"\b" + focus_class + r"\b", focus_exports)), f"Focus class {focus_class} is absent from iOS 17.0 exports")
     version_header = args.source / "HBVersion.h"
     if version_header.exists():
         version = re.search(r"^Version: (.+)$", (args.source / "control").read_text(), re.M).group(1)
@@ -72,4 +75,4 @@ if errors:
     sys.exit(1)
 print("PASS: PreferenceLoader controller registration, Preferences schema, bundle identity, and defaults")
 if not args.package_root:
-    print("PASS: all Logos host classes are exported by the installed iOS 17.0 ControlCenterUI SDK")
+    print("PASS: hook and optional Focus classes exist in the installed iOS 17.0 SDK exports")

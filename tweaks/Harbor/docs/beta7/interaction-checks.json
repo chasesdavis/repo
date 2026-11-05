@@ -1,0 +1,91 @@
+{
+  "scope": "Actual simulator HID interactions and shipping UIKit logic with Harbor's reader methods replaced by counted fixtures. No real Focus service or setting used.",
+  "checks": [
+    {
+      "name": "01-legacy-off: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "02-editor-off: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "03-diagnostics-off: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "04-unsaved-on: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "05-cancelled-on: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "06-manual-work: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "07-before-optin-save: no reader created or called",
+      "passed": true
+    },
+    {
+      "name": "On draft was actually on, while saved access stayed off",
+      "passed": true
+    },
+    {
+      "name": "Cancel closed the unsaved opt-in",
+      "passed": true
+    },
+    {
+      "name": "Manual profile selection changed the displayed layout without Focus",
+      "passed": true
+    },
+    {
+      "name": "Save authorized the initial read, catalog and observer registration",
+      "passed": true
+    },
+    {
+      "name": "Off draft paused immediately before Save",
+      "passed": true
+    },
+    {
+      "name": "Pause canceled pending work and requested listener cleanup",
+      "passed": true
+    },
+    {
+      "name": "Opening diagnostics while paused did not restart reads",
+      "passed": true
+    },
+    {
+      "name": "Cancel restored the explicitly saved opt-in",
+      "passed": true
+    },
+    {
+      "name": "Saving Off persisted disabled access without starting requests",
+      "passed": true
+    },
+    {
+      "name": "Second disable canceled work and cleaned up its listener",
+      "passed": true
+    },
+    {
+      "name": "Reopened editor and diagnostics left access disabled",
+      "passed": true
+    },
+    {
+      "name": "Native Focus shortcut expanded only the fixture module, with zero toggle actions",
+      "passed": true
+    },
+    {
+      "name": "Native handoff did not start Harbor Focus reads",
+      "passed": true
+    },
+    {
+      "name": "App relaunch kept the manual profile and created no Focus reader",
+      "passed": true
+    }
+  ],
+  "passed": 21,
+  "failed": 0
+}

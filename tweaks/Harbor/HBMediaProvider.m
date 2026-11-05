@@ -50,7 +50,7 @@ typedef Boolean (*HBSendCommand)(int, NSDictionary *);
     __weak typeof(self) weakSelf = self;
     self.timer = [NSTimer timerWithTimeInterval:2 repeats:YES block:^(NSTimer *timer) { [weakSelf refresh]; }];
     self.timer.tolerance = 0.3;
-    [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
+    [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
     [self refresh];
 }
 - (void)stop {

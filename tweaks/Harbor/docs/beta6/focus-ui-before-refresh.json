@@ -1,0 +1,186 @@
+{
+  "library" : {
+    "schema" : 1,
+    "revision" : 35,
+    "profiles" : [
+      {
+        "startExpanded" : false,
+        "id" : "default",
+        "name" : "Everyday",
+        "layouts" : {
+          "compact" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+              "extras"
+            ]
+          },
+          "expanded" : {
+            "order" : [
+              "connectivity",
+              "levels",
+              "shortcuts",
+              "media",
+              "extras"
+            ],
+            "hidden" : [
+
+            ]
+          }
+        },
+        "theme" : {
+          "accent" : "#FFBA75",
+          "radius" : 16.986797332763672,
+          "surface" : "#291B17",
+          "spacing" : 17.702970504760742,
+          "material" : "glass",
+          "opacity" : 0.61757421493530273,
+          "shape" : "circle"
+        }
+      }
+    ],
+    "activeID" : "default",
+    "automaticFocus" : true,
+    "focusLabels" : {
+
+    },
+    "bindings" : {
+
+    }
+  },
+  "focus" : {
+    "status" : "Focus could not be read. Your default profile stays selected. See Focus diagnostics for details.",
+    "active" : false,
+    "modes" : [
+
+    ],
+    "available" : false,
+    "identifier" : "",
+    "liveUpdates" : 0,
+    "name" : "",
+    "diagnostics" : {
+      "updates" : {
+        "status" : "state-unavailable",
+        "error" : {
+
+        }
+      },
+      "catalog" : {
+        "status" : "not-checked",
+        "error" : {
+
+        }
+      },
+      "checkedAt" : "2026-11-05T02:29:10Z",
+      "runtime" : "Version 17.5 (Build 21F79)",
+      "environment" : "Simulator",
+      "version" : "0.1.0~beta6",
+      "process" : "HarborPreview",
+      "state" : {
+        "status" : "query-failed",
+        "error" : {
+          "code" : 3,
+          "reason" : "XPC error received on message reply handler",
+          "description" : "The operation couldn’t be completed. XPC error received on message reply handler",
+          "domain" : "BSServiceConnectionErrorDomain"
+        }
+      }
+    }
+  },
+  "scope" : "Actual UIKit editing and HID touches; injected Focus is explicitly simulated",
+  "diagnosticsView" : {
+    "offset" : 0,
+    "height" : 720.33333333333337,
+    "fontSize" : 17,
+    "category" : "UICTContentSizeCategoryL",
+    "copyMatches" : false,
+    "text" : "Harbor 0.1.0~beta6 · Simulator\nVersion 17.5 (Build 21F79)\nProcess: HarborPreview\nLast completed read: 2026-11-05T02:29:10Z\n\nFocus could not be read. Your default profile stays selected. See Focus diagnostics for details.\n\nState: query-failed\nBSServiceConnectionErrorDomain (3): The operation couldn’t be completed. XPC error received on message reply handler\nUpdates: state-unavailable\nCatalog: not-checked\n\nUnavailable is different from Focus being off. Saved links are preserved, and Harbor uses your default profile when it cannot read an exact mode. Preview app access does not establish SpringBoard support on your phone.",
+    "contentHeight" : 500.33333333333331
+  },
+  "displayedProfile" : {
+    "startExpanded" : false,
+    "id" : "default",
+    "name" : "Everyday",
+    "layouts" : {
+      "compact" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+          "extras"
+        ]
+      },
+      "expanded" : {
+        "order" : [
+          "connectivity",
+          "levels",
+          "shortcuts",
+          "media",
+          "extras"
+        ],
+        "hidden" : [
+
+        ]
+      }
+    },
+    "theme" : {
+      "accent" : "#FFBA75",
+      "radius" : 16.986797332763672,
+      "surface" : "#291B17",
+      "spacing" : 17.702970504760742,
+      "material" : "glass",
+      "opacity" : 0.61757421493530273,
+      "shape" : "circle"
+    }
+  },
+  "realFocusProbe" : {
+    "status" : "Focus could not be read. Your default profile stays selected. See Focus diagnostics for details.",
+    "active" : false,
+    "modes" : [
+
+    ],
+    "available" : false,
+    "identifier" : "",
+    "liveUpdates" : 0,
+    "name" : "",
+    "diagnostics" : {
+      "updates" : {
+        "status" : "state-unavailable",
+        "error" : {
+
+        }
+      },
+      "catalog" : {
+        "status" : "not-checked",
+        "error" : {
+
+        }
+      },
+      "checkedAt" : "2026-11-05T02:29:10Z",
+      "runtime" : "Version 17.5 (Build 21F79)",
+      "environment" : "Simulator",
+      "version" : "0.1.0~beta6",
+      "process" : "HarborPreview",
+      "state" : {
+        "status" : "query-failed",
+        "error" : {
+          "code" : 3,
+          "reason" : "XPC error received on message reply handler",
+          "description" : "The operation couldn’t be completed. XPC error received on message reply handler",
+          "domain" : "BSServiceConnectionErrorDomain"
+        }
+      }
+    }
+  },
+  "editing" : 1,
+  "pendingProfile" : true
+}

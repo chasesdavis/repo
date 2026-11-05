@@ -7,7 +7,7 @@ INSTALL_TARGET_PROCESSES = SpringBoard
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = Harbor
-Harbor_FILES = Tweak.xm HBSession.m HBDashboardController.m HBMediaProvider.m HBPreferences.m HBPolicy.c
+Harbor_FILES = Tweak.xm HBSession.m HBNativeControls.m HBDashboardController.m HBMediaProvider.m HBPreferences.m HBProfileModel.m HBProfileStore.m HBTheme.m HBFocusMonitor.m HBProfileEditorController.m HBPolicy.c
 Harbor_CFLAGS = -fobjc-arc -Wall -Wextra -Wno-unused-parameter
 Harbor_FRAMEWORKS = UIKit Foundation QuartzCore MediaPlayer ImageIO AVKit
 

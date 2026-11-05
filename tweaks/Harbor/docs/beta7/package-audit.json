@@ -1,0 +1,208 @@
+{
+  "scope": "Static package inventory, link metadata and selector review; not a proof of private system implementation behavior.",
+  "packages": [
+    {
+      "version": "beta6",
+      "path": "/Users/chase/Documents/Codex/2026-11-04/task/harbor-publish/tweaks/Harbor/packages/com.chasedavis.harbor_0.1.0~beta6_iphoneos-arm64e.deb",
+      "bytes": 115254,
+      "sha256": "af405691375ca90f6f6a8b68b8eeb17494b8b6a8e85b9f15f46b74aa16ef7b8b",
+      "control": {
+        "exit": 0,
+        "stdout": "Package: com.chasedavis.harbor\nName: Harbor (Beta)\nDescription: A compact Control Center with a live layout editor, custom themes and saved profiles. Focus matching is experimental. iOS 17.0 beta; physical-device testing is pending.\nMaintainer: Chase Davis\nAuthor: Chase Davis\nSection: Tweaks\nDepends: firmware (>= 17.0), firmware (<< 17.1), mobilesubstrate, preferenceloader\nTag: role::tweak\nIcon: https://chasesdavis.github.io/repo/assets/harbor/icon.png\nDepiction: https://chasesdavis.github.io/repo/depiction/harbor/\nHomepage: https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor\nArchitecture: iphoneos-arm64e\nVersion: 0.1.0~beta6\nInstalled-Size: 804",
+        "stderr": ""
+      },
+      "controlFiles": [
+        "./control"
+      ],
+      "payload": [
+        "Library/MobileSubstrate/DynamicLibraries/Harbor.dylib",
+        "Library/MobileSubstrate/DynamicLibraries/Harbor.plist",
+        "Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs",
+        "Library/PreferenceBundles/HarborPrefs.bundle/Info.plist",
+        "Library/PreferenceBundles/HarborPrefs.bundle/Root.plist",
+        "Library/PreferenceLoader/Preferences/Harbor.plist"
+      ],
+      "binaries": [
+        {
+          "file": "Library/MobileSubstrate/DynamicLibraries/Harbor.dylib",
+          "sha256": "ee41f3dba2b4d5146d55a2ffff50852a0c2e5584302e51760209a6ec7b00e48e",
+          "architectures": {
+            "exit": 0,
+            "stdout": "arm64 arm64e",
+            "stderr": ""
+          },
+          "ldidExtractEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "codesignEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": "Executable=/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta6-audit-payload/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib\n/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta6-audit-payload/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib: no signature\nwarning: Specifying ':' in the path is deprecated and will not work in a future release"
+          },
+          "linkedLibraries": {
+            "exit": 0,
+            "stdout": "/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta6-audit-payload/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib:\n\t@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib (compatibility version 0.0.0, current version 0.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 7082.1.111)\n\t/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1.11.0)\n\t/System/Library/Frameworks/MediaPlayer.framework/MediaPlayer (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/ImageIO.framework/ImageIO (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/AVKit.framework/AVKit (compatibility version 1.0.0, current version 1.0.0)\n\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 1600.151.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics (compatibility version 64.0.0, current version 1774.0.1)\n\t@loader_path/.jbroot/usr/lib/libsubstrate.dylib (compatibility version 0.0.0, current version 0.0.0)",
+            "stderr": ""
+          }
+        },
+        {
+          "file": "Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs",
+          "sha256": "cecd6a079497e9023a9c5bb8853e8200186b4df676e3589d8e246bcf95c1b9e4",
+          "architectures": {
+            "exit": 0,
+            "stdout": "arm64 arm64e",
+            "stderr": ""
+          },
+          "ldidExtractEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "codesignEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": "Executable=/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta6-audit-payload/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs\n/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta6-audit-payload/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs: no signature\nwarning: Specifying ':' in the path is deprecated and will not work in a future release"
+          },
+          "linkedLibraries": {
+            "exit": 0,
+            "stdout": "/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta6-audit-payload/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs:\n\t/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs (compatibility version 0.0.0, current version 0.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 7082.1.111)\n\t/System/Library/PrivateFrameworks/Preferences.framework/Preferences (compatibility version 0.0.0, current version 0.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.0.0)",
+            "stderr": ""
+          }
+        }
+      ],
+      "reviewedSelectorStrings": {
+        "DNDStateService": true,
+        "DNDModeConfigurationService": true,
+        "serviceForClientIdentifier:": true,
+        "queryCurrentStateWithError:": true,
+        "isActive": true,
+        "activeModeIdentifier": true,
+        "activeModeConfiguration": true,
+        "modeConfigurationsReturningError:": true,
+        "addStateUpdateListener:error:": true,
+        "removeStateUpdateListener:": true,
+        "stateService:didReceiveDoNotDisturbStateUpdate:": true,
+        "mode": true,
+        "modeIdentifier": true,
+        "name": true,
+        "setActive:": true,
+        "setFocus:": true,
+        "expandModuleWithIdentifier:": true,
+        "com.apple.FocusUIModule": false
+      },
+      "filter": {
+        "Filter": {
+          "Bundles": [
+            "com.apple.springboard"
+          ]
+        }
+      }
+    },
+    {
+      "version": "beta7",
+      "path": "/Users/chase/Documents/Codex/2026-11-04/task/harbor-publish/tweaks/Harbor/packages/com.chasedavis.harbor_0.1.0~beta7_iphoneos-arm64e.deb",
+      "bytes": 116682,
+      "sha256": "70d55b6edf6e13d258e0172b6ab5fcdd0170998058f7b24e13246bd02736d352",
+      "control": {
+        "exit": 0,
+        "stdout": "Package: com.chasedavis.harbor\nName: Harbor (Beta)\nDescription: A compact Control Center with a live layout editor, custom themes and saved profiles. Experimental Focus matching is off until explicitly enabled and saved. iOS 17.0 beta; physical-device testing is pending.\nMaintainer: Chase Davis\nAuthor: Chase Davis\nSection: Tweaks\nDepends: firmware (>= 17.0), firmware (<< 17.1), mobilesubstrate, preferenceloader\nTag: role::tweak\nIcon: https://chasesdavis.github.io/repo/assets/harbor/icon.png\nDepiction: https://chasesdavis.github.io/repo/depiction/harbor/\nHomepage: https://github.com/chasesdavis/repo/tree/main/tweaks/Harbor\nArchitecture: iphoneos-arm64e\nVersion: 0.1.0~beta7\nInstalled-Size: 804",
+        "stderr": ""
+      },
+      "controlFiles": [
+        "./control"
+      ],
+      "payload": [
+        "Library/MobileSubstrate/DynamicLibraries/Harbor.dylib",
+        "Library/MobileSubstrate/DynamicLibraries/Harbor.plist",
+        "Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs",
+        "Library/PreferenceBundles/HarborPrefs.bundle/Info.plist",
+        "Library/PreferenceBundles/HarborPrefs.bundle/Root.plist",
+        "Library/PreferenceLoader/Preferences/Harbor.plist"
+      ],
+      "binaries": [
+        {
+          "file": "Library/MobileSubstrate/DynamicLibraries/Harbor.dylib",
+          "sha256": "da7e3e9c0fef56b0d04394292a5f238fa7d7fee08c569a121d9765ffe21f142d",
+          "architectures": {
+            "exit": 0,
+            "stdout": "arm64 arm64e",
+            "stderr": ""
+          },
+          "ldidExtractEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "codesignEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": "Executable=/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta7-audit-payload/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib\n/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta7-audit-payload/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib: no signature\nwarning: Specifying ':' in the path is deprecated and will not work in a future release"
+          },
+          "linkedLibraries": {
+            "exit": 0,
+            "stdout": "/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta7-audit-payload/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib:\n\t@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries/Harbor.dylib (compatibility version 0.0.0, current version 0.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 7082.1.111)\n\t/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1.11.0)\n\t/System/Library/Frameworks/MediaPlayer.framework/MediaPlayer (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/ImageIO.framework/ImageIO (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/AVKit.framework/AVKit (compatibility version 1.0.0, current version 1.0.0)\n\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 1600.151.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics (compatibility version 64.0.0, current version 1774.0.1)\n\t@loader_path/.jbroot/usr/lib/libsubstrate.dylib (compatibility version 0.0.0, current version 0.0.0)",
+            "stderr": ""
+          }
+        },
+        {
+          "file": "Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs",
+          "sha256": "7a960dd02583f94d097565b1e17b3c9af541aea305cb2e5623bfe61f908deaee",
+          "architectures": {
+            "exit": 0,
+            "stdout": "arm64 arm64e",
+            "stderr": ""
+          },
+          "ldidExtractEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          "codesignEntitlements": {
+            "exit": 0,
+            "stdout": "",
+            "stderr": "Executable=/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta7-audit-payload/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs\n/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta7-audit-payload/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs: no signature\nwarning: Specifying ':' in the path is deprecated and will not work in a future release"
+          },
+          "linkedLibraries": {
+            "exit": 0,
+            "stdout": "/Users/chase/Documents/Codex/2026-11-04/task/harbor-optin/beta7-audit-payload/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs:\n\t/Library/PreferenceBundles/HarborPrefs.bundle/HarborPrefs (compatibility version 0.0.0, current version 0.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 2048.1.101)\n\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 7082.1.111)\n\t/System/Library/PrivateFrameworks/Preferences.framework/Preferences (compatibility version 0.0.0, current version 0.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.0.0)",
+            "stderr": ""
+          }
+        }
+      ],
+      "reviewedSelectorStrings": {
+        "DNDStateService": true,
+        "DNDModeConfigurationService": true,
+        "serviceForClientIdentifier:": true,
+        "queryCurrentStateWithError:": true,
+        "isActive": true,
+        "activeModeIdentifier": true,
+        "activeModeConfiguration": true,
+        "modeConfigurationsReturningError:": true,
+        "addStateUpdateListener:error:": true,
+        "removeStateUpdateListener:": true,
+        "stateService:didReceiveDoNotDisturbStateUpdate:": true,
+        "mode": true,
+        "modeIdentifier": true,
+        "name": true,
+        "setActive:": true,
+        "setFocus:": true,
+        "expandModuleWithIdentifier:": true,
+        "com.apple.FocusUIModule": true
+      },
+      "filter": {
+        "Filter": {
+          "Bundles": [
+            "com.apple.springboard"
+          ]
+        }
+      }
+    }
+  ],
+  "nativeFocusModuleEvidence": {
+    "runtime": "iOS 17.5 (21F79) simulator",
+    "source": "/Library/Developer/CoreSimulator/Volumes/iOS_21F79/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 17.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/ControlCenter/Bundles/FocusUIModule.bundle/Info.plist",
+    "identifier": "com.apple.FocusUIModule"
+  }
+}

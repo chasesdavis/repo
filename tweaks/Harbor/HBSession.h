@@ -5,5 +5,8 @@
 + (void)preferencesChanged;
 - (void)begin;
 - (void)layout;
+- (void)scrollPositionChanged;
+- (BOOL)ownsTouchView:(UIView *)view recognizer:(UIGestureRecognizer *)recognizer;
+- (BOOL)ownsGestureStart:(UIGestureRecognizer *)recognizer;
 - (void)end;
 @end

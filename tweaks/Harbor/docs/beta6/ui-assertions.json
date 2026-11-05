@@ -1,0 +1,19 @@
+{
+  "scope": "Assertions against captured results after actual UIKit taps and HID swipes; Focus service failure is real, named mode success remains a fixture test.",
+  "checks": {
+    "refresh_advances_completed_read": true,
+    "refresh_preserves_saved_library": true,
+    "failure_selects_saved_default": true,
+    "failure_does_not_invent_focus_off": true,
+    "failure_diagnostics_retain_service_error": true,
+    "failed_state_skips_catalog": true,
+    "cancel_preserves_saved_library": true,
+    "cancel_leaves_no_pending_editor": true,
+    "large_text_is_accessibility_xxxl": true,
+    "actual_swipes_move_diagnostics": true,
+    "final_paragraph_reachable": true,
+    "copy_matches_displayed_report": true
+  },
+  "count": 12,
+  "failures": 0
+}
