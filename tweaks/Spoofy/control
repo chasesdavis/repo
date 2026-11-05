@@ -1,6 +1,6 @@
 Package: com.chasedavis.spoofy.compat
 Name: spoofy (Experimental)
-Version: 0.1.0~beta2
+Version: 0.1.0~beta3
 Architecture: iphoneos-arm64e
 Description: Experimental App Store display test with opt-in diagnostics; device behavior unverified. Does not install updates or provide newer iOS APIs.
 Icon: https://chasesdavis.github.io/repo/assets/spoofy/icon.png

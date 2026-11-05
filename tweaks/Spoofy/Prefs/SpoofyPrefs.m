@@ -24,7 +24,7 @@
             set:@selector(setEnabled:specifier:) get:@selector(readEnabled:)
             detail:nil cell:PSSwitchCell edit:nil];
         PSSpecifier *diagGroup = [PSSpecifier groupSpecifierWithName:@"Diagnostics (optional)"];
-        [diagGroup setProperty:@"Opt in to save only a fixed state and time in the jailbreak data area. Close and reopen App Store, then return here. No status can also mean the App Store could not read or write the file. A status can be from an earlier launch." forKey:@"footerText"];
+        [diagGroup setProperty:@"Records a status, time and three call indicators in the jailbreak data area. A call may come from any App Store code, including diagnostics. No report or an old report is inconclusive. Close App Store before clearing the report and relaunch it to start a new observation." forKey:@"footerText"];
         PSSpecifier *diagToggle = [PSSpecifier preferenceSpecifierNamed:@"Record App Store status" target:self
             set:@selector(setDiagnostics:specifier:) get:@selector(readDiagnostics:)
             detail:nil cell:PSSwitchCell edit:nil];
@@ -36,9 +36,30 @@
         PSSpecifier *status = [PSSpecifier preferenceSpecifierNamed:label target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
         NSString *time = date ? [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterMediumStyle] : @"Time: —";
         PSSpecifier *stamp = [PSSpecifier preferenceSpecifierNamed:time target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
-        _specifiers = [@[group, toggle, diagGroup, diagToggle, status, stamp] mutableCopy];
+        NSMutableArray *rows = [@[group, toggle, diagGroup, diagToggle, status, stamp] mutableCopy];
+        for (NSArray *pair in @[@[@"deviceVersion", @"Device version"], @[@"processVersion", @"Process version"], @[@"processMinimum", @"Minimum-version check"]]) {
+            id value = report[pair[0]];
+            BOOL valid = value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID();
+            NSString *result = valid && [value boolValue] ? @"seen" : @"not recorded";
+            NSString *text = [NSString stringWithFormat:@"%@: %@", pair[1], result];
+            [rows addObject:[PSSpecifier preferenceSpecifierNamed:text target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];
+        }
+        PSSpecifier *clear = [PSSpecifier preferenceSpecifierNamed:@"Clear diagnostic report" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
+        clear.buttonAction = @selector(clearDiagnostic:);
+        [rows addObject:clear];
+        _specifiers = rows;
     }
     return _specifiers;
+}
+- (void)clearDiagnostic:(PSSpecifier *)specifier {
+    (void)specifier;
+    if (!SpoofyClearDiagnostic(jbroot(SPOOFY_DIAGNOSTIC_PATH))) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Could not clear report" message:@"The report was not removed." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+    _specifiers = nil;
+    [self reloadSpecifiers];
 }
 - (id)readDiagnostics:(PSSpecifier *)specifier {
     (void)specifier;

@@ -11,7 +11,7 @@
 
 The repository already contains a `StayOn17` experiment, but its broad network rewriting and unverified installer hook are not evidence of reliable compatibility. Spoofy is independently scoped. The unrelated name Spoofy has appeared in the jailbreak community; this uses package ID `com.chasedavis.spoofy.compat`.
 
-The package listing uses the spoofy smile icon. The Settings switch is an experimental control for the App Store display test. Optional diagnostics record only a fixed state and timestamp; the Settings page displays the latest report. An absent or stale report is inconclusive.
+The package listing uses the spoofy smile icon. The Settings switch is an experimental control for the App Store display test. Optional diagnostics record a fixed state, timestamp, and three yes/no call indicators; the Settings page displays and can clear the latest report. Calls can come from any code in the process, including the diagnostics, and do not prove eligibility behavior. An absent or stale report is inconclusive.
 
 ## Build and tests
 

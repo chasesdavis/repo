@@ -34,8 +34,23 @@ BOOL SpoofySaveDiagnostics(NSString *path, BOOL enabled) {
 }
 
 BOOL SpoofyWriteDiagnostic(NSString *path, NSString *state) {
+    return SpoofyWriteDiagnosticSnapshot(path, state, 0);
+}
+
+BOOL SpoofyWriteDiagnosticSnapshot(NSString *path, NSString *state, SpoofyObservations observations) {
     NSSet *allowed = [NSSet setWithArray:@[@"loaded_passthrough", @"loaded_enabled", @"hook_change_observed", @"hook_not_confirmed", @"getter_called"]];
-    if (!path.length || ![allowed containsObject:state]) return NO;
-    // Only fixed state strings and a timestamp; no account, app content, device ID, or network data.
-    return [@{@"state":state, @"timestamp":[NSDate date]} writeToFile:path atomically:YES];
+    NSUInteger known = SpoofyObservedDeviceVersion | SpoofyObservedProcessVersion | SpoofyObservedProcessMinimum;
+    if (!path.length || ![allowed containsObject:state] || (observations & ~known)) return NO;
+    // Fixed state, three booleans, timestamp; no account, device ID, arguments, or network data.
+    return [@{@"state":state, @"timestamp":[NSDate date],
+        @"deviceVersion": @((observations & SpoofyObservedDeviceVersion) != 0),
+        @"processVersion": @((observations & SpoofyObservedProcessVersion) != 0),
+        @"processMinimum": @((observations & SpoofyObservedProcessMinimum) != 0)} writeToFile:path atomically:YES];
+}
+
+BOOL SpoofyClearDiagnostic(NSString *path) {
+    if (!path.length) return NO;
+    NSError *error = nil;
+    if ([NSFileManager.defaultManager removeItemAtPath:path error:&error]) return YES;
+    return [error.domain isEqualToString:NSCocoaErrorDomain] && error.code == NSFileNoSuchFileError;
 }
