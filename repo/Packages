@@ -105,3 +105,21 @@ MD5sum: 10475e8748d88f6f8f3249bb2d83e770
 SHA1: dc6f02d892fa0cea076b9dc93c6e0aabf5456bd2
 SHA256: e15699d4ee7c7ddb38b72d9eacee7ef90c0a4c12a97ec6690ca5ed75dacc6c56
 
+Package: com.chasedavis.spoofy.compat
+Name: spoofy (Experimental)
+Description: Experimental App Store display test; device behavior unverified. Does not install updates or provide newer iOS APIs.
+Icon: https://chasesdavis.github.io/repo/assets/spoofy/icon.png
+Depiction: https://chasesdavis.github.io/repo/depiction/spoofy/
+Maintainer: Chase Davis
+Author: Chase Davis
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader, firmware (>= 17.0), firmware (<< 17.1)
+Architecture: iphoneos-arm64e
+Version: 0.1.0~beta1
+Installed-Size: 376
+Filename: debs/com.chasedavis.spoofy.compat_0.1.0~beta1_iphoneos-arm64e.deb
+Size: 9980
+MD5sum: 60f54bbf3aea88cf3df9070a0bd92f66
+SHA1: 2d8cdfce7d86860b7522fba352c744b7f3029b34
+SHA256: 909ab54494fe5791cef26b51684c6280799fb6f927ec9969a891a573eb4584b3
+
