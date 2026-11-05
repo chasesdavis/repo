@@ -9,8 +9,21 @@ int main(void) { @autoreleasepool {
     assert(!SpoofySaveEnabled(@"", YES));
     assert(SpoofySaveEnabled(path, YES));
     assert([SpoofyReplacement(SpoofyReadConfig(path), @"com.apple.AppStore", os) isEqual:@"18.0"]);
+    assert(!SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert(!SpoofyDiagnosticsEnabled(@{@"Diagnostics":@"YES"}));
+    assert(SpoofySaveDiagnostics(path, YES));
+    assert(SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert([SpoofyReplacement(SpoofyReadConfig(path), @"com.apple.AppStore", os) isEqual:@"18.0"]);
     assert(SpoofySaveEnabled(path, NO));
+    assert(SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
     assert(SpoofyReplacement(SpoofyReadConfig(path), @"com.apple.AppStore", os) == nil);
+    assert(SpoofySaveDiagnostics(path, NO));
+    assert(!SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    NSString *statusPath = [dir stringByAppendingPathComponent:@"prefs/status.plist"];
+    assert(!SpoofyWriteDiagnostic(statusPath, @"untrusted-content"));
+    assert(SpoofyWriteDiagnostic(statusPath, @"getter_called"));
+    NSDictionary *report = SpoofyReadConfig(statusPath);
+    assert([report[@"state"] isEqual:@"getter_called"] && [report[@"timestamp"] isKindOfClass:NSDate.class] && report.count == 2);
     [[NSFileManager defaultManager] removeItemAtPath:dir error:NULL];
     puts("Shared config round-trip passed");
 } return 0; }

@@ -9,6 +9,33 @@ BOOL SpoofySaveEnabled(NSString *path, BOOL enabled) {
     NSString *directory = [path stringByDeletingLastPathComponent];
     if (![[NSFileManager defaultManager] createDirectoryAtPath:directory
         withIntermediateDirectories:YES attributes:nil error:NULL]) return NO;
-    NSDictionary *config = @{@"Enabled": @(enabled), @"ReportedVersion": @"18.0"};
+    NSDictionary *current = SpoofyReadConfig(path);
+    NSDictionary *config = @{@"Enabled": @(enabled), @"ReportedVersion": @"18.0",
+                             @"Diagnostics": @(SpoofyDiagnosticsEnabled(current))};
     return [config writeToFile:path atomically:YES];
+}
+
+BOOL SpoofyDiagnosticsEnabled(id config) {
+    if (![config isKindOfClass:NSDictionary.class]) return NO;
+    id value = config[@"Diagnostics"];
+    return value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID() && [value boolValue];
+}
+
+BOOL SpoofySaveDiagnostics(NSString *path, BOOL enabled) {
+    if (!path.length) return NO;
+    NSString *directory = [path stringByDeletingLastPathComponent];
+    if (![[NSFileManager defaultManager] createDirectoryAtPath:directory
+        withIntermediateDirectories:YES attributes:nil error:NULL]) return NO;
+    NSDictionary *current = SpoofyReadConfig(path);
+    id value = current[@"Enabled"];
+    BOOL experiment = value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID() && [value boolValue];
+    NSDictionary *config = @{@"Enabled": @(experiment), @"ReportedVersion": @"18.0", @"Diagnostics": @(enabled)};
+    return [config writeToFile:path atomically:YES];
+}
+
+BOOL SpoofyWriteDiagnostic(NSString *path, NSString *state) {
+    NSSet *allowed = [NSSet setWithArray:@[@"loaded_passthrough", @"loaded_enabled", @"hook_change_observed", @"hook_not_confirmed", @"getter_called"]];
+    if (!path.length || ![allowed containsObject:state]) return NO;
+    // Only fixed state strings and a timestamp; no account, app content, device ID, or network data.
+    return [@{@"state":state, @"timestamp":[NSDate date]} writeToFile:path atomically:YES];
 }
