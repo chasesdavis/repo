@@ -28,6 +28,11 @@
         PSSpecifier *diagToggle = [PSSpecifier preferenceSpecifierNamed:@"Record App Store status" target:self
             set:@selector(setDiagnostics:specifier:) get:@selector(readDiagnostics:)
             detail:nil cell:PSSwitchCell edit:nil];
+        PSSpecifier *categoryGroup = [PSSpecifier groupSpecifierWithName:@"Call context (optional)"];
+        [categoryGroup setProperty:@"Requires Record App Store status. Marks only calls made during spoofy work on the same thread; all others are unclassified, including work that may have originated in spoofy elsewhere. No return addresses, paths, arguments, or app data are recorded. A category does not identify an eligibility decision." forKey:@"footerText"];
+        PSSpecifier *categoryToggle = [PSSpecifier preferenceSpecifierNamed:@"Record call context" target:self
+            set:@selector(setCategories:specifier:) get:@selector(readCategories:)
+            detail:nil cell:PSSwitchCell edit:nil];
         NSDictionary *report = SpoofyReadConfig(jbroot(SPOOFY_DIAGNOSTIC_PATH));
         NSString *state = [report[@"state"] isKindOfClass:NSString.class] ? report[@"state"] : @"none";
         NSDate *date = [report[@"timestamp"] isKindOfClass:NSDate.class] ? report[@"timestamp"] : nil;
@@ -56,12 +61,34 @@
             NSString *text = [NSString stringWithFormat:@"%@: %@", pair[1], result];
             [rows addObject:[PSSpecifier preferenceSpecifierNamed:text target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];
         }
+        [rows addObject:categoryGroup];
+        [rows addObject:categoryToggle];
+        for (NSArray *pair in @[@[@"categoryDeviceDiagnostic", @"Device: spoofy context"], @[@"categoryDeviceUnknown", @"Device: unclassified"], @[@"categoryProcessDiagnostic", @"Process: spoofy context"], @[@"categoryProcessUnknown", @"Process: unclassified"], @[@"categoryMinimumDiagnostic", @"Minimum: spoofy context"], @[@"categoryMinimumUnknown", @"Minimum: unclassified"]]) {
+            BOOL seen = NO;
+            BOOL valid = SpoofyDiagnosticBool(report[pair[0]], &seen);
+            NSString *text = [NSString stringWithFormat:@"%@: %@", pair[1], valid && seen ? @"seen" : @"not recorded"];
+            [rows addObject:[PSSpecifier preferenceSpecifierNamed:text target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];
+        }
         PSSpecifier *clear = [PSSpecifier preferenceSpecifierNamed:@"Clear diagnostic report" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
         clear.buttonAction = @selector(clearDiagnostic:);
         [rows addObject:clear];
         _specifiers = rows;
     }
     return _specifiers;
+}
+- (id)readCategories:(PSSpecifier *)specifier {
+    (void)specifier;
+    return @(SpoofyCallCategoriesEnabled(SpoofyReadConfig(self.configPath)));
+}
+- (void)setCategories:(id)value specifier:(PSSpecifier *)specifier {
+    (void)specifier;
+    if (!SpoofySaveCallCategories(self.configPath, [value boolValue])) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Could not save call context setting" message:@"The setting is unchanged." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+    _specifiers = nil;
+    [self reloadSpecifiers];
 }
 - (void)clearDiagnostic:(PSSpecifier *)specifier {
     (void)specifier;

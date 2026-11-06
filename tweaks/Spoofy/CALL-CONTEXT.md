@@ -1,0 +1,17 @@
+# Local call-context experiment (beta6-dev)
+
+This document describes the experimental beta 6 build. It does not establish why the App Store considers a particular app compatible, and has not been run on an iPhone.
+
+## What it records
+
+When both **Record App Store status** and **Record call context** are enabled, and no previous report exists at App Store launch, spoofy records up to six fixed yes/no flags. Each of three existing hooks (device version, process version, and minimum-version check) has two flags: a call occurred while explicitly marked spoofy diagnostic work was running on the same thread, or a call occurred outside that marked work and is **unclassified**. The latter is not evidence of an App Store eligibility decision: it can include App Store code, frameworks, another tweak, or unmarked asynchronous work from spoofy. A marked call can include nested framework work. No arguments, caller addresses, paths, identities, account information, or app data are recorded. Existing fixed status and timestamp fields are retained; the report is stored locally in the jailbreak preferences area.
+
+The opt-in is off by default, and the original report protection remains: an existing report is not overwritten by a new App Store launch. Settings saves the three independent switches while retaining their other values. Category collection is allowed only during an active diagnostic session. The six per-process flags use atomic one-shot claims and the report is written on one serial queue. A thread-local guard marks the scheduling and report-writing work; unmarked work on another thread does not inherit it. The hook bookkeeping uses non-blocking atomic one-shots to avoid waiting on itself on re-entry. These measures limit diagnostic submissions but do not establish a real-device performance cost or runtime safety.
+
+This implementation does not capture or strip a return address, perform symbol lookup, inspect a stack, or use caller pointer authentication. The existing beta5 hook-implementation comparison remains. Compilation for arm64e is not a device test; pointer-authentication and hook behavior must be checked on actual compatible hardware.
+
+## Possible future phone test
+
+Beta 6 has not been tested on a phone. For a controlled device test, keep the existing ChatGPT app untouched. First preserve the current report, for example with screenshots: recording a fresh session requires deliberately clearing it. Close the App Store, turn on **Record App Store status** and **Record call context** in spoofy Settings, clear the report only after preserving it, then reopen the App Store and view the ChatGPT listing without tapping an update, install, or purchase button. Return to spoofy Settings and capture the resulting fixed indicators and timestamp. Turn both diagnostic switches off and close/reopen the App Store afterward; turn the original **Enabled** switch off too if it was enabled. The switches are read on App Store launch. The display, settings access, report writing, and RootHide behavior all remain unverified on the phone.
+
+Even a fresh unclassified observation only shows that one of these hooked methods was called outside the marked work. It does not identify which component called it, whether that call concerned ChatGPT, whether the Store or installer used the result, or whether an update would install or run on iOS 17. Preserving the current report means no new session is recorded until it is intentionally cleared.

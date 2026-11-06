@@ -10,15 +10,27 @@ int main(void) { @autoreleasepool {
     assert(SpoofySaveEnabled(path, YES));
     assert([SpoofyReplacement(SpoofyReadConfig(path), @"com.apple.AppStore", os) isEqual:@"18.0"]);
     assert(!SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert(!SpoofyCallCategoriesEnabled(SpoofyReadConfig(path)));
+    assert(!SpoofyCallCategoriesEnabled(@{@"CallCategories":@"YES"}));
     assert(!SpoofyDiagnosticsEnabled(@{@"Diagnostics":@"YES"}));
     assert(SpoofySaveDiagnostics(path, YES));
     assert(SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert(SpoofySaveCallCategories(path, YES));
+    assert(SpoofyCallCategoriesEnabled(SpoofyReadConfig(path)));
+    assert(SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert(SpoofyShouldCollectCallCategories(SpoofyReadConfig(path), YES));
+    assert(!SpoofyShouldCollectCallCategories(SpoofyReadConfig(path), NO));
     assert([SpoofyReplacement(SpoofyReadConfig(path), @"com.apple.AppStore", os) isEqual:@"18.0"]);
     assert(SpoofySaveEnabled(path, NO));
     assert(SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert(SpoofyCallCategoriesEnabled(SpoofyReadConfig(path)));
     assert(SpoofyReplacement(SpoofyReadConfig(path), @"com.apple.AppStore", os) == nil);
     assert(SpoofySaveDiagnostics(path, NO));
     assert(!SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
+    assert(SpoofyCallCategoriesEnabled(SpoofyReadConfig(path)));
+    assert(!SpoofyShouldCollectCallCategories(SpoofyReadConfig(path), YES));
+    assert(SpoofySaveCallCategories(path, NO));
+    assert(!SpoofyCallCategoriesEnabled(SpoofyReadConfig(path)));
     NSString *statusPath = [dir stringByAppendingPathComponent:@"prefs/status.plist"];
     BOOL exists = YES;
     assert(SpoofyDiagnosticReportExists(statusPath, &exists) && !exists);
@@ -40,6 +52,16 @@ int main(void) { @autoreleasepool {
     assert(SpoofyWriteDiagnosticWithHooks(statusPath, @"hook_change_observed", 0, SpoofyHookChecksMeasured | SpoofyProcessVersionHookChanged));
     report = SpoofyReadConfig(statusPath);
     assert([report[@"processHooksMeasured"] boolValue] && [report[@"processVersionHookChanged"] boolValue] && ![report[@"processMinimumHookChanged"] boolValue]);
+    assert(!SpoofyWriteDiagnosticWithCategories(statusPath, @"getter_called", 0, 0, NO, SpoofyDeviceDiagnostic));
+    assert(!SpoofyWriteDiagnosticWithCategories(statusPath, @"getter_called", 0, 0, YES, (SpoofyCallCategories)(1 << 8)));
+    assert(SpoofyWriteDiagnosticWithCategories(statusPath, @"getter_called", 0, 0, YES, SpoofyDeviceDiagnostic | SpoofyMinimumUnknown));
+    NSDictionary *categoryReport = SpoofyReadConfig(statusPath);
+    assert(categoryReport.count == 14);
+    assert([categoryReport[@"categoryDeviceDiagnostic"] boolValue] && [categoryReport[@"categoryMinimumUnknown"] boolValue]);
+    assert(![categoryReport[@"categoryDeviceUnknown"] boolValue] && ![categoryReport[@"categoryProcessDiagnostic"] boolValue]);
+    for (NSString *key in @[@"categoryDeviceDiagnostic", @"categoryDeviceUnknown", @"categoryProcessDiagnostic", @"categoryProcessUnknown", @"categoryMinimumDiagnostic", @"categoryMinimumUnknown"]) {
+        assert(CFGetTypeID((__bridge CFTypeRef)categoryReport[key]) == CFBooleanGetTypeID());
+    }
     for (NSString *key in @[@"deviceVersion", @"processVersion", @"processMinimum", @"processHooksMeasured", @"processVersionHookChanged", @"processMinimumHookChanged"]) {
         assert(CFGetTypeID((__bridge CFTypeRef)report[key]) == CFBooleanGetTypeID());
     }

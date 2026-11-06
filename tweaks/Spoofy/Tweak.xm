@@ -5,40 +5,71 @@
 #include <atomic>
 #import "SpoofyPolicy.h"
 #import "SpoofyConfig.h"
+#import "SpoofyDiagnosticGuard.h"
+#include "SpoofyCategoryBudget.hpp"
 
 static NSString *replacement;
 static BOOL diagnostics;
+static BOOL callCategories;
 static NSString *diagnosticPath;
 static dispatch_queue_t diagnosticQueue;
+static SpoofyCategoryBudget categoryBudget;
+// These values are read and changed only on diagnosticQueue.
+static SpoofyObservations savedObserved;
+static SpoofyHookChecks savedHooks;
+static SpoofyCallCategories savedCategories;
+static NSString *savedState;
 static std::atomic_bool getterCalled(false);
 static std::atomic_bool processVersionSeen(false);
 static std::atomic_bool processMinimumSeen(false);
+static void saveReportOnQueue(void) {
+    if (!savedState) savedState = @"loaded_passthrough";
+    if (!SpoofyWriteDiagnosticWithCategories(diagnosticPath, savedState, savedObserved, savedHooks, callCategories, savedCategories))
+        os_log_error(OS_LOG_DEFAULT, "[spoofy] unable to write diagnostic status");
+}
 static void recordState(NSString *state, SpoofyObservations observation, SpoofyHookChecks hookChecks) {
     if (!diagnostics || !diagnosticPath || !diagnosticQueue) return;
+    SpoofyGuardEnter();
     dispatch_async(diagnosticQueue, ^{
-        static SpoofyObservations observed = 0;
-        static SpoofyHookChecks hooks = 0;
-        static NSString *latestState;
-        observed = (SpoofyObservations)(observed | observation);
-        if (hookChecks & SpoofyHookChecksMeasured) hooks = hookChecks;
-        if (state) latestState = state;
-        if (observed & SpoofyObservedDeviceVersion) latestState = @"getter_called";
-        if (!latestState) latestState = @"loaded_passthrough";
-        if (!SpoofyWriteDiagnosticWithHooks(diagnosticPath, latestState, observed, hooks))
-            os_log_error(OS_LOG_DEFAULT, "[spoofy] unable to write diagnostic status");
+        SpoofyGuardEnter();
+        @try {
+            savedObserved = (SpoofyObservations)(savedObserved | observation);
+            if (hookChecks & SpoofyHookChecksMeasured) savedHooks = hookChecks;
+            if (state) savedState = state;
+            if (savedObserved & SpoofyObservedDeviceVersion) savedState = @"getter_called";
+            saveReportOnQueue();
+        } @finally { SpoofyGuardLeave(); }
     });
+    SpoofyGuardLeave();
+}
+static void recordCategory(unsigned diagnosticBit, unsigned unknownBit) {
+    if (!diagnostics || !callCategories || !diagnosticQueue) return;
+    unsigned bit = SpoofyGuardIsActive() ? diagnosticBit : unknownBit;
+    if (!categoryBudget.claim(bit)) return;
+    SpoofyGuardEnter();
+    dispatch_async(diagnosticQueue, ^{
+        SpoofyGuardEnter();
+        @try {
+            savedCategories = (SpoofyCallCategories)(savedCategories | bit);
+            saveReportOnQueue();
+        } @finally { SpoofyGuardLeave(); }
+    });
+    SpoofyGuardLeave();
 }
 
 %group VersionExperiment
 %hook UIDevice
 - (NSString *)systemVersion {
+    recordCategory(SpoofyDeviceDiagnostic, SpoofyDeviceUnknown);
     NSString *actual = %orig;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        getterCalled.store(true);
+    // A hook can be re-entered while diagnostic work runs. Unlike dispatch_once,
+    // an atomic one-shot does not wait on itself in that case.
+    if (!getterCalled.exchange(true)) {
+        SpoofyGuardEnter();
         os_log(OS_LOG_DEFAULT, "[spoofy] UIDevice.systemVersion reached; experiment active");
         recordState(@"getter_called", SpoofyObservedDeviceVersion, 0);
-    });
+        SpoofyGuardLeave();
+    }
     return replacement ?: actual;
 }
 %end
@@ -48,16 +79,22 @@ static void recordState(NSString *state, SpoofyObservations observation, SpoofyH
 %group PassiveVersionObservers
 %hook NSProcessInfo
 - (NSOperatingSystemVersion)operatingSystemVersion {
+    recordCategory(SpoofyProcessDiagnostic, SpoofyProcessUnknown);
     if (!processVersionSeen.exchange(true)) {
+        SpoofyGuardEnter();
         os_log(OS_LOG_DEFAULT, "[spoofy] observed NSProcessInfo operatingSystemVersion");
         recordState(nil, SpoofyObservedProcessVersion, 0);
+        SpoofyGuardLeave();
     }
     return %orig;
 }
 - (BOOL)isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion)version {
+    recordCategory(SpoofyMinimumDiagnostic, SpoofyMinimumUnknown);
     if (!processMinimumSeen.exchange(true)) {
+        SpoofyGuardEnter();
         os_log(OS_LOG_DEFAULT, "[spoofy] observed NSProcessInfo isOperatingSystemAtLeastVersion");
         recordState(nil, SpoofyObservedProcessMinimum, 0);
+        SpoofyGuardLeave();
     }
     return %orig(version);
 }
@@ -78,8 +115,10 @@ static void recordState(NSString *state, SpoofyObservations observation, SpoofyH
             BOOL known = SpoofyDiagnosticReportExists(diagnosticPath, &exists);
             diagnostics = SpoofyDiagnosticMayStart(requested, exists, known);
         }
+        callCategories = SpoofyShouldCollectCallCategories(config, diagnostics);
         if (diagnostics) diagnosticQueue = dispatch_queue_create("com.chasedavis.spoofy.diagnostics", DISPATCH_QUEUE_SERIAL);
         replacement = SpoofyReplacement(config, NSBundle.mainBundle.bundleIdentifier, actual);
+        SpoofyGuardEnter();
         recordState(replacement ? @"loaded_enabled" : @"loaded_passthrough", 0, 0);
         NSProcessInfo *info = diagnostics ? NSProcessInfo.processInfo : nil;
         Class actualClass = info ? object_getClass(info) : Nil;
@@ -100,6 +139,7 @@ static void recordState(NSString *state, SpoofyObservations observation, SpoofyH
         }
         if (!replacement) {
             os_log(OS_LOG_DEFAULT, "[spoofy] loaded; pass-through (disabled, invalid config, or unsupported OS)");
+            SpoofyGuardLeave();
             return;
         }
         os_log(OS_LOG_DEFAULT, "[spoofy] loaded; UIDevice version experiment enabled");
@@ -110,5 +150,6 @@ static void recordState(NSString *state, SpoofyObservations observation, SpoofyH
         IMP after = hookedMethod ? method_getImplementation(hookedMethod) : NULL;
         if (!getterCalled.load())
             recordState(before && after && before != after ? @"hook_change_observed" : @"hook_not_confirmed", 0, 0);
+        SpoofyGuardLeave();
     }
 }
