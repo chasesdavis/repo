@@ -6,6 +6,11 @@ typedef NS_OPTIONS(NSUInteger, SpoofyObservations) {
     SpoofyObservedProcessVersion = 1 << 1,
     SpoofyObservedProcessMinimum = 1 << 2,
 };
+typedef NS_OPTIONS(NSUInteger, SpoofyHookChecks) {
+    SpoofyHookChecksMeasured = 1 << 0,
+    SpoofyProcessVersionHookChanged = 1 << 1,
+    SpoofyProcessMinimumHookChanged = 1 << 2,
+};
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,6 +19,7 @@ BOOL SpoofySaveDiagnostics(NSString *path, BOOL enabled);
 BOOL SpoofyDiagnosticsEnabled(id config);
 BOOL SpoofyWriteDiagnostic(NSString *path, NSString *state);
 BOOL SpoofyWriteDiagnosticSnapshot(NSString *path, NSString *state, SpoofyObservations observations);
+BOOL SpoofyWriteDiagnosticWithHooks(NSString *path, NSString *state, SpoofyObservations observations, SpoofyHookChecks hooks);
 BOOL SpoofyClearDiagnostic(NSString *path);
 NSDictionary *SpoofyReadConfig(NSString *path);
 #ifdef __cplusplus

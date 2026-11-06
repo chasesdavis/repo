@@ -24,7 +24,7 @@
             set:@selector(setEnabled:specifier:) get:@selector(readEnabled:)
             detail:nil cell:PSSwitchCell edit:nil];
         PSSpecifier *diagGroup = [PSSpecifier groupSpecifierWithName:@"Diagnostics (optional)"];
-        [diagGroup setProperty:@"Records a status, time and three call indicators in the jailbreak data area. A call may come from any App Store code, including diagnostics. No report or an old report is inconclusive. Close App Store before clearing the report and relaunch it to start a new observation." forKey:@"footerText"];
+        [diagGroup setProperty:@"Records a status, time, call indicators and hook comparisons in the jailbreak data area. A call may come from any App Store code, including diagnostics. A hook comparison is not proof of a call. No report or an old report is inconclusive. Close App Store before clearing the report and relaunch it to start a new observation." forKey:@"footerText"];
         PSSpecifier *diagToggle = [PSSpecifier preferenceSpecifierNamed:@"Record App Store status" target:self
             set:@selector(setDiagnostics:specifier:) get:@selector(readDiagnostics:)
             detail:nil cell:PSSwitchCell edit:nil];
@@ -41,6 +41,15 @@
             id value = report[pair[0]];
             BOOL valid = value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID();
             NSString *result = valid && [value boolValue] ? @"seen" : @"not recorded";
+            NSString *text = [NSString stringWithFormat:@"%@: %@", pair[1], result];
+            [rows addObject:[PSSpecifier preferenceSpecifierNamed:text target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];
+        }
+        id measured = report[@"processHooksMeasured"];
+        BOOL checked = measured && CFGetTypeID((__bridge CFTypeRef)measured) == CFBooleanGetTypeID() && [measured boolValue];
+        for (NSArray *pair in @[@[@"processVersionHookChanged", @"Process hook"], @[@"processMinimumHookChanged", @"Minimum hook"]]) {
+            id value = report[pair[0]];
+            BOOL valid = value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID();
+            NSString *result = !checked ? @"not measured" : valid && [value boolValue] ? @"change observed" : @"not confirmed";
             NSString *text = [NSString stringWithFormat:@"%@: %@", pair[1], result];
             [rows addObject:[PSSpecifier preferenceSpecifierNamed:text target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];
         }

@@ -38,14 +38,23 @@ BOOL SpoofyWriteDiagnostic(NSString *path, NSString *state) {
 }
 
 BOOL SpoofyWriteDiagnosticSnapshot(NSString *path, NSString *state, SpoofyObservations observations) {
+    return SpoofyWriteDiagnosticWithHooks(path, state, observations, 0);
+}
+
+BOOL SpoofyWriteDiagnosticWithHooks(NSString *path, NSString *state, SpoofyObservations observations, SpoofyHookChecks hooks) {
     NSSet *allowed = [NSSet setWithArray:@[@"loaded_passthrough", @"loaded_enabled", @"hook_change_observed", @"hook_not_confirmed", @"getter_called"]];
     NSUInteger known = SpoofyObservedDeviceVersion | SpoofyObservedProcessVersion | SpoofyObservedProcessMinimum;
-    if (!path.length || ![allowed containsObject:state] || (observations & ~known)) return NO;
-    // Fixed state, three booleans, timestamp; no account, device ID, arguments, or network data.
+    NSUInteger knownHooks = SpoofyHookChecksMeasured | SpoofyProcessVersionHookChanged | SpoofyProcessMinimumHookChanged;
+    if (!path.length || ![allowed containsObject:state] || (observations & ~known) || (hooks & ~knownHooks) ||
+        ((hooks & (SpoofyProcessVersionHookChanged | SpoofyProcessMinimumHookChanged)) && !(hooks & SpoofyHookChecksMeasured))) return NO;
+    // Fixed state, booleans, timestamp; no account, class names, device ID, arguments, or network data.
     return [@{@"state":state, @"timestamp":[NSDate date],
         @"deviceVersion": @((observations & SpoofyObservedDeviceVersion) != 0),
         @"processVersion": @((observations & SpoofyObservedProcessVersion) != 0),
-        @"processMinimum": @((observations & SpoofyObservedProcessMinimum) != 0)} writeToFile:path atomically:YES];
+        @"processMinimum": @((observations & SpoofyObservedProcessMinimum) != 0),
+        @"processHooksMeasured": @((hooks & SpoofyHookChecksMeasured) != 0),
+        @"processVersionHookChanged": @((hooks & SpoofyProcessVersionHookChanged) != 0),
+        @"processMinimumHookChanged": @((hooks & SpoofyProcessMinimumHookChanged) != 0)} writeToFile:path atomically:YES];
 }
 
 BOOL SpoofyClearDiagnostic(NSString *path) {

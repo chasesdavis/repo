@@ -13,16 +13,18 @@ static dispatch_queue_t diagnosticQueue;
 static std::atomic_bool getterCalled(false);
 static std::atomic_bool processVersionSeen(false);
 static std::atomic_bool processMinimumSeen(false);
-static void recordState(NSString *state, SpoofyObservations observation) {
+static void recordState(NSString *state, SpoofyObservations observation, SpoofyHookChecks hookChecks) {
     if (!diagnostics || !diagnosticPath || !diagnosticQueue) return;
     dispatch_async(diagnosticQueue, ^{
         static SpoofyObservations observed = 0;
+        static SpoofyHookChecks hooks = 0;
         static NSString *latestState;
         observed = (SpoofyObservations)(observed | observation);
+        if (hookChecks & SpoofyHookChecksMeasured) hooks = hookChecks;
         if (state) latestState = state;
         if (observed & SpoofyObservedDeviceVersion) latestState = @"getter_called";
         if (!latestState) latestState = @"loaded_passthrough";
-        if (!SpoofyWriteDiagnosticSnapshot(diagnosticPath, latestState, observed))
+        if (!SpoofyWriteDiagnosticWithHooks(diagnosticPath, latestState, observed, hooks))
             os_log_error(OS_LOG_DEFAULT, "[spoofy] unable to write diagnostic status");
     });
 }
@@ -35,7 +37,7 @@ static void recordState(NSString *state, SpoofyObservations observation) {
     dispatch_once(&once, ^{
         getterCalled.store(true);
         os_log(OS_LOG_DEFAULT, "[spoofy] UIDevice.systemVersion reached; experiment active");
-        recordState(@"getter_called", SpoofyObservedDeviceVersion);
+        recordState(@"getter_called", SpoofyObservedDeviceVersion, 0);
     });
     return replacement ?: actual;
 }
@@ -48,14 +50,14 @@ static void recordState(NSString *state, SpoofyObservations observation) {
 - (NSOperatingSystemVersion)operatingSystemVersion {
     if (!processVersionSeen.exchange(true)) {
         os_log(OS_LOG_DEFAULT, "[spoofy] observed NSProcessInfo operatingSystemVersion");
-        recordState(nil, SpoofyObservedProcessVersion);
+        recordState(nil, SpoofyObservedProcessVersion, 0);
     }
     return %orig;
 }
 - (BOOL)isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion)version {
     if (!processMinimumSeen.exchange(true)) {
         os_log(OS_LOG_DEFAULT, "[spoofy] observed NSProcessInfo isOperatingSystemAtLeastVersion");
-        recordState(nil, SpoofyObservedProcessMinimum);
+        recordState(nil, SpoofyObservedProcessMinimum, 0);
     }
     return %orig(version);
 }
@@ -73,8 +75,24 @@ static void recordState(NSString *state, SpoofyObservations observation) {
         diagnosticPath = jbroot(SPOOFY_DIAGNOSTIC_PATH);
         if (diagnostics) diagnosticQueue = dispatch_queue_create("com.chasedavis.spoofy.diagnostics", DISPATCH_QUEUE_SERIAL);
         replacement = SpoofyReplacement(config, NSBundle.mainBundle.bundleIdentifier, actual);
-        recordState(replacement ? @"loaded_enabled" : @"loaded_passthrough", 0);
+        recordState(replacement ? @"loaded_enabled" : @"loaded_passthrough", 0, 0);
+        NSProcessInfo *info = diagnostics ? NSProcessInfo.processInfo : nil;
+        Class actualClass = info ? object_getClass(info) : Nil;
+        Method pvBeforeMethod = diagnostics ? class_getInstanceMethod(actualClass, @selector(operatingSystemVersion)) : NULL;
+        Method pmBeforeMethod = diagnostics ? class_getInstanceMethod(actualClass, @selector(isOperatingSystemAtLeastVersion:)) : NULL;
+        IMP pvBefore = pvBeforeMethod ? method_getImplementation(pvBeforeMethod) : NULL;
+        IMP pmBefore = pmBeforeMethod ? method_getImplementation(pmBeforeMethod) : NULL;
         if (diagnostics) %init(PassiveVersionObservers);
+        if (diagnostics) {
+            Method pvAfterMethod = class_getInstanceMethod(actualClass, @selector(operatingSystemVersion));
+            Method pmAfterMethod = class_getInstanceMethod(actualClass, @selector(isOperatingSystemAtLeastVersion:));
+            IMP pvAfter = pvAfterMethod ? method_getImplementation(pvAfterMethod) : NULL;
+            IMP pmAfter = pmAfterMethod ? method_getImplementation(pmAfterMethod) : NULL;
+            SpoofyHookChecks checks = SpoofyHookChecksMeasured;
+            if (pvBefore && pvAfter && pvBefore != pvAfter) checks = (SpoofyHookChecks)(checks | SpoofyProcessVersionHookChanged);
+            if (pmBefore && pmAfter && pmBefore != pmAfter) checks = (SpoofyHookChecks)(checks | SpoofyProcessMinimumHookChanged);
+            recordState(nil, 0, checks);
+        }
         if (!replacement) {
             os_log(OS_LOG_DEFAULT, "[spoofy] loaded; pass-through (disabled, invalid config, or unsupported OS)");
             return;
@@ -86,6 +104,6 @@ static void recordState(NSString *state, SpoofyObservations observation) {
         Method hookedMethod = class_getInstanceMethod(UIDevice.class, @selector(systemVersion));
         IMP after = hookedMethod ? method_getImplementation(hookedMethod) : NULL;
         if (!getterCalled.load())
-            recordState(before && after && before != after ? @"hook_change_observed" : @"hook_not_confirmed", 0);
+            recordState(before && after && before != after ? @"hook_change_observed" : @"hook_not_confirmed", 0, 0);
     }
 }
