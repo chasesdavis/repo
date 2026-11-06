@@ -20,8 +20,13 @@ int main(void) { @autoreleasepool {
     assert(SpoofySaveDiagnostics(path, NO));
     assert(!SpoofyDiagnosticsEnabled(SpoofyReadConfig(path)));
     NSString *statusPath = [dir stringByAppendingPathComponent:@"prefs/status.plist"];
+    BOOL exists = YES;
+    assert(SpoofyDiagnosticReportExists(statusPath, &exists) && !exists);
+    assert(!SpoofyDiagnosticReportExists(@"", &exists));
+    assert(!SpoofyDiagnosticReportExists(statusPath, NULL));
     assert(!SpoofyWriteDiagnostic(statusPath, @"untrusted-content"));
     assert(SpoofyWriteDiagnostic(statusPath, @"getter_called"));
+    assert(SpoofyDiagnosticReportExists(statusPath, &exists) && exists);
     NSDictionary *report = SpoofyReadConfig(statusPath);
     assert([report[@"state"] isEqual:@"getter_called"] && [report[@"timestamp"] isKindOfClass:NSDate.class] && report.count == 8);
     assert(![report[@"deviceVersion"] boolValue] && ![report[@"processVersion"] boolValue] && ![report[@"processMinimum"] boolValue]);
@@ -35,6 +40,36 @@ int main(void) { @autoreleasepool {
     assert(SpoofyWriteDiagnosticWithHooks(statusPath, @"hook_change_observed", 0, SpoofyHookChecksMeasured | SpoofyProcessVersionHookChanged));
     report = SpoofyReadConfig(statusPath);
     assert([report[@"processHooksMeasured"] boolValue] && [report[@"processVersionHookChanged"] boolValue] && ![report[@"processMinimumHookChanged"] boolValue]);
+    for (NSString *key in @[@"deviceVersion", @"processVersion", @"processMinimum", @"processHooksMeasured", @"processVersionHookChanged", @"processMinimumHookChanged"]) {
+        assert(CFGetTypeID((__bridge CFTypeRef)report[key]) == CFBooleanGetTypeID());
+    }
+    // Real beta 3/4 report payloads contained integers, not booleans.
+    NSDictionary *legacyValues = @{@"yes": [NSNumber numberWithInt:1], @"no": [NSNumber numberWithInt:0]};
+    assert([legacyValues writeToFile:statusPath atomically:YES]);
+    NSDictionary *legacy = SpoofyReadConfig(statusPath);
+    BOOL decoded = NO;
+    NSData *legacyBytes = [NSData dataWithContentsOfFile:statusPath];
+    BOOL legacyExists = NO;
+    BOOL legacyKnown = SpoofyDiagnosticReportExists(statusPath, &legacyExists);
+    assert(!SpoofyDiagnosticMayStart(YES, legacyExists, legacyKnown));
+    assert([legacyBytes isEqual:[NSData dataWithContentsOfFile:statusPath]]);
+    assert(SpoofyDiagnosticBool(legacy[@"yes"], &decoded) && decoded);
+    assert(SpoofyDiagnosticBool(legacy[@"no"], &decoded) && !decoded);
+    NSDictionary *legacyReport = @{@"deviceVersion": @1, @"processVersion": @0, @"processMinimum": @1, @"processHooksMeasured": @1, @"processVersionHookChanged": @1, @"processMinimumHookChanged": @0};
+    assert([legacyReport writeToFile:statusPath atomically:YES]);
+    legacy = SpoofyReadConfig(statusPath);
+    for (NSString *key in legacyReport) {
+        assert(SpoofyDiagnosticBool(legacy[key], &decoded));
+        assert(decoded == [legacyReport[key] boolValue]);
+    }
+    assert(SpoofyDiagnosticBool(@YES, &decoded) && decoded);
+    assert(SpoofyDiagnosticBool(@NO, &decoded) && !decoded);
+    for (id invalid in @[@2, @(-1), @1.0, @"1", NSNull.null]) assert(!SpoofyDiagnosticBool(invalid, &decoded));
+    assert(!SpoofyDiagnosticBool(nil, &decoded) && !SpoofyDiagnosticBool(@YES, NULL));
+    assert(SpoofyDiagnosticMayStart(YES, NO, YES));
+    assert(!SpoofyDiagnosticMayStart(NO, NO, YES));
+    assert(!SpoofyDiagnosticMayStart(YES, YES, YES));
+    assert(!SpoofyDiagnosticMayStart(YES, NO, NO));
     assert(SpoofyClearDiagnostic(statusPath));
     assert(SpoofyReadConfig(statusPath) == nil);
     assert(SpoofyClearDiagnostic(statusPath));

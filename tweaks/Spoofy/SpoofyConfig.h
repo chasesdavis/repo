@@ -20,6 +20,9 @@ BOOL SpoofyDiagnosticsEnabled(id config);
 BOOL SpoofyWriteDiagnostic(NSString *path, NSString *state);
 BOOL SpoofyWriteDiagnosticSnapshot(NSString *path, NSString *state, SpoofyObservations observations);
 BOOL SpoofyWriteDiagnosticWithHooks(NSString *path, NSString *state, SpoofyObservations observations, SpoofyHookChecks hooks);
+BOOL SpoofyDiagnosticBool(id value, BOOL *result);
+BOOL SpoofyDiagnosticMayStart(BOOL requested, BOOL reportExists, BOOL reportStateKnown);
+BOOL SpoofyDiagnosticReportExists(NSString *path, BOOL *exists);
 BOOL SpoofyClearDiagnostic(NSString *path);
 NSDictionary *SpoofyReadConfig(NSString *path);
 #ifdef __cplusplus

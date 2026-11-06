@@ -115,11 +115,11 @@ Author: Chase Davis
 Section: Tweaks
 Depends: mobilesubstrate, preferenceloader, firmware (>= 17.0), firmware (<< 17.1)
 Architecture: iphoneos-arm64e
-Version: 0.1.0~beta4
+Version: 0.1.0~beta5
 Installed-Size: 380
-Filename: debs/com.chasedavis.spoofy.compat_0.1.0~beta4_iphoneos-arm64e.deb
-Size: 16740
-MD5sum: 31749a5e1aba274f926f397dd54f81b2
-SHA1: 44d2af3b771115de27aa4f05ea8abaa03fc76661
-SHA256: c3261ae3bb9d25d063a3eebf03b047fc00c2a5edf00e044156e65ea44cef8ac1
+Filename: debs/com.chasedavis.spoofy.compat_0.1.0~beta5_iphoneos-arm64e.deb
+Size: 17412
+MD5sum: 68fe2925c23e58bc681f43a255761fc8
+SHA1: 36fa98ebf61ea5cacce1da7c1e90edeb6489c7a8
+SHA256: bd90776c91bc52fdeefc92086c23975bc459dd7a9ff3434af7e3f16fdaeb9f5c
 

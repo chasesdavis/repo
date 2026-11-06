@@ -71,8 +71,13 @@ static void recordState(NSString *state, SpoofyObservations observation, SpoofyH
         NSOperatingSystemVersion actual = NSProcessInfo.processInfo.operatingSystemVersion;
         NSString *path = jbroot(SPOOFY_CONFIG_PATH);
         NSDictionary *config = SpoofyReadConfig(path);
-        diagnostics = SpoofyDiagnosticsEnabled(config);
         diagnosticPath = jbroot(SPOOFY_DIAGNOSTIC_PATH);
+        BOOL requested = SpoofyDiagnosticsEnabled(config);
+        if (requested) {
+            BOOL exists = NO;
+            BOOL known = SpoofyDiagnosticReportExists(diagnosticPath, &exists);
+            diagnostics = SpoofyDiagnosticMayStart(requested, exists, known);
+        }
         if (diagnostics) diagnosticQueue = dispatch_queue_create("com.chasedavis.spoofy.diagnostics", DISPATCH_QUEUE_SERIAL);
         replacement = SpoofyReplacement(config, NSBundle.mainBundle.bundleIdentifier, actual);
         recordState(replacement ? @"loaded_enabled" : @"loaded_passthrough", 0, 0);

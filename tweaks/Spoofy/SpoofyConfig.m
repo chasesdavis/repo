@@ -49,12 +49,44 @@ BOOL SpoofyWriteDiagnosticWithHooks(NSString *path, NSString *state, SpoofyObser
         ((hooks & (SpoofyProcessVersionHookChanged | SpoofyProcessMinimumHookChanged)) && !(hooks & SpoofyHookChecksMeasured))) return NO;
     // Fixed state, booleans, timestamp; no account, class names, device ID, arguments, or network data.
     return [@{@"state":state, @"timestamp":[NSDate date],
-        @"deviceVersion": @((observations & SpoofyObservedDeviceVersion) != 0),
-        @"processVersion": @((observations & SpoofyObservedProcessVersion) != 0),
-        @"processMinimum": @((observations & SpoofyObservedProcessMinimum) != 0),
-        @"processHooksMeasured": @((hooks & SpoofyHookChecksMeasured) != 0),
-        @"processVersionHookChanged": @((hooks & SpoofyProcessVersionHookChanged) != 0),
-        @"processMinimumHookChanged": @((hooks & SpoofyProcessMinimumHookChanged) != 0)} writeToFile:path atomically:YES];
+        @"deviceVersion": @((BOOL)((observations & SpoofyObservedDeviceVersion) != 0)),
+        @"processVersion": @((BOOL)((observations & SpoofyObservedProcessVersion) != 0)),
+        @"processMinimum": @((BOOL)((observations & SpoofyObservedProcessMinimum) != 0)),
+        @"processHooksMeasured": @((BOOL)((hooks & SpoofyHookChecksMeasured) != 0)),
+        @"processVersionHookChanged": @((BOOL)((hooks & SpoofyProcessVersionHookChanged) != 0)),
+        @"processMinimumHookChanged": @((BOOL)((hooks & SpoofyProcessMinimumHookChanged) != 0))} writeToFile:path atomically:YES];
+}
+
+BOOL SpoofyDiagnosticBool(id value, BOOL *result) {
+    if (!value || !result) return NO;
+    CFTypeID type = CFGetTypeID((__bridge CFTypeRef)value);
+    if (type == CFBooleanGetTypeID()) {
+        *result = [value boolValue];
+        return YES;
+    }
+    // Beta 3/4 emitted plist integers. Accept only integral 0/1 for recovery.
+    if (type != CFNumberGetTypeID() || CFNumberIsFloatType((__bridge CFNumberRef)value)) return NO;
+    long long number = [value longLongValue];
+    if (number != 0 && number != 1) return NO;
+    *result = number == 1;
+    return YES;
+}
+
+BOOL SpoofyDiagnosticMayStart(BOOL requested, BOOL reportExists, BOOL reportStateKnown) {
+    return requested && reportStateKnown && !reportExists;
+}
+
+BOOL SpoofyDiagnosticReportExists(NSString *path, BOOL *exists) {
+    if (!path.length || !exists) return NO;
+    NSError *error = nil;
+    NSDictionary *attrs = [NSFileManager.defaultManager attributesOfItemAtPath:path error:&error];
+    if (attrs) { *exists = YES; return YES; }
+    if ([error.domain isEqualToString:NSCocoaErrorDomain] &&
+        (error.code == NSFileNoSuchFileError || error.code == NSFileReadNoSuchFileError)) {
+        *exists = NO;
+        return YES;
+    }
+    return NO;
 }
 
 BOOL SpoofyClearDiagnostic(NSString *path) {
